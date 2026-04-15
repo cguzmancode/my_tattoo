@@ -46,3 +46,10 @@ AGENTS.md
 
 # project plans directory
 /plans/
+
+# agent skills (local development)
+/.agents/
+skills-lock.json
+
+# IDE
+/.idea/
