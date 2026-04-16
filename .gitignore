@@ -53,3 +53,5 @@ skills-lock.json
 
 # IDE
 /.idea/
+
+/src/generated/prisma

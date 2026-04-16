@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Artist {
+  id              String   @id @default(uuid())
+  clerkId         String   @unique
+  email           String   @unique
+  name            String
+  slug            String   @unique
+  bio             String?
+  styles          String[] @default([])
+  depositAmount   Int      @default(2000)
+  instagramUrl    String?
+  portfolioImages String[] @default([])
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  bookings     Booking[]
+  blockedDates BlockedDate[]
+
+  @@map("artists")
+}
+
+enum BookingStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+model Booking {
+  id              String        @id @default(uuid())
+  artistId        String
+  clientName      String
+  clientEmail     String
+  clientPhone     String?
+  bodyZone        String
+  size            String
+  description     String
+  referenceImages String[]      @default([])
+  preferredDates  String[]      @default([])
+  status          BookingStatus @default(PENDING)
+  proposedDate    DateTime?
+  depositPaid     Boolean       @default(false)
+  paymentIntentId String?
+  reminderSent24h Boolean       @default(false)
+  reminderSent48h Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  artist   Artist    @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  payments Payment[]
+
+  @@map("bookings")
+}
+
+model BlockedDate {
+  id        String   @id @default(uuid())
+  artistId  String
+  date      DateTime @db.Date
+  reason    String?
+  createdAt DateTime @default(now())
+
+  artist Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
+
+  @@unique([artistId, date])
+  @@map("blocked_dates")
+}
+
+enum PaymentStatus {
+  PENDING
+  CAPTURED
+  REFUNDED
+  FAILED
+}
+
+model Payment {
+  id                    String        @id @default(uuid())
+  bookingId             String
+  stripePaymentIntentId String        @unique
+  amount                Int
+  currency              String        @default("eur")
+  status                PaymentStatus @default(PENDING)
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
+}
