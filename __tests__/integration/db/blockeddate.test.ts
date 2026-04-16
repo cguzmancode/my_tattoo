@@ -1,22 +1,16 @@
 import 'dotenv/config'
-import { describe, it, expect } from 'vitest'
-import { PrismaClient } from '@prisma/client'
-import { PrismaPg } from '@prisma/adapter-pg'
-
-const connectionString = process.env.DATABASE_URL
-
-if (!connectionString) {
-  throw new Error('DATABASE_URL is not defined')
-}
-
-const adapter = new PrismaPg({ connectionString })
-const prisma = new PrismaClient({ adapter })
+import { describe, it, expect, afterAll } from 'vitest'
+import { prisma } from '@/lib/prisma'
 
 function generateUniqueId() {
   return `test_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
 }
 
 describe('BlockedDate Model', () => {
+  afterAll(async () => {
+    await prisma.$disconnect()
+  })
+
   it('should block a date for artist', async () => {
     const uniqueId = generateUniqueId()
 

@@ -1,16 +1,6 @@
 import 'dotenv/config'
 import { describe, it, expect } from 'vitest'
-import { PrismaClient } from '@prisma/client'
-import { PrismaPg } from '@prisma/adapter-pg'
-
-const connectionString = process.env.DATABASE_URL
-
-if (!connectionString) {
-  throw new Error('DATABASE_URL is not defined')
-}
-
-const adapter = new PrismaPg({ connectionString })
-const prisma = new PrismaClient({ adapter })
+import { prisma } from '@/lib/prisma'
 
 describe('Database Connection', () => {
   it('should connect to database', async () => {

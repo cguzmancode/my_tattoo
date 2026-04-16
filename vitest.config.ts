@@ -10,6 +10,8 @@ export default defineConfig({
     setupFiles: ['./vitest.setup.ts'],
     include: ['**/*.test.{ts,tsx}'],
     exclude: ['node_modules', '.next', '__tests__/e2e'],
+    // Run integration tests sequentially to avoid DB concurrency issues
+    fileParallelism: false,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],

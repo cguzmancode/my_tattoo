@@ -1,16 +1,10 @@
 import 'dotenv/config'
-import { describe, it, expect, beforeAll, afterAll } from 'vitest'
-import { PrismaClient } from '@prisma/client'
-import { PrismaPg } from '@prisma/adapter-pg'
+import { describe, it, expect, afterAll } from 'vitest'
+import { prisma } from '@/lib/prisma'
 
-const connectionString = process.env.DATABASE_URL
-
-if (!connectionString) {
-  throw new Error('DATABASE_URL is not defined')
+function generateUniqueId() {
+  return `test_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
 }
-
-const adapter = new PrismaPg({ connectionString })
-const prisma = new PrismaClient({ adapter })
 
 describe('Artist Model', () => {
   afterAll(async () => {
@@ -18,7 +12,7 @@ describe('Artist Model', () => {
   })
 
   it('should create artist with required fields', async () => {
-    const uniqueId = `user_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
+    const uniqueId = generateUniqueId()
 
     const artist = await prisma.artist.create({
       data: {
@@ -38,7 +32,7 @@ describe('Artist Model', () => {
   })
 
   it('should enforce unique clerkId constraint', async () => {
-    const uniqueId = `clerk_${Date.now()}`
+    const uniqueId = generateUniqueId()
 
     await prisma.artist.create({
       data: {
@@ -62,7 +56,7 @@ describe('Artist Model', () => {
   })
 
   it('should enforce unique slug constraint', async () => {
-    const uniqueId = `slug_${Date.now()}`
+    const uniqueId = generateUniqueId()
     const sharedSlug = `shared-slug-${uniqueId}`
 
     await prisma.artist.create({
@@ -87,7 +81,7 @@ describe('Artist Model', () => {
   })
 
   it('should query artist by slug', async () => {
-    const uniqueId = `query_${Date.now()}`
+    const uniqueId = generateUniqueId()
 
     await prisma.artist.create({
       data: {
@@ -107,7 +101,7 @@ describe('Artist Model', () => {
   })
 
   it('should update artist fields', async () => {
-    const uniqueId = `update_${Date.now()}`
+    const uniqueId = generateUniqueId()
 
     const artist = await prisma.artist.create({
       data: {
