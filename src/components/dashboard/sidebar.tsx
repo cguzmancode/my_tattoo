@@ -2,12 +2,12 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Calendar, List, Settings, User } from 'lucide-react'
+import { Calendar, List, CalendarDays, Settings, User } from 'lucide-react'
 
 const navItems = [
   { href: '/dashboard', label: 'Overview', icon: List },
   { href: '/dashboard/bookings', label: 'Bookings', icon: Calendar },
-  { href: '/dashboard/calendar', label: 'Calendar', icon: Calendar },
+  { href: '/dashboard/calendar', label: 'Calendar', icon: CalendarDays },
   { href: '/dashboard/settings', label: 'Settings', icon: Settings },
 ]
 
