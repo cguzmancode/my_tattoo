@@ -2,9 +2,10 @@
 
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronLeft, ChevronRight, Lock, Unlock } from 'lucide-react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isSameDay, addMonths, subMonths } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { BlockedIcon, TattooNeedleIcon } from '@/components/icons/tattoo-icons'
 
 interface CalendarEvent {
   id: string
@@ -84,7 +85,7 @@ export function CalendarView({
     >
       {/* Background glow */}
       <div className="absolute -top-32 -right-32 w-64 h-64 bg-[#ff6b35]/5 rounded-full blur-[100px]" />
-      
+
       {/* Header */}
       <div className="mb-6 flex items-center justify-between relative z-10">
         <div className="flex items-center gap-4">
@@ -133,7 +134,7 @@ export function CalendarView({
           data-testid="block-date-button"
           className="flex items-center gap-2 rounded-lg bg-[#ff6b35] px-4 py-2 text-sm font-label tracking-wider text-black transition-colors hover:bg-[#ff8555] uppercase"
         >
-          <Lock className="h-4 w-4" />
+          <BlockedIcon className="h-4 w-4" />
           Bloquear
         </motion.button>
       </div>
@@ -151,7 +152,7 @@ export function CalendarView({
       </div>
 
       {/* Calendar grid */}
-      <motion.div 
+      <motion.div
         layout
         className="grid grid-cols-7 gap-1"
       >
@@ -208,7 +209,7 @@ export function CalendarView({
                       `}
                       title={blocked ? 'Desbloquear fecha' : 'Bloquear fecha'}
                     >
-                      {blocked ? <Lock className="h-3.5 w-3.5" /> : <Unlock className="h-3.5 w-3.5" />}
+                      {blocked ? <BlockedIcon className="h-3.5 w-3.5" /> : <TattooNeedleIcon className="h-3.5 w-3.5" />}
                     </motion.button>
                   )}
                 </div>
@@ -223,8 +224,8 @@ export function CalendarView({
                       transition={{ delay: eventIndex * 0.1 }}
                       className={`
                         truncate rounded px-1.5 py-0.5 text-xs font-medium
-                        ${event.type === 'booking' 
-                          ? 'bg-[#00d4ff]/10 text-[#00d4ff] border border-[#00d4ff]/20' 
+                        ${event.type === 'booking'
+                          ? 'bg-[#00d4ff]/10 text-[#00d4ff] border border-[#00d4ff]/20'
                           : 'bg-red-500/10 text-red-400 border border-red-500/20'
                         }
                       `}
