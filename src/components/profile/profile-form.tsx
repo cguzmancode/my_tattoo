@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Save, Loader2, User, Link as LinkIcon, DollarSign, FileText, Image as ImageIcon } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Save, Loader2, User, Link as LinkIcon, DollarSign, FileText, Image as ImageIcon, CheckCircle, AlertCircle, Sparkles } from 'lucide-react'
 import { updateProfile } from '@/app/actions/profile'
 import { generateSlug } from '@/lib/utils'
 
@@ -10,10 +11,10 @@ interface ProfileFormProps {
     id: string
     name: string
     slug: string
-    bio: string | null
+    bio: string
     styles: string[]
     depositAmount: number
-    instagramUrl: string | null
+    instagramUrl: string
     portfolioImages: string[]
   }
 }
@@ -22,14 +23,15 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  
+  const [focusedField, setFocusedField] = useState<string | null>(null)
+
   const [formData, setFormData] = useState({
     name: initialData.name,
     slug: initialData.slug,
-    bio: initialData.bio || '',
+    bio: initialData.bio,
     styles: initialData.styles.join(', '),
     depositAmount: (initialData.depositAmount / 100).toFixed(2),
-    instagramUrl: initialData.instagramUrl || '',
+    instagramUrl: initialData.instagramUrl,
   })
 
   const handleChange = (
@@ -72,25 +74,62 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
     }
   }
 
+  const inputClasses = (fieldName: string) => `
+    w-full rounded-xl border bg-[#0a0a0a] px-4 py-3 text-sm text-white 
+    placeholder:text-[#525252] transition-all duration-300
+    ${focusedField === fieldName 
+      ? 'border-[#ff6b35] shadow-[0_0_15px_rgba(255,107,53,0.2)]' 
+      : 'border-white/10 hover:border-white/20'}
+    focus:border-[#ff6b35] focus:outline-none focus:shadow-[0_0_15px_rgba(255,107,53,0.2)]
+  `
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {success && (
-        <div className="rounded-lg border border-emerald-800 bg-emerald-950/30 p-4">
-          <p className="text-sm text-emerald-400">Profile updated successfully!</p>
-        </div>
-      )}
+      <AnimatePresence mode="wait">
+        {success && (
+          <motion.div
+            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            className="rounded-xl border border-green-500/30 bg-green-500/10 p-4 flex items-center gap-3"
+          >
+            <div className="h-8 w-8 rounded-full bg-green-500/20 flex items-center justify-center">
+              <CheckCircle className="h-5 w-5 text-green-400" />
+            </div>
+            <div>
+              <p className="font-medium text-green-400">¡Perfil actualizado!</p>
+              <p className="text-sm text-green-400/70">Tus cambios se han guardado correctamente.</p>
+            </div>
+          </motion.div>
+        )}
 
-      {error && (
-        <div className="rounded-lg border border-red-800 bg-red-950/30 p-4">
-          <p className="text-sm text-red-400">{error}</p>
-        </div>
-      )}
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 flex items-center gap-3"
+          >
+            <div className="h-8 w-8 rounded-full bg-red-500/20 flex items-center justify-center">
+              <AlertCircle className="h-5 w-5 text-red-400" />
+            </div>
+            <div>
+              <p className="font-medium text-red-400">Error</p>
+              <p className="text-sm text-red-400/70">{error}</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Name */}
-      <div>
-        <label htmlFor="name" className="mb-1.5 block text-sm font-medium text-zinc-300">
-          <User className="mr-1 inline-block h-4 w-4" />
-          Display Name
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.1 }}
+      >
+        <label htmlFor="name" className="mb-2 flex items-center gap-2 text-sm font-medium text-[#a1a1a1]">
+          <User className="h-4 w-4 text-[#ff6b35]" />
+          Nombre del Artista
         </label>
         <input
           type="text"
@@ -98,21 +137,28 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
           name="name"
           value={formData.name}
           onChange={handleChange}
+          onFocus={() => setFocusedField('name')}
+          onBlur={() => setFocusedField(null)}
           required
-          className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+          className={inputClasses('name')}
+          placeholder="Ej: Alex Rivera"
         />
-      </div>
+      </motion.div>
 
       {/* Slug */}
-      <div>
-        <label htmlFor="slug" className="mb-1.5 block text-sm font-medium text-zinc-300">
-          <LinkIcon className="mr-1 inline-block h-4 w-4" />
-          Profile URL
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.15 }}
+      >
+        <label htmlFor="slug" className="mb-2 flex items-center gap-2 text-sm font-medium text-[#a1a1a1]">
+          <LinkIcon className="h-4 w-4 text-[#ff6b35]" />
+          URL de tu Perfil
         </label>
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           <div className="flex-1">
-            <div className="flex items-center rounded-lg border border-zinc-700 bg-zinc-950">
-              <span className="border-r border-zinc-700 px-3 py-3 text-sm text-zinc-500">
+            <div className="flex items-center rounded-xl border border-white/10 bg-[#0a0a0a] overflow-hidden focus-within:border-[#ff6b35] focus-within:shadow-[0_0_15px_rgba(255,107,53,0.2)] transition-all duration-300">
+              <span className="border-r border-white/10 px-4 py-3 text-sm text-[#525252] bg-[#141414]">
                 inkapp.com/t/
               </span>
               <input
@@ -121,46 +167,65 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
                 name="slug"
                 value={formData.slug}
                 onChange={handleChange}
+                onFocus={() => setFocusedField('slug')}
+                onBlur={() => setFocusedField(null)}
                 required
-                className="flex-1 bg-transparent px-3 py-3 text-sm text-white focus:outline-none"
+                className="flex-1 bg-transparent px-4 py-3 text-sm text-white focus:outline-none"
+                placeholder="tu-nombre"
               />
             </div>
           </div>
-          <button
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             type="button"
             onClick={generateSlugFromName}
-            className="rounded-lg border border-zinc-700 bg-zinc-900 px-4 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-800"
+            className="rounded-xl border border-white/10 bg-[#141414] px-4 text-sm font-medium text-[#a1a1a1] transition-colors hover:border-[#ff6b35]/50 hover:text-white whitespace-nowrap"
           >
-            Generate
-          </button>
+            <Sparkles className="h-4 w-4 inline mr-2" />
+            Generar
+          </motion.button>
         </div>
-        <p className="mt-1.5 text-xs text-zinc-500">
-          This is your public profile URL. Share it with clients.
+        <p className="mt-2 text-xs text-[#525252]">
+          Esta es tu URL pública. Compártela con tus clientes.
         </p>
-      </div>
+      </motion.div>
 
       {/* Bio */}
-      <div>
-        <label htmlFor="bio" className="mb-1.5 block text-sm font-medium text-zinc-300">
-          <FileText className="mr-1 inline-block h-4 w-4" />
-          Bio
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.2 }}
+      >
+        <label htmlFor="bio" className="mb-2 flex items-center gap-2 text-sm font-medium text-[#a1a1a1]">
+          <FileText className="h-4 w-4 text-[#ff6b35]" />
+          Biografía
         </label>
         <textarea
           id="bio"
           name="bio"
           value={formData.bio}
           onChange={handleChange}
+          onFocus={() => setFocusedField('bio')}
+          onBlur={() => setFocusedField(null)}
           rows={4}
-          placeholder="Tell clients about your experience, style, and studio..."
-          className="w-full resize-none rounded-lg border border-zinc-700 bg-zinc-950 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+          placeholder="Cuéntales a los clientes sobre tu experiencia, estilo y estudio..."
+          className={`${inputClasses('bio')} resize-none`}
         />
-      </div>
+        <p className="mt-2 text-xs text-[#525252]">
+          {formData.bio.length}/500 caracteres
+        </p>
+      </motion.div>
 
       {/* Styles */}
-      <div>
-        <label htmlFor="styles" className="mb-1.5 block text-sm font-medium text-zinc-300">
-          <ImageIcon className="mr-1 inline-block h-4 w-4" />
-          Tattoo Styles (comma separated)
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.25 }}
+      >
+        <label htmlFor="styles" className="mb-2 flex items-center gap-2 text-sm font-medium text-[#a1a1a1]">
+          <ImageIcon className="h-4 w-4 text-[#ff6b35]" />
+          Estilos (separados por comas)
         </label>
         <input
           type="text"
@@ -168,40 +233,68 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
           name="styles"
           value={formData.styles}
           onChange={handleChange}
+          onFocus={() => setFocusedField('styles')}
+          onBlur={() => setFocusedField(null)}
           placeholder="Traditional, Japanese, Realism, Blackwork..."
-          className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+          className={inputClasses('styles')}
         />
-      </div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {formData.styles.split(',').map((style, index) => (
+            style.trim() && (
+              <motion.span
+                key={index}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-[#ff6b35]/10 text-[#ff6b35] border border-[#ff6b35]/20"
+              >
+                {style.trim()}
+              </motion.span>
+            )
+          ))}
+        </div>
+      </motion.div>
 
       {/* Deposit Amount */}
-      <div>
-        <label htmlFor="depositAmount" className="mb-1.5 block text-sm font-medium text-zinc-300">
-          <DollarSign className="mr-1 inline-block h-4 w-4" />
-          Required Deposit ($)
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.3 }}
+      >
+        <label htmlFor="depositAmount" className="mb-2 flex items-center gap-2 text-sm font-medium text-[#a1a1a1]">
+          <DollarSign className="h-4 w-4 text-[#ff6b35]" />
+          Depósito Requerido ($)
         </label>
-        <div className="flex items-center rounded-lg border border-zinc-700 bg-zinc-950">
-          <span className="border-r border-zinc-700 px-3 py-3 text-sm text-zinc-500">$</span>
+        <div className="flex items-center rounded-xl border border-white/10 bg-[#0a0a0a] overflow-hidden focus-within:border-[#ff6b35] focus-within:shadow-[0_0_15px_rgba(255,107,53,0.2)] transition-all duration-300">
+          <span className="border-r border-white/10 px-4 py-3 text-sm text-[#525252] bg-[#141414] font-medium">
+            $
+          </span>
           <input
             type="number"
             id="depositAmount"
             name="depositAmount"
             value={formData.depositAmount}
             onChange={handleChange}
+            onFocus={() => setFocusedField('depositAmount')}
+            onBlur={() => setFocusedField(null)}
             min="0"
             step="0.01"
             required
-            className="flex-1 bg-transparent px-3 py-3 text-sm text-white focus:outline-none"
+            className="flex-1 bg-transparent px-4 py-3 text-sm text-white focus:outline-none"
           />
         </div>
-        <p className="mt-1.5 text-xs text-zinc-500">
-          Clients must pay this deposit to confirm their booking.
+        <p className="mt-2 text-xs text-[#525252]">
+          Los clientes deben pagar este depósito para confirmar su cita.
         </p>
-      </div>
+      </motion.div>
 
       {/* Instagram URL */}
-      <div>
-        <label htmlFor="instagramUrl" className="mb-1.5 block text-sm font-medium text-zinc-300">
-          Instagram URL
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.35 }}
+      >
+        <label htmlFor="instagramUrl" className="mb-2 block text-sm font-medium text-[#a1a1a1]">
+          Instagram
         </label>
         <input
           type="url"
@@ -209,31 +302,40 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
           name="instagramUrl"
           value={formData.instagramUrl}
           onChange={handleChange}
-          placeholder="https://instagram.com/yourhandle"
-          className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+          onFocus={() => setFocusedField('instagramUrl')}
+          onBlur={() => setFocusedField(null)}
+          placeholder="https://instagram.com/tuusuario"
+          className={inputClasses('instagramUrl')}
         />
-      </div>
+      </motion.div>
 
       {/* Submit */}
-      <div className="flex items-center justify-end gap-4 pt-4 border-t border-zinc-800">
-        <button
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="flex items-center justify-end gap-4 pt-6 border-t border-white/10"
+      >
+        <motion.button
           type="submit"
           disabled={isSubmitting}
-          className="flex items-center gap-2 rounded-lg bg-orange-500 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
+          whileHover={{ scale: 1.02, boxShadow: "0 0 30px rgba(255, 107, 53, 0.4)" }}
+          whileTap={{ scale: 0.98 }}
+          className="flex items-center gap-2 rounded-xl bg-[#ff6b35] px-8 py-3 text-sm font-label tracking-wider text-black transition-all hover:bg-[#ff8555] disabled:cursor-not-allowed disabled:opacity-50 uppercase"
         >
           {isSubmitting ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              Saving...
+              Guardando...
             </>
           ) : (
             <>
               <Save className="h-4 w-4" />
-              Save Changes
+              Guardar Cambios
             </>
           )}
-        </button>
-      </div>
+        </motion.button>
+      </motion.div>
     </form>
   )
 }
