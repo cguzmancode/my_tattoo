@@ -1,9 +1,22 @@
-import { getArtistBookings } from '@/app/actions/bookings'
+import { DEMO_BOOKINGS } from '@/lib/mocks/data'
 import { formatDistanceToNow } from '@/lib/utils'
 
-export async function BookingList() {
-  const bookings = await getArtistBookings()
+interface Booking {
+  id: string
+  clientName: string
+  clientEmail: string
+  bodyZone: string
+  size: string
+  description: string
+  status: 'PENDING' | 'ACCEPTED' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED'
+  createdAt: Date | string
+}
 
+interface BookingListProps {
+  bookings?: Booking[]
+}
+
+export function BookingList({ bookings = DEMO_BOOKINGS as Booking[] }: BookingListProps) {
   if (bookings.length === 0) {
     return (
       <div className="text-center py-12">
@@ -35,10 +48,10 @@ export async function BookingList() {
                   booking.status === 'PENDING'
                     ? 'bg-yellow-100 text-yellow-800'
                     : booking.status === 'ACCEPTED'
-                    ? 'bg-blue-100 text-blue-800'
-                    : booking.status === 'CONFIRMED'
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-gray-100 text-gray-800'
+                      ? 'bg-blue-100 text-blue-800'
+                      : booking.status === 'CONFIRMED'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-gray-100 text-gray-800'
                 }`}
               >
                 {booking.status}

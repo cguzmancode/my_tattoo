@@ -3,33 +3,49 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { CalendarView } from '@/components/calendar/calendar-view'
 import { blockDate, unblockDate } from '@/app/actions/calendar'
+import { DEMO_ARTIST, DEMO_BLOCKED_DATES, DEMO_BOOKINGS } from '@/lib/mocks/data'
 
 export default async function CalendarPage() {
   const { userId } = await auth()
 
-  if (!userId) {
+  // Bypass para development - permite ver la UI sin login
+  const isDev = process.env.NODE_ENV === 'development'
+
+  if (!userId && !isDev) {
     redirect('/sign-in')
   }
 
-  const artist = await prisma.artist.findUnique({
-    where: { clerkId: userId },
-  })
+  // En development sin login, usar datos del mock
+  let artist
+  let blockedDates
+  let bookings
 
-  if (!artist) {
-    redirect('/sign-up')
+  if (userId) {
+    // Usuario autenticado - usar datos reales de la DB
+    artist = await prisma.artist.findUnique({
+      where: { clerkId: userId },
+    })
+
+    if (!artist) {
+      redirect('/sign-up')
+    }
+
+    blockedDates = await prisma.blockedDate.findMany({
+      where: { artistId: artist.id },
+    })
+
+    bookings = await prisma.booking.findMany({
+      where: {
+        artistId: artist.id,
+        status: { in: ['ACCEPTED', 'CONFIRMED'] },
+      },
+    })
+  } else {
+    // Development mode - usar datos del mock
+    artist = DEMO_ARTIST
+    blockedDates = DEMO_BLOCKED_DATES.map((bd) => ({ date: bd.date }))
+    bookings = DEMO_BOOKINGS.filter((b) => ['ACCEPTED', 'CONFIRMED'].includes(b.status))
   }
-
-  // Fetch blocked dates and bookings for this month
-  const blockedDates = await prisma.blockedDate.findMany({
-    where: { artistId: artist.id },
-  })
-
-  const bookings = await prisma.booking.findMany({
-    where: {
-      artistId: artist.id,
-      status: { in: ['ACCEPTED', 'CONFIRMED'] },
-    },
-  })
 
   // Transform bookings to calendar events
   const events = bookings.map((booking) => ({

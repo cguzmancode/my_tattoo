@@ -49,6 +49,13 @@ test.describe('📸 Screenshot Preview - UX Redesign', () => {
     console.log('✅ Screenshot: Settings con formulario estilizado')
   })
 
+  test('06b - Bookings', async ({ page }) => {
+    await page.goto('/dashboard/bookings')
+    await page.waitForTimeout(2000)
+    await page.screenshot({ path: 'test-results/screenshots/06b-bookings.png', fullPage: true })
+    console.log('✅ Screenshot: Citas/Bookings')
+  })
+
   test('07 - 404 Page', async ({ page }) => {
     await page.goto('/t/non-existent-slug')
     await page.waitForTimeout(1000)

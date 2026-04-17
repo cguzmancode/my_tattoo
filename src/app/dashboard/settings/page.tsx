@@ -7,11 +7,14 @@ import { DEMO_ARTIST } from '@/lib/mocks/data'
 export default async function SettingsPage() {
   const { userId } = await auth()
 
-  if (!userId) {
+  // Bypass para development - permite ver la UI sin login
+  const isDev = process.env.NODE_ENV === 'development'
+
+  if (!userId && !isDev) {
     redirect('/sign-in')
   }
 
-  // Usar datos del mock para demo
+  // En development, usar datos del mock
   const artist = DEMO_ARTIST
 
   return (
