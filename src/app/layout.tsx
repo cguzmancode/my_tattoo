@@ -1,21 +1,19 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import { ClerkProvider, Show, UserButton, SignInButton, SignUpButton } from "@clerk/nextjs";
+import { motion } from "framer-motion";
+import { Header } from "@/components/layout/header";
+import { NoiseOverlay } from "@/components/layout/noise-overlay";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
   title: "InkApp - Tattoo Booking Platform",
-  description: "Manage your tattoo appointments professionally",
+  description: "Gestiona tus citas de tatuaje profesionalmente. Conecta artistas con clientes.",
 };
 
 export default function RootLayout({
@@ -24,27 +22,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">
-        <ClerkProvider>
-          <header className="border-b p-4 flex justify-between items-center">
-            <h1 className="text-xl font-bold">InkApp</h1>
-            <nav>
-              <Show when="signed-out">
-                <SignInButton />
-                <SignUpButton />
-              </Show>
-              <Show when="signed-in">
-                <UserButton />
-              </Show>
-            </nav>
-          </header>
-          <main className="flex-1">{children}</main>
-        </ClerkProvider>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="es" className={`${inter.variable} dark`}>
+        <body className="min-h-screen bg-background text-foreground font-body antialiased">
+          <NoiseOverlay />
+          <Header />
+          <main className="relative z-10">
+            {children}
+          </main>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
