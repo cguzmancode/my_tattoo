@@ -1,7 +1,5 @@
 // Mock data for local development and demo
-// This allows the app to function without real database data
-
-import { prisma } from '@/lib/prisma'
+// Pure data - no server dependencies
 
 export const DEMO_ARTIST = {
   id: 'demo-artist-001',
@@ -11,7 +9,7 @@ export const DEMO_ARTIST = {
   slug: 'alex-rivera-tattoo',
   bio: 'Especialista en tradicional americano y neotradicional. 10+ años de experiencia transformando ideas en arte permanente. Estudio privado en el corazón de Madrid. Cada diseño es único, creado en colaboración con el cliente.',
   styles: ['Traditional', 'Neotraditional', 'Blackwork', 'Japanese'],
-  depositAmount: 5000, // $50.00 in cents
+  depositAmount: 5000,
   instagramUrl: 'https://instagram.com/alex.needle',
   portfolioImages: [
     'https://images.unsplash.com/photo-1611501275019-9e0877284709?w=800&q=80',
@@ -37,7 +35,7 @@ export const DEMO_BOOKINGS = [
     description: 'Quiero un diseño de una rosa tradicional con un banner que diga "Mamá". Colores vivos, estilo old school.',
     referenceImages: [],
     preferredDates: [new Date('2024-02-15'), new Date('2024-02-16')],
-    status: 'PENDING',
+    status: 'PENDING' as const,
     createdAt: new Date('2024-01-10'),
     updatedAt: new Date('2024-01-10'),
     artistId: 'demo-artist-001',
@@ -53,7 +51,7 @@ export const DEMO_BOOKINGS = [
     description: 'Dragón japonés estilo irezumi, en blanco y negro con sombreado. Diseño que se extienda por el pecho.',
     referenceImages: [],
     preferredDates: [new Date('2024-02-20')],
-    status: 'PENDING',
+    status: 'PENDING' as const,
     createdAt: new Date('2024-01-12'),
     updatedAt: new Date('2024-01-12'),
     artistId: 'demo-artist-001',
@@ -69,7 +67,7 @@ export const DEMO_BOOKINGS = [
     description: 'Tatuaje minimalista de una luna con una cara sutil. Estilo fine line.',
     referenceImages: [],
     preferredDates: [new Date('2024-02-10')],
-    status: 'ACCEPTED',
+    status: 'ACCEPTED' as const,
     createdAt: new Date('2024-01-08'),
     updatedAt: new Date('2024-01-11'),
     artistId: 'demo-artist-001',
@@ -85,7 +83,7 @@ export const DEMO_BOOKINGS = [
     description: 'Calavera mexicana con elementos florales y un reloj. Estilo neotradicional a color.',
     referenceImages: [],
     preferredDates: [new Date('2024-03-01'), new Date('2024-03-02')],
-    status: 'ACCEPTED',
+    status: 'ACCEPTED' as const,
     createdAt: new Date('2024-01-05'),
     updatedAt: new Date('2024-01-09'),
     artistId: 'demo-artist-001',
@@ -95,7 +93,7 @@ export const DEMO_BOOKINGS = [
         bookingId: 'booking-004',
         stripePaymentIntentId: 'pi_demo_001',
         amount: 5000,
-        status: 'PENDING',
+        status: 'PENDING' as const,
         createdAt: new Date('2024-01-09'),
         updatedAt: new Date('2024-01-09'),
       }
@@ -111,7 +109,7 @@ export const DEMO_BOOKINGS = [
     description: 'Serpiente enroscada con rosas y dagas. Estilo tradicional con colores vivos.',
     referenceImages: [],
     preferredDates: [new Date('2024-01-25')],
-    status: 'CONFIRMED',
+    status: 'CONFIRMED' as const,
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-06'),
     artistId: 'demo-artist-001',
@@ -121,7 +119,7 @@ export const DEMO_BOOKINGS = [
         bookingId: 'booking-005',
         stripePaymentIntentId: 'pi_demo_002',
         amount: 5000,
-        status: 'COMPLETED',
+        status: 'COMPLETED' as const,
         createdAt: new Date('2024-01-06'),
         updatedAt: new Date('2024-01-06'),
       }
@@ -137,7 +135,7 @@ export const DEMO_BOOKINGS = [
     description: 'Ancla con cadenas y rosas. Estilo tradicional americano, colores sólidos.',
     referenceImages: [],
     preferredDates: [new Date('2024-01-28')],
-    status: 'CONFIRMED',
+    status: 'CONFIRMED' as const,
     createdAt: new Date('2023-12-28'),
     updatedAt: new Date('2024-01-03'),
     artistId: 'demo-artist-001',
@@ -147,7 +145,7 @@ export const DEMO_BOOKINGS = [
         bookingId: 'booking-006',
         stripePaymentIntentId: 'pi_demo_003',
         amount: 5000,
-        status: 'COMPLETED',
+        status: 'COMPLETED' as const,
         createdAt: new Date('2024-01-03'),
         updatedAt: new Date('2024-01-03'),
       }
@@ -163,7 +161,7 @@ export const DEMO_BOOKINGS = [
     description: 'Letras con el nombre de mi hija en estilo script.',
     referenceImages: [],
     preferredDates: [new Date('2024-01-20')],
-    status: 'CANCELLED',
+    status: 'CANCELLED' as const,
     createdAt: new Date('2024-01-03'),
     updatedAt: new Date('2024-01-07'),
     artistId: 'demo-artist-001',
@@ -179,7 +177,7 @@ export const DEMO_BOOKINGS = [
     description: 'Lobo aullando a la luna con bosque de fondo. Estilo blackwork.',
     referenceImages: [],
     preferredDates: [new Date('2024-02-05')],
-    status: 'PENDING',
+    status: 'PENDING' as const,
     createdAt: new Date('2024-01-13'),
     updatedAt: new Date('2024-01-13'),
     artistId: 'demo-artist-001',
@@ -203,6 +201,11 @@ export const DEMO_STATS = {
   thisMonth: 5,
 }
 
+// Verificar si estamos en modo demo
+export function isDemoMode(): boolean {
+  return process.env.NEXT_PUBLIC_DEMO_MODE === 'true' || process.env.NODE_ENV === 'development'
+}
+
 // Helper para obtener datos del artista demo
 export function getDemoArtist() {
   return DEMO_ARTIST
@@ -221,26 +224,4 @@ export function getDemoBlockedDates() {
 // Helper para obtener stats
 export function getDemoStats() {
   return DEMO_STATS
-}
-
-// Verificar si estamos en modo demo
-export function isDemoMode(): boolean {
-  return process.env.NEXT_PUBLIC_DEMO_MODE === 'true' || process.env.NODE_ENV === 'development'
-}
-
-// Helper para obtener artista por slug (modo demo)
-export async function getArtistBySlugWithFallback(slug: string) {
-  // Primero intentar DB real
-  const artist = await prisma.artist.findUnique({
-    where: { slug, isActive: true },
-  })
-  
-  if (artist) return artist
-  
-  // Si no existe y es el slug demo, retornar mock
-  if (slug === DEMO_ARTIST.slug && isDemoMode()) {
-    return DEMO_ARTIST
-  }
-  
-  return null
 }

@@ -1,42 +1,58 @@
 import { test, expect } from '@playwright/test'
-import { execSync } from 'child_process'
 
-// Este test genera screenshots de las páginas para preview visual
-test.describe('📸 Screenshot Preview', () => {
+// Este test genera screenshots de todas las páginas para preview visual
+test.describe('📸 Screenshot Preview - UX Redesign', () => {
   test.afterAll(() => {
     console.log('\n📁 Screenshots guardados en: test-results/screenshots/')
-    console.log('Para verlos abre la carpeta en tu navegador de archivos\n')
+    console.log('Revisa las imágenes para ver el progreso del rediseño\n')
   })
 
-  test('homepage screenshot', async ({ page }) => {
+  test('01 - Homepage', async ({ page }) => {
     await page.goto('/')
+    await page.waitForTimeout(2000)
     await page.screenshot({ path: 'test-results/screenshots/01-homepage.png', fullPage: true })
-    console.log('✅ Screenshot: Homepage')
+    console.log('✅ Screenshot: Homepage con hero, features, stats')
   })
 
-  test('sign-in screenshot', async ({ page }) => {
+  test('02 - Sign-in page', async ({ page }) => {
     await page.goto('/sign-in')
     await page.waitForTimeout(1000)
     await page.screenshot({ path: 'test-results/screenshots/02-sign-in.png', fullPage: true })
-    console.log('✅ Screenshot: Sign In')
+    console.log('✅ Screenshot: Sign-in con tema tattoo')
   })
 
-  test('public profile screenshot', async ({ page }) => {
-    await page.goto('/t/demo-artist')
+  test('03 - Public profile', async ({ page }) => {
+    await page.goto('/t/alex-rivera-tattoo')
+    await page.waitForTimeout(2000)
     await page.screenshot({ path: 'test-results/screenshots/03-public-profile.png', fullPage: true })
-    console.log('✅ Screenshot: Public Profile')
+    console.log('✅ Screenshot: Perfil público del artista')
   })
 
-  test('404 page screenshot', async ({ page }) => {
-    await page.goto('/t/non-existent-slug')
-    await page.screenshot({ path: 'test-results/screenshots/04-404-page.png', fullPage: true })
-    console.log('✅ Screenshot: 404 Page')
-  })
-
-  test('dashboard screenshot (redirects to sign-in)', async ({ page }) => {
+  test('04 - Dashboard overview', async ({ page }) => {
     await page.goto('/dashboard')
+    await page.waitForTimeout(2000)
+    await page.screenshot({ path: 'test-results/screenshots/04-dashboard.png', fullPage: true })
+    console.log('✅ Screenshot: Dashboard con stats y bookings')
+  })
+
+  test('05 - Calendar', async ({ page }) => {
+    await page.goto('/dashboard/calendar')
+    await page.waitForTimeout(2000)
+    await page.screenshot({ path: 'test-results/screenshots/05-calendar.png', fullPage: true })
+    console.log('✅ Screenshot: Calendario con grid animado')
+  })
+
+  test('06 - Settings', async ({ page }) => {
+    await page.goto('/dashboard/settings')
+    await page.waitForTimeout(2000)
+    await page.screenshot({ path: 'test-results/screenshots/06-settings.png', fullPage: true })
+    console.log('✅ Screenshot: Settings con formulario estilizado')
+  })
+
+  test('07 - 404 Page', async ({ page }) => {
+    await page.goto('/t/non-existent-slug')
     await page.waitForTimeout(1000)
-    await page.screenshot({ path: 'test-results/screenshots/05-dashboard-redirect.png', fullPage: true })
-    console.log('✅ Screenshot: Dashboard (auth redirect)')
+    await page.screenshot({ path: 'test-results/screenshots/07-404.png', fullPage: true })
+    console.log('✅ Screenshot: Página 404')
   })
 })
