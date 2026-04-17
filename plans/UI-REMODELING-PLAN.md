@@ -135,33 +135,52 @@ Se han analizado 8 páginas clave de la aplicación InkApp.
 - ✅ Header de página con barra de búsqueda y filtros estilizados
 - ✅ Consistencia total con el dashboard
 
-### Fase 2: Mejoras de Iconografía (Media)
+### Fase 2: Mejoras de Iconografía (Media) ✅ COMPLETADA
 
 **Tiempo**: 3-4 horas
 
-#### 2.1 Calendar Icons
+#### 2.1 Calendar Icons ✅
 
-Crear componentes de iconos SVG personalizados:
+Creado `src/components/icons/tattoo-icons.tsx` con componentes SVG personalizados:
 
 ```tsx
-// Icono bloqueado - Cruz estilo tattoo
-const BlockedIcon = () => (
-  <svg viewBox="0 0 24 24" className="w-5 h-5 text-red-500">
-    <path stroke="currentColor" strokeWidth="2" 
-          d="M18 6L6 18M6 6l12 12" />
-  </svg>
-)
+// Icono bloqueado - Cruz estilo tattoo con puntos decorativos
+export function BlockedIcon({ className = "h-5 w-5" }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M6 6L18 18" />
+      <path d="M18 6L6 18" />
+      <circle cx="6" cy="6" r="1.5" fill="currentColor" />
+      <circle cx="18" cy="18" r="1.5" fill="currentColor" />
+      <circle cx="18" cy="6" r="1.5" fill="currentColor" />
+      <circle cx="6" cy="18" r="1.5" fill="currentColor" />
+    </svg>
+  )
+}
 
-// Icono cita - Aguja
-const BookingIcon = () => (
-  <svg viewBox="0 0 24 24" className="w-5 h-5 text-[#ff6b35]">
-    <path fill="currentColor" 
-          d="M12 2L12.5 8H15L12 22L9 8H11.5L12 2Z" />
-  </svg>
-)
+// Icono de aguja de tattoo simplificada
+export function TattooNeedleIcon({ className = "h-5 w-5" }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M12 2L12 14" />
+      <circle cx="12" cy="16" r="2" />
+      <path d="M12 18L12 20" />
+      <circle cx="10" cy="21" r="0.5" fill="currentColor" />
+      <circle cx="14" cy="21.5" r="0.5" fill="currentColor" />
+    </svg>
+  )
+}
 ```
 
-#### 2.2 Style Tags con Iconos
+**Implementado**:
+- ✅ BlockedIcon: X cruzada con puntos decorativos en esquinas (estilo tattoo)
+- ✅ TattooNeedleIcon: Aguja simplificada con gotas de tinta
+- ✅ AvailableIcon: Círculo con puntos decorativos
+- ✅ SkullIcon: Calavera old school tattoo
+- ✅ RoseIcon: Rosa tradicional
+- ✅ Integración en calendar-view.tsx (reemplaza Lock/Unlock)
+
+#### 2.2 Style Tags con Iconos 🔄 PENDIENTE
 
 Para los tags de estilos (Traditional, Neotraditional, etc.):
 
@@ -360,10 +379,10 @@ xl: 1280px  - Desktop
 - [x] Consistencia con dashboard
 - [x] Testing visual completo (screenshot actualizado)
 
-**Día 3-4**: Calendar icons 🔄 PENDIENTE
-- [ ] Iconos SVG personalizados creados
-- [ ] Integración en componente Calendar
-- [ ] Testing interactivo
+**Día 3-4**: Calendar icons ✅ COMPLETADO
+- [x] Iconos SVG personalizados creados (tattoo-icons.tsx)
+- [x] Integración en componente Calendar
+- [x] Testing visual (screenshot actualizado)
 
 **Día 5**: Public profile imagen 🔄 PENDIENTE
 - [ ] Nueva imagen de portada
@@ -425,9 +444,9 @@ xl: 1280px  - Desktop
 
 ## 🚀 Próximos Pasos
 
-1. **✅ Completado**: Fix bookings (fondo blanco → oscuro)
-2. **🔄 Siguiente**: Iconos calendar personalizados (Fase 2)
-3. **Próxima semana**: Settings y Public Profile mejorados (Fase 3)
+1. **✅ Completado**: Fix bookings (fondo blanco → oscuro) - Fase 1
+2. **✅ Completado**: Iconos calendar personalizados (tattoo style) - Fase 2
+3. **🔄 Siguiente**: Settings y Public Profile mejorados (Fase 3)
 4. **Futuro**: Componentes tattoo-centric (Body Zone, etc.)
 
 ---
