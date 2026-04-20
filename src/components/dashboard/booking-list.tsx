@@ -29,11 +29,17 @@ export function BookingList({ bookings = DEMO_BOOKINGS as Booking[], onBookingCl
   return (
     <div className="space-y-4">
       {bookings.map((booking) => (
-        <TattooBookingCard
-          key={booking.id}
-          booking={booking}
+        <div 
+          key={booking.id} 
+          data-testid="booking-card"
           onClick={() => onBookingClick?.(booking)}
-        />
+          className="cursor-pointer"
+        >
+          <TattooBookingCard
+            booking={booking}
+            onClick={() => onBookingClick?.(booking)}
+          />
+        </div>
       ))}
     </div>
   )

@@ -65,10 +65,10 @@ export default function BookingsPage() {
           <input
             type="text"
             placeholder="Buscar por cliente..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#141414] border border-white/10 
-                       text-white placeholder-[#525252] text-sm
-                       focus:outline-none focus:border-[#ff6b35]/50 focus:ring-1 focus:ring-[#ff6b35]/20
-                       transition-all"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#141414] border border-white/10
+            text-white placeholder-[#525252] text-sm
+            focus:outline-none focus:border-[#ff6b35]/50 focus:ring-1 focus:ring-[#ff6b35]/20
+            transition-all"
           />
         </div>
 
@@ -78,8 +78,8 @@ export default function BookingsPage() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#141414] border border-white/10
-                       text-[#a1a1a1] text-sm font-medium hover:border-[#ff6b35]/30 hover:text-white
-                       transition-all"
+            text-[#a1a1a1] text-sm font-medium hover:border-[#ff6b35]/30 hover:text-white
+            transition-all"
           >
             <Filter className="w-4 h-4" />
             Filtrar
@@ -94,8 +94,18 @@ export default function BookingsPage() {
         transition={{ delay: 0.2 }}
         className="rounded-2xl border border-white/10 bg-[#141414] p-6"
       >
-        <BookingList bookings={bookings} />
+        <BookingList 
+          bookings={bookings} 
+          onBookingClick={handleBookingClick}
+        />
       </motion.div>
+
+      {/* Booking Detail Drawer */}
+      <BookingDetailDrawer
+        isOpen={isDrawerOpen}
+        onClose={handleCloseDrawer}
+        booking={selectedBooking}
+      />
     </div>
   )
 }
