@@ -37,26 +37,30 @@ enum BookingStatus {
 }
 
 model Booking {
-  id              String        @id @default(uuid())
-  artistId        String
-  clientName      String
-  clientEmail     String
-  clientPhone     String?
-  bodyZone        String
-  size            String
-  description     String
-  referenceImages String[]      @default([])
-  preferredDates  String[]      @default([])
-  status          BookingStatus @default(PENDING)
-  proposedDate    DateTime?
-  depositPaid     Boolean       @default(false)
+  id String @id @default(uuid())
+  artistId String
+  clientName String
+  clientEmail String
+  clientPhone String?
+  bodyZone String
+  size String
+  description String
+  referenceImages String[] @default([])
+  preferredDates String[] @default([])
+  status BookingStatus @default(PENDING)
+  proposedDate DateTime?
+  depositPaid Boolean @default(false)
   paymentIntentId String?
-  reminderSent24h Boolean       @default(false)
-  reminderSent48h Boolean       @default(false)
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  reminderSent24h Boolean @default(false)
+  reminderSent48h Boolean @default(false)
+  // Campos editables por el artista
+  priceEstimate Int?
+  durationEstimate String?
+  artistNotes String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  artist   Artist    @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  artist Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
   payments Payment[]
 
   @@map("bookings")

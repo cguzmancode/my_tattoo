@@ -90,8 +90,11 @@ export async function getBookingById(bookingId: string) {
 
 export interface UpdateBookingStatusInput {
   status: BookingStatus
-  proposedDate?: Date
+  proposedDate?: Date | string
   rejectionReason?: string
+  priceEstimate?: number
+  durationEstimate?: string
+  artistNotes?: string
 }
 
 export async function updateBookingStatus(
@@ -136,12 +139,22 @@ export async function updateBookingStatus(
     throw new Error(`Invalid status transition from ${booking.status} to ${input.status}`)
   }
 
+  // Convertir proposedDate a Date si es string
+  const proposedDate = input.proposedDate
+    ? typeof input.proposedDate === 'string'
+      ? new Date(input.proposedDate)
+      : input.proposedDate
+    : undefined
+
   // Actualizar booking
   const updated = await prisma.booking.update({
     where: { id: bookingId },
     data: {
       status: input.status,
-      proposedDate: input.proposedDate,
+      proposedDate,
+      priceEstimate: input.priceEstimate,
+      durationEstimate: input.durationEstimate,
+      artistNotes: input.artistNotes,
     },
   })
 

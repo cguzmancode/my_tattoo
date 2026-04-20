@@ -1,15 +1,28 @@
 'use client'
 
+import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { auth } from '@clerk/nextjs/server'
-import { redirect } from 'next/navigation'
 import { Calendar, Filter, Search } from 'lucide-react'
 import { DEMO_BOOKINGS } from '@/lib/mocks/data'
 import { BookingList } from '@/components/dashboard/booking-list'
+import { BookingDetailDrawer } from '@/components/dashboard/booking-detail-drawer'
 
 export default function BookingsPage() {
   // En development sin login, usar datos del mock
   const bookings = DEMO_BOOKINGS
+  const [selectedBooking, setSelectedBooking] = useState<typeof bookings[0] | null>(null)
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+
+  const handleBookingClick = (booking: typeof bookings[0]) => {
+    setSelectedBooking(booking)
+    setIsDrawerOpen(true)
+  }
+
+  const handleCloseDrawer = () => {
+    setIsDrawerOpen(false)
+    // Limpiar selectedBooking después de la animación
+    setTimeout(() => setSelectedBooking(null), 300)
+  }
 
   return (
     <div className="space-y-8">
