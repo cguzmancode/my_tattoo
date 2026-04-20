@@ -1,7 +1,9 @@
+import { Suspense } from 'react'
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { DashboardClient } from './dashboard-client'
+import { DashboardSkeleton } from '@/components/ui/skeleton'
 import { DEMO_BOOKINGS, DEMO_STATS, DEMO_ARTIST } from '@/lib/mocks'
 
 export default async function DashboardPage() {
@@ -89,11 +91,13 @@ export default async function DashboardPage() {
   }
 
   return (
-    <DashboardClient
-      artist={artist as any}
-      bookings={bookings as any[]}
-      stats={stats}
-      isDemo={!userId}
-    />
+    <Suspense fallback={<DashboardSkeleton />}>
+      <DashboardClient
+        artist={artist as any}
+        bookings={bookings as any[]}
+        stats={stats}
+        isDemo={!userId}
+      />
+    </Suspense>
   )
 }

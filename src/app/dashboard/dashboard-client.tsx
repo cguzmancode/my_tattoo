@@ -1,10 +1,12 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Calendar, Clock, DollarSign, TrendingUp, ArrowRight, AlertCircle } from 'lucide-react'
+import { Calendar, Clock, DollarSign, TrendingUp, ArrowRight, AlertCircle, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { StatusBadge } from '@/components/dashboard/status-badge'
 import { ArtistStatsDashboard } from '@/components/dashboard/artist-stats-dashboard'
+import { EmptyBookings } from '@/components/ui/empty-state'
+import { useToast } from '@/components/ui/toast'
 import { MockBooking } from '@/lib/mocks'
 
 interface Artist {
@@ -58,6 +60,7 @@ interface DashboardClientProps {
 }
 
 export function DashboardClient({ artist, bookings, stats, isDemo }: DashboardClientProps) {
+  const { showToast } = useToast()
   const statItems = [
     {
       label: 'Total Citas',
@@ -206,16 +209,11 @@ export function DashboardClient({ artist, bookings, stats, isDemo }: DashboardCl
           </Link>
         </div>
 
-        <div className="divide-y divide-white/10">
-          {bookings.length === 0 ? (
-            <div className="p-8 text-center">
-              <p className="text-[#a1a1a1]">No tienes citas recientes</p>
-              <p className="text-[#525252] text-sm mt-1">
-                Comparte tu perfil para recibir solicitudes
-              </p>
-            </div>
-          ) : (
-            bookings.map((booking, index) => (
+      <div className="divide-y divide-white/10">
+        {bookings.length === 0 ? (
+          <EmptyBookings />
+        ) : (
+          bookings.map((booking, index) => (
               <motion.div
                 key={booking.id}
                 initial={{ opacity: 0, x: -20 }}
