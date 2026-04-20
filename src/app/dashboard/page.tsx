@@ -5,7 +5,9 @@ import { Calendar, Clock, DollarSign, TrendingUp, ArrowRight } from 'lucide-reac
 import Link from 'next/link'
 import { DEMO_BOOKINGS, DEMO_STATS } from '@/lib/mocks'
 import { StatusBadge } from '@/components/dashboard/status-badge'
+import { ArtistStatsDashboard } from '@/components/dashboard/artist-stats-dashboard'
 
+// Legacy stats for backward compatibility
 const stats = [
   { 
     label: 'Total Citas', 
@@ -184,15 +186,49 @@ export default function DashboardPage() {
             </motion.div>
           ))}
         </div>
-      </motion.div>
+  </motion.div>
 
-      {/* Quick Actions */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6 }}
-        className="grid grid-cols-1 md:grid-cols-2 gap-6"
-      >
+  {/* Enhanced Stats Dashboard - Fase 5 */}
+  <motion.div
+    initial={{ opacity: 0, y: 30 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay: 0.4 }}
+    className="rounded-2xl border border-white/10 bg-[#141414]/50 p-6"
+  >
+    <div className="mb-6">
+      <h2 className="font-display text-xl font-bold text-white">
+        Estadísticas del Estudio
+      </h2>
+      <p className="text-[#a1a1a1] text-sm mt-1">
+        Visualiza tu progreso y métricas clave
+      </p>
+    </div>
+    <ArtistStatsDashboard
+      bookingsThisMonth={12}
+      bookingsTrend={15}
+      completedWorks={48}
+      totalWorksTrend={8}
+      rating={4.8}
+      ratingCount={36}
+      revenueThisMonth={2400}
+      revenueTrend={12}
+      newClients={8}
+      recentWorks={DEMO_BOOKINGS.slice(0, 6).map((b, i) => ({
+        id: b.id,
+        image: `https://picsum.photos/seed/work${i}/200/200`,
+        title: `${b.clientName} - ${b.bodyZone}`,
+        date: new Date(b.createdAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
+      }))}
+    />
+  </motion.div>
+
+  {/* Quick Actions */}
+  <motion.div
+    initial={{ opacity: 0, y: 30 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay: 0.6 }}
+    className="grid grid-cols-1 md:grid-cols-2 gap-6"
+  >
         <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-[#ff6b35]/10 to-transparent p-6">
           <h3 className="font-display text-lg font-bold text-white mb-2">
             Comparte tu perfil

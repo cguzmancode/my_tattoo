@@ -23,6 +23,8 @@ interface CalendarViewProps {
   onUnblockDate?: (date: Date) => void
 }
 
+type ViewMode = 'month' | 'week'
+
 export function CalendarView({
   events = [],
   blockedDates = [],
@@ -33,6 +35,7 @@ export function CalendarView({
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [hoveredDate, setHoveredDate] = useState<Date | null>(null)
+  const [viewMode, setViewMode] = useState<ViewMode>('month')
 
   const monthStart = startOfMonth(currentDate)
   const monthEnd = endOfMonth(monthStart)
@@ -95,7 +98,10 @@ export function CalendarView({
             animate={{ opacity: 1, x: 0 }}
             className="text-2xl font-display font-bold text-white capitalize"
           >
-            {format(currentDate, 'MMMM yyyy', { locale: es })}
+            {viewMode === 'month' 
+              ? format(currentDate, 'MMMM yyyy', { locale: es })
+              : `Semana del ${format(currentDate, 'd MMM', { locale: es })}`
+            }
           </motion.h2>
           <div className="flex items-center gap-1">
             <motion.button
@@ -128,15 +134,45 @@ export function CalendarView({
           </div>
         </div>
 
-        <motion.button
-          whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(255, 107, 53, 0.4)" }}
-          whileTap={{ scale: 0.95 }}
-          data-testid="block-date-button"
-          className="flex items-center gap-2 rounded-lg bg-[#ff6b35] px-4 py-2 text-sm font-label tracking-wider text-black transition-colors hover:bg-[#ff8555] uppercase"
-        >
-          <BlockedIcon className="h-4 w-4" />
-          Bloquear
-        </motion.button>
+        <div className="flex items-center gap-3">
+          {/* View Mode Toggle */}
+          <div className="flex rounded-lg border border-white/10 bg-black/30 p-1">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setViewMode('month')}
+              className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${
+                viewMode === 'month' 
+                  ? 'bg-[#ff6b35] text-black' 
+                  : 'text-[#a1a1a1] hover:text-white'
+              }`}
+            >
+              Mes
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setViewMode('week')}
+              className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${
+                viewMode === 'week' 
+                  ? 'bg-[#ff6b35] text-black' 
+                  : 'text-[#a1a1a1] hover:text-white'
+              }`}
+            >
+              Semana
+            </motion.button>
+          </div>
+
+          <motion.button
+            whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(255, 107, 53, 0.4)" }}
+            whileTap={{ scale: 0.95 }}
+            data-testid="block-date-button"
+            className="flex items-center gap-2 rounded-lg bg-[#ff6b35] px-4 py-2 text-sm font-label tracking-wider text-black transition-colors hover:bg-[#ff8555] uppercase btn-glow"
+          >
+            <BlockedIcon className="h-4 w-4" />
+            Bloquear
+          </motion.button>
+        </div>
       </div>
 
       {/* Week day headers */}
