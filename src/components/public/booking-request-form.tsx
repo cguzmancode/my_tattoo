@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Send, CheckCircle, AlertCircle, Loader2, ChevronDown } from 'lucide-react'
 import { BodyZoneSelector } from '@/components/body-zone/body-zone-selector'
+import { ImageUpload } from '@/components/ui/image-upload'
 
 interface BookingRequestFormProps {
   artistSlug: string
@@ -17,6 +18,7 @@ interface FormData {
   preferredDate: string
   bodyZone: string
   size: string
+  referenceImages: File[]
 }
 
 const sizes = [
@@ -38,6 +40,7 @@ export function BookingRequestForm({ artistSlug }: BookingRequestFormProps) {
     preferredDate: '',
     bodyZone: '',
     size: 'medium',
+    referenceImages: [],
   })
   const [showBodyZoneSelector, setShowBodyZoneSelector] = useState(false)
 
@@ -54,19 +57,44 @@ export function BookingRequestForm({ artistSlug }: BookingRequestFormProps) {
     setShowBodyZoneSelector(false)
   }
 
+  const handleImagesSelected = (files: File[]) => {
+    setFormData((prev) => ({
+      ...prev,
+      referenceImages: [...prev.referenceImages, ...files],
+    }))
+  }
+
+  const handleImageRemoved = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      referenceImages: prev.referenceImages.filter((_, i) => i !== index),
+    }))
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
     setError(null)
 
     try {
+      // Crear FormData para enviar archivos
+      const submitData = new FormData()
+      submitData.append('artistSlug', artistSlug)
+      submitData.append('clientName', formData.clientName)
+      submitData.append('clientEmail', formData.clientEmail)
+      submitData.append('description', formData.description)
+      submitData.append('preferredDate', formData.preferredDate)
+      submitData.append('bodyZone', formData.bodyZone)
+      submitData.append('size', formData.size)
+
+      // Agregar imágenes
+      formData.referenceImages.forEach((file, index) => {
+        submitData.append(`image_${index}`, file)
+      })
+
       const response = await fetch('/api/bookings', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          artistSlug,
-        }),
+        body: submitData,
       })
 
       const data = await response.json()
@@ -76,7 +104,7 @@ export function BookingRequestForm({ artistSlug }: BookingRequestFormProps) {
       }
 
       setIsSuccess(true)
-      setFormData({ clientName: '', clientEmail: '', description: '', preferredDate: '', bodyZone: '', size: 'medium' })
+      setFormData({ clientName: '', clientEmail: '', description: '', preferredDate: '', bodyZone: '', size: 'medium', referenceImages: [] })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
     } finally {
@@ -224,6 +252,19 @@ export function BookingRequestForm({ artistSlug }: BookingRequestFormProps) {
           rows={4}
           placeholder="Estilo, colores, referencias, ideas..."
           className="w-full resize-none rounded-lg border border-zinc-700 bg-zinc-950 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+        />
+      </div>
+
+      {/* Image Upload */}
+      <div>
+        <label className="mb-1.5 block text-sm font-medium text-zinc-300">
+          Imágenes de referencia (opcional)
+        </label>
+        <ImageUpload
+          maxFiles={5}
+          maxSizeMB={2}
+          onFilesSelected={handleImagesSelected}
+          onFileRemoved={handleImageRemoved}
         />
       </div>
 

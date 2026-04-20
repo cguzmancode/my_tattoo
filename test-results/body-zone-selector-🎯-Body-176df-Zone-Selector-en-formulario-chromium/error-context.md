@@ -1,0 +1,206 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: body-zone-selector.spec.ts >> 🎯 Body Zone Selector >> Screenshot - Body Zone Selector en formulario
+- Location: __tests__/e2e/body-zone-selector.spec.ts:4:7
+
+# Error details
+
+```
+Error: page.evaluate: SyntaxError: Failed to execute 'querySelector' on 'Document': 'section:has(h2:contains("próximo tatuaje"))' is not a valid selector.
+    at eval (eval at evaluate (:302:30), <anonymous>:2:39)
+    at UtilityScript.evaluate (<anonymous>:304:16)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)
+```
+
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "InkApp TATTOO STUDIO" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - img [ref=e6]
+        - generic [ref=e11]:
+          - generic [ref=e12]: InkApp
+          - generic [ref=e13]: TATTOO STUDIO
+      - navigation [ref=e14]:
+        - button "INICIAR SESIÓN" [ref=e15]
+        - button "REGISTRARSE" [ref=e16]
+  - main [ref=e18]:
+    - generic [ref=e19]:
+      - navigation [ref=e20]:
+        - generic [ref=e22]:
+          - link "InkApp" [ref=e23] [cursor=pointer]:
+            - /url: /
+            - img [ref=e25]
+            - generic [ref=e29]: InkApp
+          - generic [ref=e30]: Perfil del Artista
+      - generic [ref=e31]:
+        - generic [ref=e37]:
+          - generic [ref=e38]:
+            - generic [ref=e39]:
+              - img [ref=e40]
+              - generic [ref=e43]: Artista Destacado
+            - heading "Alex \"The Needle\" Rivera" [level=1] [ref=e44]
+            - paragraph [ref=e45]: Especialista en tradicional americano y neotradicional. 10+ años de experiencia transformando ideas en arte permanente. Estudio privado en el corazón de Madrid. Cada diseño es único, creado en colaboración con el cliente.
+            - generic [ref=e46]:
+              - generic [ref=e47]:
+                - img [ref=e48]
+                - text: Traditional
+              - generic [ref=e54]:
+                - img [ref=e55]
+                - text: Neotraditional
+              - generic [ref=e61]:
+                - img [ref=e62]
+                - text: Blackwork
+              - generic [ref=e68]:
+                - img [ref=e69]
+                - text: Japanese
+            - generic [ref=e75]:
+              - generic [ref=e76]:
+                - img [ref=e78]
+                - generic [ref=e80]:
+                  - paragraph [ref=e81]: Depósito
+                  - paragraph [ref=e82]: $50.00
+              - generic [ref=e83]:
+                - img [ref=e85]
+                - generic [ref=e88]:
+                  - paragraph [ref=e89]: Disponibilidad
+                  - paragraph [ref=e90]: Aceptando citas
+              - link "Instagram Ver trabajos" [ref=e91] [cursor=pointer]:
+                - /url: https://instagram.com/alex.needle
+                - img [ref=e93]
+                - generic [ref=e95]:
+                  - paragraph [ref=e96]: Instagram
+                  - paragraph [ref=e97]: Ver trabajos
+          - generic [ref=e98]:
+            - img "Alex \"The Needle\" Rivera featured work" [ref=e100]
+            - generic [ref=e104]:
+              - generic [ref=e105]: "6"
+              - generic [ref=e106]:
+                - paragraph [ref=e107]: Trabajos
+                - paragraph [ref=e108]: en portfolio
+        - generic [ref=e110]:
+          - generic [ref=e111]: Ver Portfolio
+          - img [ref=e112]
+      - generic [ref=e115]:
+        - generic [ref=e116]:
+          - generic [ref=e119]: Portfolio
+          - heading "Trabajos Recientes" [level=2] [ref=e120]
+        - generic [ref=e121]:
+          - generic [ref=e124] [cursor=pointer]:
+            - img "Alex \"The Needle\" Rivera portfolio 1" [ref=e125]
+            - generic [ref=e128]:
+              - paragraph [ref=e129]: "Trabajo #1"
+              - paragraph [ref=e130]: Click para ver más
+            - img [ref=e132]
+            - generic [ref=e135]: Destacado
+          - generic [ref=e138] [cursor=pointer]:
+            - img "Alex \"The Needle\" Rivera portfolio 2" [ref=e139]
+            - generic [ref=e142]:
+              - paragraph [ref=e143]: "Trabajo #2"
+              - paragraph [ref=e144]: Click para ver más
+            - img [ref=e146]
+          - generic [ref=e151] [cursor=pointer]:
+            - img "Alex \"The Needle\" Rivera portfolio 3" [ref=e152]
+            - generic [ref=e155]:
+              - paragraph [ref=e156]: "Trabajo #3"
+              - paragraph [ref=e157]: Click para ver más
+            - img [ref=e159]
+          - generic [ref=e164] [cursor=pointer]:
+            - img "Alex \"The Needle\" Rivera portfolio 4" [ref=e165]
+            - generic [ref=e168]:
+              - paragraph [ref=e169]: "Trabajo #4"
+              - paragraph [ref=e170]: Click para ver más
+            - img [ref=e172]
+          - generic [ref=e177] [cursor=pointer]:
+            - img "Alex \"The Needle\" Rivera portfolio 5" [ref=e178]
+            - generic [ref=e181]:
+              - paragraph [ref=e182]: "Trabajo #5"
+              - paragraph [ref=e183]: Click para ver más
+            - img [ref=e185]
+          - generic [ref=e190] [cursor=pointer]:
+            - img "Alex \"The Needle\" Rivera portfolio 6" [ref=e191]
+            - generic [ref=e194]:
+              - paragraph [ref=e195]: "Trabajo #6"
+              - paragraph [ref=e196]: Click para ver más
+            - img [ref=e198]
+            - generic [ref=e201]: Destacado
+      - generic [ref=e206]:
+        - generic [ref=e207]:
+          - generic [ref=e210]: Reserva
+          - heading "¿Listo para tu próximo tatuaje?" [level=2] [ref=e211]
+          - paragraph [ref=e212]: Completa el formulario y Alex "The Needle" Rivera se pondrá en contacto contigo para discutir los detalles de tu diseño.
+          - generic [ref=e213]:
+            - generic [ref=e214]:
+              - img [ref=e216]
+              - generic [ref=e218]: Elige tu fecha preferida
+            - generic [ref=e219]:
+              - img [ref=e221]
+              - generic [ref=e223]: Depósito seguro de $50
+            - generic [ref=e224]:
+              - img [ref=e226]
+              - generic [ref=e229]: Respuesta en 24-48 horas
+        - generic [ref=e233]:
+          - generic [ref=e234]:
+            - heading "Solicitar Cita" [level=3] [ref=e235]
+            - paragraph [ref=e236]: Todos los campos son obligatorios
+          - generic [ref=e237]:
+            - generic [ref=e238]:
+              - generic [ref=e239]: Tu nombre
+              - textbox "Tu nombre" [ref=e240]:
+                - /placeholder: John Doe
+            - generic [ref=e241]:
+              - generic [ref=e242]: Correo electrónico
+              - textbox "Correo electrónico" [ref=e243]:
+                - /placeholder: john@example.com
+            - generic [ref=e244]:
+              - generic [ref=e245]: Fecha preferida
+              - textbox "Fecha preferida" [ref=e246]
+            - generic [ref=e247]:
+              - generic [ref=e248]: Zona del cuerpo
+              - button "Selecciona la zona del cuerpo" [ref=e249]:
+                - generic [ref=e250]: Selecciona la zona del cuerpo
+                - img [ref=e251]
+            - generic [ref=e253]:
+              - generic [ref=e254]: Tamaño del tatuaje
+              - combobox "Tamaño del tatuaje" [ref=e255] [cursor=pointer]:
+                - option "Pequeño (hasta 5cm)"
+                - option "Mediano (5-15cm)" [selected]
+                - option "Grande (15-25cm)"
+                - option "Extra Grande (+25cm)"
+            - generic [ref=e256]:
+              - generic [ref=e257]: Describe tu tatuaje
+              - textbox "Describe tu tatuaje" [ref=e258]:
+                - /placeholder: Estilo, colores, referencias, ideas...
+            - generic [ref=e259]:
+              - generic [ref=e260]: Imágenes de referencia (opcional)
+              - generic [ref=e261]:
+                - generic [ref=e264] [cursor=pointer]:
+                  - img [ref=e266]
+                  - paragraph [ref=e269]: Arrastra imágenes aquí
+                  - paragraph [ref=e270]: o haz click para seleccionar
+                  - paragraph [ref=e271]: Máximo 5 imágenes, hasta 2MB cada una
+                - generic [ref=e273]: 0 de 5 imágenes
+            - button "Enviar solicitud" [ref=e274]:
+              - img [ref=e275]
+              - text: Enviar solicitud
+            - paragraph [ref=e278]: Al enviar, aceptas los términos de servicio de InkApp.
+      - generic [ref=e281]:
+        - generic [ref=e282]:
+          - img [ref=e283]
+          - generic [ref=e287]: InkApp
+        - paragraph [ref=e288]: © 2024 InkApp. Reservas gestionadas profesionalmente.
+        - link "Volver al inicio →" [ref=e289] [cursor=pointer]:
+          - /url: /
+  - button "Open Next.js Dev Tools" [ref=e295] [cursor=pointer]:
+    - img [ref=e296]
+  - alert [ref=e299]
+```

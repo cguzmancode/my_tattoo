@@ -24,7 +24,38 @@ export const DEMO_ARTIST = {
   updatedAt: new Date('2024-01-15'),
 }
 
-export const DEMO_BOOKINGS = [
+export interface MockBooking {
+  id: string
+  clientName: string
+  clientEmail: string
+  clientPhone: string
+  bodyZone: string
+  size: string
+  description: string
+  style: string
+  referenceImages: string[]
+  preferredDates: Date[]
+  status: 'PENDING' | 'ACCEPTED' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED'
+  depositPaid: boolean
+  createdAt: Date
+  updatedAt: Date
+  artistId: string
+  payments: Array<{
+    id: string
+    bookingId: string
+    stripePaymentIntentId: string
+    amount: number
+    status: 'PENDING' | 'COMPLETED' | 'CANCELLED'
+    createdAt: Date
+    updatedAt: Date
+  }>
+  proposedDate?: Date
+  priceEstimate?: number
+  durationEstimate?: string
+  artistNotes?: string
+}
+
+export const DEMO_BOOKINGS: MockBooking[] = [
   {
     id: 'booking-001',
     clientName: 'María García',
@@ -33,9 +64,11 @@ export const DEMO_BOOKINGS = [
     bodyZone: 'Forearm',
     size: 'Medium (10-15cm)',
     description: 'Quiero un diseño de una rosa tradicional con un banner que diga "Mamá". Colores vivos, estilo old school.',
+    style: 'Traditional',
     referenceImages: [],
     preferredDates: [new Date('2024-02-15'), new Date('2024-02-16')],
     status: 'PENDING' as const,
+    depositPaid: false,
     createdAt: new Date('2024-01-10'),
     updatedAt: new Date('2024-01-10'),
     artistId: 'demo-artist-001',
@@ -49,9 +82,11 @@ export const DEMO_BOOKINGS = [
     bodyZone: 'Chest',
     size: 'Large (20-30cm)',
     description: 'Dragón japonés estilo irezumi, en blanco y negro con sombreado. Diseño que se extienda por el pecho.',
+    style: 'Japanese',
     referenceImages: [],
     preferredDates: [new Date('2024-02-20')],
     status: 'PENDING' as const,
+    depositPaid: false,
     createdAt: new Date('2024-01-12'),
     updatedAt: new Date('2024-01-12'),
     artistId: 'demo-artist-001',
@@ -65,9 +100,11 @@ export const DEMO_BOOKINGS = [
     bodyZone: 'Shoulder',
     size: 'Small (5-8cm)',
     description: 'Tatuaje minimalista de una luna con una cara sutil. Estilo fine line.',
+    style: 'Minimalist',
     referenceImages: [],
     preferredDates: [new Date('2024-02-10')],
     status: 'ACCEPTED' as const,
+    depositPaid: false,
     createdAt: new Date('2024-01-08'),
     updatedAt: new Date('2024-01-11'),
     artistId: 'demo-artist-001',
@@ -81,9 +118,11 @@ export const DEMO_BOOKINGS = [
     bodyZone: 'Back',
     size: 'Extra Large (Full Back)',
     description: 'Calavera mexicana con elementos florales y un reloj. Estilo neotradicional a color.',
+    style: 'Neotraditional',
     referenceImages: [],
     preferredDates: [new Date('2024-03-01'), new Date('2024-03-02')],
     status: 'ACCEPTED' as const,
+    depositPaid: false,
     createdAt: new Date('2024-01-05'),
     updatedAt: new Date('2024-01-09'),
     artistId: 'demo-artist-001',
@@ -107,9 +146,11 @@ export const DEMO_BOOKINGS = [
     bodyZone: 'Thigh',
     size: 'Large (20-25cm)',
     description: 'Serpiente enroscada con rosas y dagas. Estilo tradicional con colores vivos.',
+    style: 'Traditional',
     referenceImages: [],
     preferredDates: [new Date('2024-01-25')],
     status: 'CONFIRMED' as const,
+    depositPaid: true,
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-06'),
     artistId: 'demo-artist-001',
@@ -133,9 +174,11 @@ export const DEMO_BOOKINGS = [
     bodyZone: 'Calf',
     size: 'Medium (12-18cm)',
     description: 'Ancla con cadenas y rosas. Estilo tradicional americano, colores sólidos.',
+    style: 'Traditional',
     referenceImages: [],
     preferredDates: [new Date('2024-01-28')],
     status: 'CONFIRMED' as const,
+    depositPaid: true,
     createdAt: new Date('2023-12-28'),
     updatedAt: new Date('2024-01-03'),
     artistId: 'demo-artist-001',
@@ -159,9 +202,11 @@ export const DEMO_BOOKINGS = [
     bodyZone: 'Wrist',
     size: 'Small (5-7cm)',
     description: 'Letras con el nombre de mi hija en estilo script.',
+    style: 'Script',
     referenceImages: [],
     preferredDates: [new Date('2024-01-20')],
     status: 'CANCELLED' as const,
+    depositPaid: false,
     createdAt: new Date('2024-01-03'),
     updatedAt: new Date('2024-01-07'),
     artistId: 'demo-artist-001',
@@ -175,9 +220,11 @@ export const DEMO_BOOKINGS = [
     bodyZone: 'Upper Arm',
     size: 'Medium (10-14cm)',
     description: 'Lobo aullando a la luna con bosque de fondo. Estilo blackwork.',
+    style: 'Blackwork',
     referenceImages: [],
     preferredDates: [new Date('2024-02-05')],
     status: 'PENDING' as const,
+    depositPaid: false,
     createdAt: new Date('2024-01-13'),
     updatedAt: new Date('2024-01-13'),
     artistId: 'demo-artist-001',

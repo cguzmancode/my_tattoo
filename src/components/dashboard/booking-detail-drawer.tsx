@@ -8,28 +8,12 @@ import { StatusBadge } from './status-badge'
 import { BookingDetailEdit } from './booking-detail-edit'
 import { updateBookingStatus } from '@/app/actions/bookings'
 
+import { MockBooking } from '@/lib/mocks'
+
 interface BookingDetailDrawerProps {
   isOpen: boolean
   onClose: () => void
-  booking?: {
-    id: string
-    clientName: string
-    clientEmail: string
-    clientPhone?: string
-    bodyZone: string
-    size: string
-    description: string
-    style: string
-    preferredDates: string[]
-    proposedDate?: Date
-    depositPaid: boolean
-    status: 'PENDING' | 'ACCEPTED' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED'
-    createdAt: Date
-    referenceImages: string[]
-    priceEstimate?: number
-    durationEstimate?: string
-    artistNotes?: string
-  } | null
+  booking?: MockBooking | null
 }
 
 export function BookingDetailDrawer({ isOpen, onClose, booking }: BookingDetailDrawerProps) {
@@ -344,9 +328,9 @@ export function BookingDetailDrawer({ isOpen, onClose, booking }: BookingDetailD
                         <div className="flex-1">
                           <p className="text-xs text-[#525252]">Fechas preferidas</p>
                           <div className="flex flex-wrap gap-2 mt-1">
-                            {booking.preferredDates.map((date) => (
-                              <span
-                                key={date}
+{booking.preferredDates.map((date, index) => (
+                <span
+                key={`date-${index}`}
                                 className="px-3 py-1 rounded-full bg-white/5 text-xs text-white border border-white/10"
                               >
                                 {new Date(date).toLocaleDateString('es-ES', {

@@ -10,6 +10,7 @@ export interface CreateBookingInput {
   size: string
   description: string
   preferredDates?: string[]
+  referenceImages?: string[]
 }
 
 export interface CreateBookingResult {
@@ -91,6 +92,7 @@ export async function createBooking(
       size: input.size,
       description: input.description,
       preferredDates: input.preferredDates || [],
+      referenceImages: input.referenceImages || [],
     },
   })
 

@@ -6,8 +6,8 @@
 
 # Test info
 
-- Name: drawer-screenshot.spec.ts >> 📸 Booking Detail Drawer Screenshots >> Drawer edit mode
-- Location: __tests__/e2e/drawer-screenshot.spec.ts:26:7
+- Name: booking-drawer.spec.ts >> 📸 Booking Detail Drawer >> Drawer - Modo edición
+- Location: __tests__/e2e/booking-drawer.spec.ts:22:7
 
 # Error details
 
@@ -18,7 +18,7 @@ Test timeout of 30000ms exceeded.
 ```
 Error: page.click: Test timeout of 30000ms exceeded.
 Call log:
-  - waiting for locator('button:has(.lucide-edit2)')
+  - waiting for locator('button[title="Editar"]')
 
 ```
 
@@ -368,55 +368,47 @@ Call log:
 ```ts
   1  | import { test, expect } from '@playwright/test'
   2  | 
-  3  | test.describe('📸 Booking Detail Drawer Screenshots', () => {
-  4  |   test('Full drawer view', async ({ page }) => {
+  3  | test.describe('📸 Booking Detail Drawer', () => {
+  4  |   test('Drawer - Vista de detalle', async ({ page }) => {
   5  |     // Ir a la página de bookings
   6  |     await page.goto('/dashboard/bookings')
   7  |     await page.waitForTimeout(2000)
   8  | 
-  9  |     // Hacer click en la primera card (María García)
-  10 |     const firstCard = await page.locator('.space-y-4 > div').first()
-  11 |     await firstCard.click()
-  12 |     await page.waitForTimeout(1000)
-  13 | 
-  14 |     // Esperar a que el drawer se abra
-  15 |     await page.waitForSelector('text=Información de Contacto')
-  16 | 
-  17 |     // Screenshot del drawer en vista
-  18 |     await page.screenshot({
-  19 |       path: 'test-results/screenshots/drawer-view.png',
-  20 |       fullPage: true
-  21 |     })
-  22 | 
-  23 |     console.log('✅ Screenshot: Drawer view mode')
-  24 |   })
-  25 | 
-  26 |   test('Drawer edit mode', async ({ page }) => {
-  27 |     // Ir a la página de bookings
-  28 |     await page.goto('/dashboard/bookings')
-  29 |     await page.waitForTimeout(2000)
+  9  |     // Hacer click en la primera cita
+  10 |     await page.click('[data-testid="booking-card"]:first-of-type')
+  11 |     await page.waitForTimeout(1000)
+  12 | 
+  13 |     // Screenshot del drawer abierto
+  14 |     await page.screenshot({
+  15 |       path: 'test-results/screenshots/booking-drawer-view.png',
+  16 |       fullPage: false
+  17 |     })
+  18 | 
+  19 |     console.log('✅ Screenshot: Drawer en modo vista')
+  20 |   })
+  21 | 
+  22 |   test('Drawer - Modo edición', async ({ page }) => {
+  23 |     // Ir a la página de bookings
+  24 |     await page.goto('/dashboard/bookings')
+  25 |     await page.waitForTimeout(2000)
+  26 | 
+  27 |     // Hacer click en la primera cita
+  28 |     await page.click('[data-testid="booking-card"]:first-of-type')
+  29 |     await page.waitForTimeout(1000)
   30 | 
-  31 |     // Hacer click en la primera card
-  32 |     const firstCard = await page.locator('.space-y-4 > div').first()
-  33 |     await firstCard.click()
-  34 |     await page.waitForTimeout(1000)
-  35 | 
-  36 |     // Esperar a que el drawer se abra
-  37 |     await page.waitForSelector('text=Información de Contacto')
-  38 | 
-  39 |     // Click en botón de editar (buscar el botón con icono de lápiz)
-> 40 |     await page.click('button:has(.lucide-edit2)')
+  31 |     // Click en botón de editar
+> 32 |     await page.click('button[title="Editar"]')
      |                ^ Error: page.click: Test timeout of 30000ms exceeded.
-  41 |     await page.waitForTimeout(500)
-  42 | 
-  43 |     // Screenshot del drawer en modo edición
-  44 |     await page.screenshot({
-  45 |       path: 'test-results/screenshots/drawer-edit.png',
-  46 |       fullPage: true
-  47 |     })
-  48 | 
-  49 |     console.log('✅ Screenshot: Drawer edit mode')
-  50 |   })
-  51 | })
-  52 | 
+  33 |     await page.waitForTimeout(500)
+  34 | 
+  35 |     // Screenshot del drawer en modo edición
+  36 |     await page.screenshot({
+  37 |       path: 'test-results/screenshots/booking-drawer-edit.png',
+  38 |       fullPage: false
+  39 |     })
+  40 | 
+  41 |     console.log('✅ Screenshot: Drawer en modo edición')
+  42 |   })
+  43 | })
+  44 | 
 ```

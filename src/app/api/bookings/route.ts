@@ -1,19 +1,78 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createBooking } from '@/lib/api/bookings'
+import { createClient } from '@/lib/supabase/server'
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
+    const formData = await request.formData()
+
+    // Extraer campos del formulario
+    const artistSlug = formData.get('artistSlug') as string
+    const clientName = formData.get('clientName') as string
+    const clientEmail = formData.get('clientEmail') as string
+    const description = formData.get('description') as string
+    const preferredDate = formData.get('preferredDate') as string
+    const bodyZone = formData.get('bodyZone') as string
+    const size = formData.get('size') as string
+
+    // Validar campos requeridos
+    if (!artistSlug || !clientName || !clientEmail || !description || !preferredDate) {
+      return NextResponse.json(
+        { success: false, error: 'Missing required fields' },
+        { status: 400 }
+      )
+    }
+
+    // Extraer imágenes
+    const images: File[] = []
+    for (const [key, value] of formData.entries()) {
+      if (key.startsWith('image_') && value instanceof File) {
+        images.push(value)
+      }
+    }
+
+    // Subir imágenes a Supabase Storage
+    const imageUrls: string[] = []
+    if (images.length > 0) {
+      const supabase = await createClient()
+
+      for (const image of images) {
+        // Generar nombre único
+        const timestamp = Date.now()
+        const random = Math.random().toString(36).substring(2, 9)
+        const filename = `bookings/${artistSlug}/${timestamp}-${random}.jpg`
+
+        // Subir archivo
+        const { error: uploadError } = await supabase.storage
+          .from('portfolio')
+          .upload(filename, image, {
+            contentType: 'image/jpeg',
+            cacheControl: '3600',
+          })
+
+        if (uploadError) {
+          console.error('Error uploading image:', uploadError)
+          continue
+        }
+
+        // Obtener URL pública
+        const { data: publicUrl } = supabase.storage
+          .from('portfolio')
+          .getPublicUrl(filename)
+
+        imageUrls.push(publicUrl.publicUrl)
+      }
+    }
 
     const result = await createBooking({
-      artistSlug: body.artistSlug,
-      clientName: body.clientName,
-      clientEmail: body.clientEmail,
-      clientPhone: body.clientPhone,
-      bodyZone: body.bodyZone,
-      size: body.size,
-      description: body.description,
-      preferredDates: body.preferredDates,
+      artistSlug,
+      clientName,
+      clientEmail,
+      bodyZone,
+      size,
+      description,
+      preferredDates: [preferredDate],
+      referenceImages: imageUrls,
     })
 
     return NextResponse.json(

@@ -3,17 +3,17 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Calendar, Filter, Search } from 'lucide-react'
-import { DEMO_BOOKINGS } from '@/lib/mocks/data'
+import { DEMO_BOOKINGS, MockBooking } from '@/lib/mocks'
 import { BookingList } from '@/components/dashboard/booking-list'
 import { BookingDetailDrawer } from '@/components/dashboard/booking-detail-drawer'
 
 export default function BookingsPage() {
   // En development sin login, usar datos del mock
   const bookings = DEMO_BOOKINGS
-  const [selectedBooking, setSelectedBooking] = useState<typeof bookings[0] | null>(null)
+  const [selectedBooking, setSelectedBooking] = useState<MockBooking | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
-  const handleBookingClick = (booking: typeof bookings[0]) => {
+  const handleBookingClick = (booking: MockBooking) => {
     setSelectedBooking(booking)
     setIsDrawerOpen(true)
   }

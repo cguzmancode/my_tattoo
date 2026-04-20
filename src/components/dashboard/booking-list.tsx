@@ -1,23 +1,15 @@
-import { DEMO_BOOKINGS } from '@/lib/mocks/data'
+import { DEMO_BOOKINGS, MockBooking } from '@/lib/mocks'
 import { TattooBookingCard } from './tattoo-booking-card'
 
-interface Booking {
-  id: string
-  clientName: string
-  clientEmail: string
-  bodyZone: string
-  size: string
-  description: string
-  status: 'PENDING' | 'ACCEPTED' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED'
-  createdAt: Date | string
-}
-
 interface BookingListProps {
-  bookings?: Booking[]
-  onBookingClick?: (booking: Booking) => void
+  bookings?: MockBooking[]
+  onBookingClick?: (booking: MockBooking) => void
 }
 
-export function BookingList({ bookings = DEMO_BOOKINGS as Booking[], onBookingClick }: BookingListProps) {
+export function BookingList({ 
+  bookings = DEMO_BOOKINGS, 
+  onBookingClick 
+}: BookingListProps) {
   if (bookings.length === 0) {
     return (
       <div className="text-center py-12">
@@ -29,8 +21,8 @@ export function BookingList({ bookings = DEMO_BOOKINGS as Booking[], onBookingCl
   return (
     <div className="space-y-4">
       {bookings.map((booking) => (
-        <div 
-          key={booking.id} 
+        <div
+          key={booking.id}
           data-testid="booking-card"
           onClick={() => onBookingClick?.(booking)}
           className="cursor-pointer"
