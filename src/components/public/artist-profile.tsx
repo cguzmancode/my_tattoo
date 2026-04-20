@@ -7,6 +7,7 @@ import { motion, useScroll, useTransform } from 'framer-motion'
 import { Calendar, DollarSign, Palette, MapPin, ArrowRight, Clock, Sparkles } from 'lucide-react'
 import { BookingRequestForm } from './booking-request-form'
 import { TattooNeedle } from '@/components/icons/tattoo-needle'
+import { PortfolioGallery } from '@/components/portfolio/portfolio-gallery'
 
 interface ArtistProfileProps {
   artist: {
@@ -281,48 +282,8 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
             </h2>
           </motion.div>
 
-          {/* Masonry Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {artist.portfolioImages.map((image, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                whileHover={{ scale: 1.02 }}
-                className={`
-                  group relative overflow-hidden rounded-xl
-                  ${index === 0 ? 'sm:col-span-2 sm:row-span-2' : ''}
-                  ${index === 3 ? 'lg:col-span-2' : ''}
-                `}
-              >
-                <div className={`
-                  relative overflow-hidden rounded-xl border border-white/10
-                  ${index === 0 ? 'aspect-[16/9]' : 'aspect-square'}
-                `}>
-                  <Image
-                    src={image}
-                    alt={`${artist.name} portfolio ${index + 1}`}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-110"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  
-                  {/* Hover Overlay */}
-                  <div className="absolute inset-0 flex items-end p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <p className="text-white font-medium">
-                      Trabajo #{index + 1}
-                    </p>
-                  </div>
-                  
-                  {/* Glow Border on Hover */}
-                  <div className="absolute inset-0 rounded-xl ring-2 ring-[#ff6b35]/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-                </div>
-              </motion.div>
-            ))}
-          </div>
+      {/* Masonry Gallery */}
+      <PortfolioGallery images={artist.portfolioImages} artistName={artist.name} />
         </div>
       </section>
 

@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Send, CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
+import { Send, CheckCircle, AlertCircle, Loader2, ChevronDown } from 'lucide-react'
+import { BodyZoneSelector } from '@/components/body-zone/body-zone-selector'
 
 interface BookingRequestFormProps {
   artistSlug: string
@@ -14,7 +15,16 @@ interface FormData {
   clientEmail: string
   description: string
   preferredDate: string
+  bodyZone: string
+  size: string
 }
+
+const sizes = [
+  { value: 'small', label: 'Pequeño (hasta 5cm)', dots: 1 },
+  { value: 'medium', label: 'Mediano (5-15cm)', dots: 2 },
+  { value: 'large', label: 'Grande (15-25cm)', dots: 3 },
+  { value: 'xlarge', label: 'Extra Grande (+25cm)', dots: 4 },
+]
 
 export function BookingRequestForm({ artistSlug }: BookingRequestFormProps) {
   const router = useRouter()
@@ -26,14 +36,22 @@ export function BookingRequestForm({ artistSlug }: BookingRequestFormProps) {
     clientEmail: '',
     description: '',
     preferredDate: '',
+    bodyZone: '',
+    size: 'medium',
   })
+  const [showBodyZoneSelector, setShowBodyZoneSelector] = useState(false)
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
     setError(null)
+  }
+
+  const handleBodyZoneSelect = (zoneId: string) => {
+    setFormData((prev) => ({ ...prev, bodyZone: zoneId }))
+    setShowBodyZoneSelector(false)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -58,7 +76,7 @@ export function BookingRequestForm({ artistSlug }: BookingRequestFormProps) {
       }
 
       setIsSuccess(true)
-      setFormData({ clientName: '', clientEmail: '', description: '', preferredDate: '' })
+      setFormData({ clientName: '', clientEmail: '', description: '', preferredDate: '', bodyZone: '', size: 'medium' })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
     } finally {
@@ -145,6 +163,54 @@ export function BookingRequestForm({ artistSlug }: BookingRequestFormProps) {
         />
       </div>
 
+      {/* Body Zone Selector */}
+      <div>
+        <label className="mb-1.5 block text-sm font-medium text-zinc-300">
+          Zona del cuerpo
+        </label>
+        <button
+          type="button"
+          onClick={() => setShowBodyZoneSelector(!showBodyZoneSelector)}
+          className="w-full flex items-center justify-between rounded-lg border border-zinc-700 bg-zinc-950 px-4 py-3 text-sm text-white hover:border-orange-500 transition-colors"
+        >
+          <span className={formData.bodyZone ? 'text-white' : 'text-zinc-500'}>
+            {formData.bodyZone
+              ? formData.bodyZone.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+              : 'Selecciona la zona del cuerpo'}
+          </span>
+          <ChevronDown className={`h-4 w-4 text-zinc-500 transition-transform ${showBodyZoneSelector ? 'rotate-180' : ''}`} />
+        </button>
+        {showBodyZoneSelector && (
+          <div className="mt-3">
+            <BodyZoneSelector
+              selectedZone={formData.bodyZone}
+              onSelect={handleBodyZoneSelect}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Size Selector */}
+      <div>
+        <label htmlFor="size" className="mb-1.5 block text-sm font-medium text-zinc-300">
+          Tamaño del tatuaje
+        </label>
+        <select
+          id="size"
+          name="size"
+          value={formData.size}
+          onChange={handleChange}
+          required
+          className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-4 py-3 text-sm text-white focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 appearance-none cursor-pointer"
+        >
+          {sizes.map((size) => (
+            <option key={size.value} value={size.value}>
+              {size.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
       <div>
         <label htmlFor="description" className="mb-1.5 block text-sm font-medium text-zinc-300">
           Describe tu tatuaje
@@ -156,7 +222,7 @@ export function BookingRequestForm({ artistSlug }: BookingRequestFormProps) {
           onChange={handleChange}
           required
           rows={4}
-          placeholder="Tamaño, ubicación, estilo, referencias..."
+          placeholder="Estilo, colores, referencias, ideas..."
           className="w-full resize-none rounded-lg border border-zinc-700 bg-zinc-950 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
         />
       </div>
