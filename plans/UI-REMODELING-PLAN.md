@@ -321,11 +321,14 @@ Nuevo diseño de tarjeta:
 └────────────────────────────────────────┘
 ```
 
-### Fase 4: Mejoras Visuales Premium (Media)
+### Fase 4: Mejoras Visuales Premium (Media) ✅ COMPLETADA
 
-**Tiempo**: 1 día
+**Tiempo**: 1 día  
+**Estado**: ✅ Fase 4.2 Glow Effects completada
 
-#### 4.1 Texturas Sutiles
+---
+
+#### 4.1 Texturas Sutiles 🔄 PENDIENTE (Opcional)
 
 Agregar textura de papel/fondo:
 
@@ -337,27 +340,127 @@ Agregar textura de papel/fondo:
 }
 ```
 
-#### 4.2 Glow Effects Mejorados
+**Nota**: El noise overlay SVG ya está implementado en `globals.css` como `.noise-overlay`
 
+---
+
+#### 4.2 Glow Effects Mejorados ✅ COMPLETADA
+
+**Archivo**: `src/app/globals.css`
+
+Nuevas clases CSS implementadas:
+
+| Clase | Efecto | Uso |
+|-------|--------|-----|
+| `.glow-primary` | Sombra naranja estándar (20px) | Elementos base |
+| `.glow-primary-intense` | Múltiples capas de glow (60px) | Destacados |
+| `.glow-primary-subtle` | Glow sutil (15px) | Hover states |
+| `.glow-accent-intense` | Glow cian intenso | Accent elements |
+| `.glow-success-intense` | Glow verde intenso | Confirmaciones |
+| `.glow-danger-intense` | Glow rojo intenso | Errores |
+| `.glow-gold-intense` | Glow dorado | Premium elements |
+| `.text-glow-primary-intense` | Glow en texto | Títulos destacados |
+| `.border-glow-intense` | Borde con glow | Cards seleccionadas |
+| `.card-glow` | Glow en hover para cards | Booking cards |
+| `.btn-glow` | Glow en hover para botones | CTA buttons |
+| `.inner-glow` / `.inner-glow-intense` | Glow interno | Selected states |
+
+**Implementación en componentes:**
+- ✅ `tattoo-booking-card.tsx` - Usa `.card-glow` y `.inner-glow-intense`
+- ✅ `portfolio-gallery.tsx` - Usa `.card-glow` y glow intenso en imágenes
+- ✅ `globals.css` - Clases `.btn-glow` listas para usar en botones
+
+**Código de ejemplo aplicado:**
+```tsx
+// Booking Card con glow mejorado
+<motion.div
+  whileHover={{ scale: 1.02, y: -4 }}
+  className="group card-glow cursor-pointer"
+>
+  {/* Inner glow effect */}
+  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 
+                  transition-opacity duration-500 inner-glow-intense" />
+  {/* Content */}
+</motion.div>
+
+// Portfolio image con glow intenso
+<motion.div
+  whileHover={{ scale: 1.03, y: -5 }}
+  className="group card-glow"
+>
+  {/* Outer glow */}
+  <div className="absolute -inset-1 rounded-xl opacity-0 group-hover:opacity-100 
+                  transition-opacity duration-500 blur-xl"
+    style={{
+      background: 'radial-gradient(circle at center, 
+                   rgba(255, 107, 53, 0.3) 0%, transparent 70%)'
+    }}
+  />
+</motion.div>
+```
+
+---
+
+#### 4.3 Animaciones Tatúa-específicas ✅ COMPLETADA
+
+**Archivo**: `src/app/globals.css`
+
+**Animaciones implementadas:**
+
+| Animación | Clase | Descripción |
+|-----------|-------|-------------|
+| **Needle Shake** | `.animate-needle-shake` | Subtle shake (0.2s loop) |
+| **Ink Ripple** | `.ink-ripple` | Expansión desde el centro |
+| **Pulse Glow** | `.animate-pulse-glow-intense` | Glow pulsante mejorado |
+| **Shimmer Gold** | `.shimmer-gold` | Efecto brillo dorado |
+
+**Código CSS:**
 ```css
-/* Glow naranja más intenso */
-.glow-orange {
-  box-shadow: 0 0 60px rgba(255, 107, 53, 0.15),
-              0 0 100px rgba(255, 107, 53, 0.1);
+/* Aguja vibrando - Subtle shake */
+@keyframes needle-shake {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(1deg); }
+  75% { transform: rotate(-1deg); }
 }
 
-/* Glow en hover */
-.card-hover:hover {
-  box-shadow: 0 0 40px rgba(255, 107, 53, 0.2);
-  border-color: rgba(255, 107, 53, 0.4);
+/* Tinta expandiéndose - Ripple effect */
+.ink-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.ink-ripple::after {
+  /* Radial gradient que expande al hacer click */
+}
+
+/* Pulse glow intenso */
+@keyframes pulse-glow-intense {
+  0%, 100% { box-shadow: 0 0 20px var(--primary-glow), ... }
+  50% { box-shadow: 0 0 30px var(--primary-glow), ... }
+}
+
+/* Shimmer dorado */
+@keyframes shimmer-gold {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 ```
 
-#### 4.3 Animaciones Tatúa-específicas
+---
 
-- **Aguja vibrando**: Subtle shake animation en hover
-- **Tinta expandiéndose**: Ripple effect desde el centro
-- **Parallax sutil**: En imágenes de portfolio
+## ✅ FASE 4.2 COMPLETADA
+
+**Entregables:**
+1. ✅ Sistema de glow effects mejorado en `globals.css`
+2. ✅ Integración en `tattoo-booking-card.tsx`
+3. ✅ Integración en `portfolio-gallery.tsx`
+4. ✅ Animaciones tattoo-específicas listas para usar
+
+**Impacto visual:**
+- Cards con elevación suave (y: -4px) + glow al hover
+- Imágenes de portfolio con outer glow radial
+- Inner glow sutil en elementos seleccionados
+- Múltiples niveles de intensidad para diferentes contextos
 
 ### Fase 5: Nuevos Componentes (Baja)
 

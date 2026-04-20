@@ -140,11 +140,13 @@ export function TattooBookingCard({ booking, onClick }: TattooBookingCardProps) 
 
   return (
     <motion.div
-      whileHover={{ scale: 1.01 }}
+      whileHover={{ scale: 1.02, y: -4 }}
       transition={{ type: 'spring', stiffness: 400, damping: 25 }}
       onClick={onClick}
-      className="group relative rounded-xl border border-white/10 bg-[#141414] p-5 hover:border-[#ff6b35]/40 hover:shadow-[0_0_40px_rgba(255,107,53,0.15)] transition-all duration-500 cursor-pointer"
+      className="group relative rounded-xl border border-white/10 bg-[#141414] p-5 card-glow cursor-pointer overflow-hidden"
     >
+      {/* Inner glow effect */}
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none inner-glow-intense" />
       {/* Top Row: Avatar + Info + Status */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-4">

@@ -106,35 +106,220 @@ body {
   font-family: var(--font-body);
 }
 
-/* Glow Effects */
+/* ============================================
+   GLOW EFFECTS PREMIUM - FASE 4.2
+   ============================================ */
+
+/* Glow Primario - Naranja Tattoo (Intenso) */
 .glow-primary {
-  box-shadow: 0 0 20px var(--primary-glow), 0 0 40px var(--primary-glow);
+  box-shadow: 0 0 20px var(--primary-glow),
+              0 0 40px var(--primary-glow);
 }
 
+.glow-primary-intense {
+  box-shadow: 0 0 30px var(--primary-glow),
+              0 0 60px rgba(255, 107, 53, 0.2),
+              0 0 100px rgba(255, 107, 53, 0.1);
+}
+
+.glow-primary-subtle {
+  box-shadow: 0 0 15px var(--primary-glow);
+}
+
+/* Glow de Acento - Cian */
 .glow-accent {
   box-shadow: 0 0 20px var(--accent-glow);
 }
 
+.glow-accent-intense {
+  box-shadow: 0 0 30px var(--accent-glow),
+              0 0 60px rgba(0, 212, 255, 0.2),
+              0 0 100px rgba(0, 212, 255, 0.1);
+}
+
+/* Glow de Éxito - Verde */
 .glow-success {
   box-shadow: 0 0 20px var(--success-glow);
 }
 
+.glow-success-intense {
+  box-shadow: 0 0 30px var(--success-glow),
+              0 0 60px rgba(34, 197, 94, 0.2);
+}
+
+/* Glow de Peligro - Rojo */
 .glow-danger {
   box-shadow: 0 0 20px var(--danger-glow);
 }
 
+.glow-danger-intense {
+  box-shadow: 0 0 30px var(--danger-glow),
+              0 0 60px rgba(239, 68, 68, 0.2);
+}
+
+/* Glow Dorado - Secondary */
+.glow-gold {
+  box-shadow: 0 0 20px var(--secondary-glow);
+}
+
+.glow-gold-intense {
+  box-shadow: 0 0 30px var(--secondary-glow),
+              0 0 60px rgba(192, 160, 98, 0.2),
+              0 0 100px rgba(192, 160, 98, 0.1);
+}
+
+/* Glow de Texto */
 .text-glow-primary {
   text-shadow: 0 0 20px var(--primary-glow);
+}
+
+.text-glow-primary-intense {
+  text-shadow: 0 0 20px var(--primary-glow),
+               0 0 40px rgba(255, 107, 53, 0.5);
 }
 
 .text-glow-accent {
   text-shadow: 0 0 20px var(--accent-glow);
 }
 
-/* Border Glow */
+.text-glow-gold {
+  text-shadow: 0 0 20px var(--secondary-glow);
+}
+
+/* Border Glow Mejorado */
 .border-glow {
   border-color: var(--primary);
-  box-shadow: 0 0 10px var(--border-glow), inset 0 0 10px var(--border-glow);
+  box-shadow: 0 0 10px var(--border-glow),
+              inset 0 0 10px var(--border-glow);
+}
+
+.border-glow-intense {
+  border-color: var(--primary);
+  box-shadow: 0 0 20px var(--border-glow),
+              0 0 40px var(--border-glow),
+              inset 0 0 15px var(--border-glow);
+}
+
+/* Card Glow en Hover */
+.card-glow {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-glow:hover {
+  box-shadow: 0 0 40px rgba(255, 107, 53, 0.2),
+              0 0 80px rgba(255, 107, 53, 0.1);
+  border-color: rgba(255, 107, 53, 0.4);
+}
+
+/* Button Glow */
+.btn-glow {
+  transition: all 0.3s ease;
+}
+
+.btn-glow:hover {
+  box-shadow: 0 0 30px var(--primary-glow),
+              0 0 60px rgba(255, 107, 53, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Inner Glow */
+.inner-glow {
+  box-shadow: inset 0 0 30px rgba(255, 107, 53, 0.1);
+}
+
+.inner-glow-intense {
+  box-shadow: inset 0 0 50px rgba(255, 107, 53, 0.15),
+              inset 0 0 100px rgba(255, 107, 53, 0.05);
+}
+
+/* ============================================
+   ANIMACIONES TATUA-ESPECÍFICAS - FASE 4.3
+   ============================================ */
+
+/* Aguja vibrando - Subtle shake */
+@keyframes needle-shake {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(1deg); }
+  75% { transform: rotate(-1deg); }
+}
+
+.animate-needle-shake:hover {
+  animation: needle-shake 0.2s ease-in-out infinite;
+}
+
+/* Tinta expandiéndose - Ripple effect */
+@keyframes ink-ripple {
+  0% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.ink-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.ink-ripple::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  transition: transform 0.6s, opacity 0.6s;
+  pointer-events: none;
+}
+
+.ink-ripple:active::after {
+  transform: translate(-50%, -50%) scale(4);
+  opacity: 0.3;
+  transition: 0s;
+}
+
+/* Pulse glow mejorado */
+@keyframes pulse-glow-intense {
+  0%, 100% {
+    box-shadow: 0 0 20px var(--primary-glow),
+                0 0 40px rgba(255, 107, 53, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 30px var(--primary-glow),
+                0 0 60px rgba(255, 107, 53, 0.3),
+                0 0 90px rgba(255, 107, 53, 0.1);
+  }
+}
+
+.animate-pulse-glow-intense {
+  animation: pulse-glow-intense 3s ease-in-out infinite;
+}
+
+/* Shimmer effect para elementos premium */
+@keyframes shimmer-gold {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer-gold {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(192, 160, 98, 0.3) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer-gold 3s ease-in-out infinite;
 }
 
 /* Gradient Borders */

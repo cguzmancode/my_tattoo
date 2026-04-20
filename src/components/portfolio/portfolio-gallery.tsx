@@ -37,9 +37,9 @@ export function PortfolioGallery({ images, artistName }: PortfolioGalleryProps) 
             className={`break-inside-avoid ${isFeatured(index) ? 'sm:col-span-2' : ''}`}
           >
             <motion.div
-              whileHover={{ scale: 1.02 }}
+              whileHover={{ scale: 1.03, y: -5 }}
               transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-              className="group relative overflow-hidden rounded-xl cursor-pointer"
+              className="group relative overflow-hidden rounded-xl cursor-pointer card-glow"
               onClick={() => setSelectedImage(index)}
             >
               {/* Image Container */}
@@ -55,15 +55,18 @@ export function PortfolioGallery({ images, artistName }: PortfolioGalleryProps) 
                 {/* Gradient Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                {/* Glow Effect on Hover */}
-                <div className="absolute inset-0 rounded-xl ring-2 ring-[#ff6b35]/0 group-hover:ring-[#ff6b35]/50 transition-all duration-500 pointer-events-none" />
+                {/* Glow Effect on Hover - Intense */}
+                <div className="absolute inset-0 rounded-xl ring-2 ring-[#ff6b35]/0 group-hover:ring-[#ff6b35]/60 transition-all duration-500 pointer-events-none" />
 
-                {/* Inner Glow */}
-                <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                {/* Outer Glow */}
+                <div className="absolute -inset-1 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none blur-xl"
                   style={{
-                    boxShadow: 'inset 0 0 60px rgba(255, 107, 53, 0.15)'
+                    background: 'radial-gradient(circle at center, rgba(255, 107, 53, 0.3) 0%, transparent 70%)'
                   }}
                 />
+
+                {/* Inner Glow */}
+                <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none inner-glow-intense" />
 
                 {/* Content Overlay */}
                 <div className="absolute inset-0 flex flex-col justify-end p-5 opacity-0 group-hover:opacity-100 transition-all duration-500">
