@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { prisma } from '@/lib/prisma'
 import { currentUser, auth } from '@clerk/nextjs/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { POST as onboardingPOST } from '@/app/api/onboarding/route'
 
 // Mock Clerk
 vi.mock('@clerk/nextjs/server', () => ({
@@ -8,11 +10,19 @@ vi.mock('@clerk/nextjs/server', () => ({
   currentUser: vi.fn(),
 }))
 
+// Mock rate limit middleware
+vi.mock('@/lib/rate-limit', () => ({
+  rateLimitMiddleware: vi.fn().mockReturnValue({ success: true }),
+}))
+
 describe('POST /api/onboarding', () => {
   beforeEach(async () => {
     // Clean up test data
     await prisma.booking.deleteMany({})
     await prisma.artist.deleteMany({})
+    
+    // Reset mocks
+    vi.clearAllMocks()
   })
 
   it('should create artist automatically if not exists when completing onboarding', async () => {
@@ -35,13 +45,15 @@ describe('POST /api/onboarding', () => {
       instagramUrl: '@testartist',
     }
 
-    // Act: Call onboarding API
-    const response = await fetch('http://localhost:3000/api/onboarding', {
+    // Create a mock request
+    const request = new NextRequest('http://localhost:3000/api/onboarding', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData),
+      headers: { 'Content-Type': 'application/json' },
     })
 
+    // Act: Call onboarding API
+    const response = await onboardingPOST(request)
     const result = await response.json()
 
     // Assert: Should succeed
@@ -58,7 +70,7 @@ describe('POST /api/onboarding', () => {
     expect(artist).not.toBeNull()
     expect(artist?.name).toBe('Test Tattoo Artist')
     expect(artist?.email).toBe('test@example.com')
-  })
+  }, 10000)
 
   it('should update existing artist if already created by webhook', async () => {
     // Arrange: Create artist first (simulating webhook)
@@ -88,13 +100,15 @@ describe('POST /api/onboarding', () => {
       depositAmount: '100',
     }
 
-    // Act
-    const response = await fetch('http://localhost:3000/api/onboarding', {
+    // Create a mock request
+    const request = new NextRequest('http://localhost:3000/api/onboarding', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData),
+      headers: { 'Content-Type': 'application/json' },
     })
 
+    // Act
+    const response = await onboardingPOST(request)
     const result = await response.json()
 
     // Assert
@@ -107,21 +121,24 @@ describe('POST /api/onboarding', () => {
     })
     expect(artist?.name).toBe('Updated Artist Name')
     expect(artist?.bio).toBe('Updated bio')
-  })
+  }, 10000)
 
   it('should return 401 if user is not authenticated', async () => {
     // Arrange: No auth
     vi.mocked(auth).mockResolvedValue({ userId: null } as any)
     vi.mocked(currentUser).mockResolvedValue(null as any)
 
-    // Act
-    const response = await fetch('http://localhost:3000/api/onboarding', {
+    // Create a mock request
+    const request = new NextRequest('http://localhost:3000/api/onboarding', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({}),
+      headers: { 'Content-Type': 'application/json' },
     })
+
+    // Act
+    const response = await onboardingPOST(request)
 
     // Assert
     expect(response.status).toBe(401)
-  })
+  }, 10000)
 })
