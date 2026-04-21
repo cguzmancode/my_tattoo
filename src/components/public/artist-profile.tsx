@@ -201,22 +201,34 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
               </motion.div>
             </motion.div>
 
-            {/* Right: Featured Image */}
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              className="relative"
-            >
-              <div className="relative aspect-[4/5] rounded-2xl overflow-hidden">
-                <Image
-                  src={artist.portfolioImages[0]}
-                  alt={`${artist.name} featured work`}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  priority
-                />
+      {/* Right: Featured Image */}
+      <motion.div
+        initial={{ opacity: 0, x: 50 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+        className="relative"
+      >
+        <div className="relative aspect-[4/5] rounded-2xl overflow-hidden bg-gradient-to-br from-[#ff6b35]/20 to-[#00d4ff]/20">
+          {artist.portfolioImages.length > 0 ? (
+            <Image
+              src={artist.portfolioImages[0]}
+              alt={`${artist.name} featured work`}
+              fill
+              className="object-cover"
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              priority
+            />
+          ) : (
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
+              <div className="h-20 w-20 rounded-2xl bg-[#ff6b35]/10 flex items-center justify-center mb-4">
+                <svg className="h-10 w-10 text-[#ff6b35]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <p className="text-[#a1a1a1] text-sm">Portfolio en construcción</p>
+              <p className="text-[#525252] text-xs mt-1">Próximamente imágenes de trabajos</p>
+            </div>
+          )}
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
                 <div className="absolute inset-0 ring-1 ring-inset ring-white/10 rounded-2xl" />
               </div>

@@ -1,8 +1,7 @@
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
-import { CalendarView } from '@/components/calendar/calendar-view'
-import { blockDate, unblockDate } from '@/app/actions/calendar'
+import { CalendarClient } from './calendar-client'
 import { DEMO_ARTIST, DEMO_BLOCKED_DATES, DEMO_BOOKINGS } from '@/lib/mocks/data'
 
 export default async function CalendarPage() {
@@ -67,9 +66,10 @@ export default async function CalendarPage() {
         </div>
       </div>
 
-      <CalendarView
+      <CalendarClient
         events={events}
-        blockedDates={blockedDates.map((bd) => bd.date)}
+        blockedDates={blockedDates.map((bd) => new Date(bd.date))}
+        artistId={artist.id}
       />
     </div>
   )

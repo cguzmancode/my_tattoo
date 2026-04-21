@@ -2,6 +2,64 @@
 
 import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@/lib/supabase/server'
+import { createServerClient } from '@supabase/ssr'
+
+export interface UploadResult {
+  success: boolean
+  url?: string
+  error?: string
+}
+
+export async function uploadImage(
+  file: FormData
+): Promise<UploadResult> {
+  const { userId } = await auth()
+
+  if (!userId) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  try {
+    const imageFile = file.get('image') as File
+    if (!imageFile) {
+      return { success: false, error: 'No image provided' }
+    }
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
+    if (!allowedTypes.includes(imageFile.type)) {
+      return { success: false, error: 'Invalid file type' }
+    }
+
+    const ext = imageFile.name.split('.').pop()?.toLowerCase() || 'jpg'
+    const uniqueFilename = `${userId}/${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${ext}`
+
+    const supabase = await createClient()
+
+    const { data, error } = await supabase.storage
+      .from('portfolio')
+      .upload(uniqueFilename, imageFile, {
+        contentType: imageFile.type,
+        upsert: false,
+      })
+
+    if (error) {
+      console.error('Error uploading image:', error)
+      return { success: false, error: error.message }
+    }
+
+    const { data: publicData } = supabase.storage
+      .from('portfolio')
+      .getPublicUrl(data.path)
+
+    return {
+      success: true,
+      url: publicData.publicUrl,
+    }
+  } catch (error) {
+    console.error('Error:', error)
+    return { success: false, error: 'Internal server error' }
+  }
+}
 
 export interface SignedUrlResult {
   success: boolean
@@ -20,42 +78,48 @@ export async function getSignedUploadUrl(
     return { success: false, error: 'Unauthorized' }
   }
 
-  // Validar tipo de archivo
   const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
   if (!allowedTypes.includes(contentType)) {
     return { success: false, error: 'Invalid file type. Only JPG, PNG, WebP allowed' }
   }
 
-  // Validar extensión
   const ext = filename.split('.').pop()?.toLowerCase()
   if (!['jpg', 'jpeg', 'png', 'webp'].includes(ext || '')) {
     return { success: false, error: 'Invalid file extension' }
   }
 
-  // Generar nombre único
   const uniqueFilename = `${userId}/${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${ext}`
 
   try {
-    const supabase = await createClient()
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return []
+          },
+          setAll() {},
+        },
+      }
+    )
 
-    // Crear signed URL para upload (válido por 60 segundos)
-    const { data: signedData, error: signedError } = await supabase.storage
+    const { data, error } = await supabase.storage
       .from('portfolio')
       .createSignedUploadUrl(uniqueFilename)
 
-    if (signedError) {
-      console.error('Error creating signed URL:', signedError)
-      return { success: false, error: 'Failed to create upload URL' }
+    if (error) {
+      console.error('Error creating signed URL:', error)
+      return { success: false, error: error.message }
     }
 
-    // Obtener URL pública
     const { data: publicData } = supabase.storage
       .from('portfolio')
       .getPublicUrl(uniqueFilename)
 
     return {
       success: true,
-      signedUrl: signedData.signedUrl,
+      signedUrl: data.signedUrl,
       publicUrl: publicData.publicUrl,
     }
   } catch (error) {

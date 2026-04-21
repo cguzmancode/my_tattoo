@@ -7,61 +7,49 @@ datasource db {
 }
 
 model Artist {
-  id              String   @id @default(uuid())
-  clerkId         String   @unique
-  email           String   @unique
+  id              String        @id @default(uuid())
+  clerkId         String        @unique
+  email           String        @unique
   name            String
-  slug            String   @unique
+  slug            String        @unique
   bio             String?
-  styles          String[] @default([])
-  depositAmount   Int      @default(2000)
+  styles          String[]      @default([])
+  depositAmount   Int           @default(2000)
   instagramUrl    String?
-  portfolioImages String[] @default([])
-  isActive        Boolean  @default(true)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  bookings     Booking[]
-  blockedDates BlockedDate[]
+  portfolioImages String[]      @default([])
+  isActive        Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  blockedDates    BlockedDate[]
+  bookings        Booking[]
 
   @@map("artists")
 }
 
-enum BookingStatus {
-  PENDING
-  ACCEPTED
-  REJECTED
-  CONFIRMED
-  COMPLETED
-  CANCELLED
-}
-
 model Booking {
-  id String @id @default(uuid())
-  artistId String
-  clientName String
-  clientEmail String
-  clientPhone String?
-  bodyZone String
-  size String
-  description String
-  referenceImages String[] @default([])
-  preferredDates String[] @default([])
-  status BookingStatus @default(PENDING)
-  proposedDate DateTime?
-  depositPaid Boolean @default(false)
-  paymentIntentId String?
-  reminderSent24h Boolean @default(false)
-  reminderSent48h Boolean @default(false)
-  // Campos editables por el artista
-  priceEstimate Int? @map("priceestimate")
-  durationEstimate String? @map("durationestimate")
-  artistNotes String? @map("artistnotes")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  artist Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
-  payments Payment[]
+  id               String        @id @default(uuid())
+  artistId         String
+  clientName       String
+  clientEmail      String
+  clientPhone      String?
+  bodyZone         String
+  size             String
+  description      String
+  referenceImages  String[]      @default([])
+  preferredDates   String[]      @default([])
+  status           BookingStatus @default(PENDING)
+  proposedDate     DateTime?
+  depositPaid      Boolean       @default(false)
+  paymentIntentId  String?
+  reminderSent24h  Boolean       @default(false)
+  reminderSent48h  Boolean       @default(false)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  priceEstimate    Int?          @map("priceestimate")
+  durationEstimate String?       @map("durationestimate")
+  artistNotes      String?       @map("artistnotes")
+  artist           Artist        @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  payments         Payment[]
 
   @@map("bookings")
 }
@@ -72,18 +60,10 @@ model BlockedDate {
   date      DateTime @db.Date
   reason    String?
   createdAt DateTime @default(now())
-
-  artist Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  artist    Artist   @relation(fields: [artistId], references: [id], onDelete: Cascade)
 
   @@unique([artistId, date])
   @@map("blocked_dates")
-}
-
-enum PaymentStatus {
-  PENDING
-  CAPTURED
-  REFUNDED
-  FAILED
 }
 
 model Payment {
@@ -95,8 +75,23 @@ model Payment {
   status                PaymentStatus @default(PENDING)
   createdAt             DateTime      @default(now())
   updatedAt             DateTime      @updatedAt
-
-  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  booking               Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
   @@map("payments")
+}
+
+enum BookingStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  CAPTURED
+  REFUNDED
+  FAILED
 }

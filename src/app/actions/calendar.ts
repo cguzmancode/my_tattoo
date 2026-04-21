@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 
 export interface BlockDateInput {
-  date: Date
+  date: string
   reason?: string
 }
 
@@ -24,9 +24,7 @@ export async function blockDate(input: BlockDateInput) {
     throw new Error('Artist not found')
   }
 
-  // Normalizar fecha (quitar hora)
-  const normalizedDate = new Date(input.date)
-  normalizedDate.setHours(0, 0, 0, 0)
+  const normalizedDate = new Date(input.date + 'T00:00:00.000Z')
 
   try {
     const blocked = await prisma.blockedDate.create({
@@ -78,6 +76,44 @@ export async function unblockDate(blockedDateId: string) {
 
   await prisma.blockedDate.delete({
     where: { id: blockedDateId },
+  })
+
+  revalidatePath('/dashboard/calendar')
+
+  return { success: true }
+}
+
+export async function unblockDateByDate(input: { date: string }) {
+  const { userId } = await auth()
+
+  if (!userId) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  const artist = await prisma.artist.findUnique({
+    where: { clerkId: userId },
+  })
+
+  if (!artist) {
+    return { success: false, error: 'Artist not found' }
+  }
+
+  const normalizedDate = new Date(input.date + 'T00:00:00.000Z')
+
+  // Buscar la fecha bloqueada por fecha y artista
+  const blocked = await prisma.blockedDate.findFirst({
+    where: {
+      artistId: artist.id,
+      date: normalizedDate,
+    },
+  })
+
+  if (!blocked) {
+    return { success: false, error: 'Blocked date not found' }
+  }
+
+  await prisma.blockedDate.delete({
+    where: { id: blocked.id },
   })
 
   revalidatePath('/dashboard/calendar')

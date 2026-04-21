@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Save, Loader2, User, Link as LinkIcon, DollarSign, FileText, Image as ImageIcon, CheckCircle, AlertCircle, Sparkles } from 'lucide-react'
 import { updateProfile } from '@/app/actions/profile'
+import { uploadImage as uploadImageAction, deleteImage } from '@/app/actions/upload'
 import { generateSlug } from '@/lib/utils'
 import { ImageUpload } from '@/components/ui/image-upload'
 
@@ -51,13 +52,41 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
     setFormData((prev) => ({ ...prev, slug: newSlug }))
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    setSuccess(false)
-    setError(null)
+  const uploadImages = async (files: File[]): Promise<string[]> => {
+    const uploadedUrls: string[] = []
+
+    for (const file of files) {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const result = await response.json()
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to upload image')
+      }
+
+      uploadedUrls.push(result.url)
+    }
+
+    return uploadedUrls
+  }
+
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault()
+  setIsSubmitting(true)
+  setSuccess(false)
+  setError(null)
+
+  try {
+    const uploadedUrls: string[] = []
 
     try {
+      // 1. Actualizar perfil (sin imágenes nuevas)
       const result = await updateProfile({
         name: formData.name,
         slug: formData.slug,
@@ -67,15 +96,45 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
         instagramUrl: formData.instagramUrl || undefined,
       })
 
-      if (result) {
-        setSuccess(true)
+      if (!result) {
+        throw new Error('Failed to update profile')
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update profile')
-    } finally {
-      setIsSubmitting(false)
+
+      // 2. Si hay imágenes nuevas, subirlas con rollback en caso de error
+      if (newImages.length > 0) {
+        for (const file of newImages) {
+          const uploadResult = await uploadImages([file])
+          if (uploadResult) {
+            uploadedUrls.push(...uploadResult)
+          }
+        }
+
+        // 3. Actualizar portfolio con URLs nuevas
+        const { updatePortfolioImages } = await import('@/app/actions/profile')
+        const updatedPortfolioImages = [...portfolioImages, ...uploadedUrls]
+        await updatePortfolioImages(updatedPortfolioImages)
+
+        // 4. Actualizar estado local solo si todo fue OK
+        setPortfolioImages(updatedPortfolioImages)
+        setNewImages([])
+      }
+
+      setSuccess(true)
+    } catch (uploadError) {
+      // Rollback: eliminar imágenes subidas si algo falló
+      if (uploadedUrls.length > 0) {
+        for (const url of uploadedUrls) {
+          await deleteImage(url)
+        }
+      }
+      throw uploadError
     }
+  } catch (err) {
+    setError(err instanceof Error ? err.message : 'Failed to update profile')
+  } finally {
+    setIsSubmitting(false)
   }
+}
 
   const inputClasses = (fieldName: string) => `
     w-full rounded-xl border bg-[#0a0a0a] px-4 py-3 text-sm text-white 
@@ -325,9 +384,18 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
           maxFiles={10}
           maxSizeMB={2}
           onFilesSelected={(files) => setNewImages((prev) => [...prev, ...files])}
-          onFileRemoved={(index) => {
-            setNewImages((prev) => prev.filter((_, i) => i !== index))
-            setPortfolioImages((prev) => prev.filter((_, i) => i !== index))
+          onFileRemoved={async (index) => {
+            // Si es una imagen existente (ya subida), eliminarla del servidor
+            if (index < portfolioImages.length) {
+              const { deleteImage } = await import('@/app/actions/upload')
+              const imageToDelete = portfolioImages[index]
+              await deleteImage(imageToDelete)
+              setPortfolioImages((prev) => prev.filter((_, i) => i !== index))
+            } else {
+              // Si es una imagen nueva (no subida aún), solo eliminarla del estado
+              const newImageIndex = index - portfolioImages.length
+              setNewImages((prev) => prev.filter((_, i) => i !== newImageIndex))
+            }
           }}
           existingImages={portfolioImages}
         />

@@ -1,8 +1,9 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Calendar, Clock, DollarSign, TrendingUp, ArrowRight, AlertCircle, Loader2 } from 'lucide-react'
+import { Calendar, Clock, DollarSign, TrendingUp, ArrowRight, AlertCircle, ExternalLink, Copy, Check } from 'lucide-react'
 import Link from 'next/link'
+import { useState } from 'react'
 import { StatusBadge } from '@/components/dashboard/status-badge'
 import { ArtistStatsDashboard } from '@/components/dashboard/artist-stats-dashboard'
 import { EmptyBookings } from '@/components/ui/empty-state'
@@ -61,6 +62,38 @@ interface DashboardClientProps {
 
 export function DashboardClient({ artist, bookings, stats, isDemo }: DashboardClientProps) {
   const { showToast } = useToast()
+  const [copied, setCopied] = useState(false)
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(`inkapp.com/t/${artist.slug}`)
+      setCopied(true)
+      showToast('¡Enlace copiado!', 'success')
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      showToast('Error al copiar', 'error')
+    }
+  }
+
+  const handleShare = async () => {
+    const shareData = {
+      title: `Reserva tu cita con ${artist.name} en InkApp`,
+      text: `Reserva tu cita de tatuaje con ${artist.name} directamente online.`,
+      url: `https://inkapp.com/t/${artist.slug}`,
+    }
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData)
+      } catch (err) {
+        // User cancelled or share failed
+      }
+    } else {
+      // Fallback: copy to clipboard
+      handleCopyLink()
+    }
+  }
+
   const statItems = [
     {
       label: 'Total Citas',
@@ -266,27 +299,51 @@ export function DashboardClient({ artist, bookings, stats, isDemo }: DashboardCl
         transition={{ delay: 0.6 }}
         className="grid grid-cols-1 md:grid-cols-2 gap-6"
       >
-        <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-[#ff6b35]/10 to-transparent p-6">
-          <h3 className="font-display text-lg font-bold text-white mb-2">
-            Comparte tu perfil
-          </h3>
-          <p className="text-[#a1a1a1] text-sm mb-4">
-            Envía tu enlace a clientes para que puedan solicitar citas directamente.
-          </p>
-          <div className="flex gap-2">
-            <code className="flex-1 bg-[#0a0a0a] border border-white/10 rounded-lg px-4 py-2 text-sm text-[#a1a1a1] font-mono truncate">
-              inkapp.com/t/{artist.slug}
-            </code>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => navigator.clipboard.writeText(`inkapp.com/t/${artist.slug}`)}
-              className="btn-primary rounded-lg text-sm px-4"
-            >
-              Copiar
-            </motion.button>
-          </div>
-        </div>
+    <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-[#ff6b35]/10 to-transparent p-6">
+      <h3 className="font-display text-lg font-bold text-white mb-2">
+        Comparte tu perfil
+      </h3>
+      <p className="text-[#a1a1a1] text-sm mb-4">
+        Envía tu enlace a clientes para que puedan solicitar citas directamente.
+      </p>
+      <div className="flex gap-2 mb-3">
+        <code className="flex-1 bg-[#0a0a0a] border border-white/10 rounded-lg px-4 py-2 text-sm text-[#a1a1a1] font-mono truncate">
+          inkapp.com/t/{artist.slug}
+        </code>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={handleCopyLink}
+          className="btn-primary rounded-lg text-sm px-4 flex items-center gap-2"
+          title="Copiar enlace"
+        >
+          {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+          {copied ? 'Copiado' : 'Copiar'}
+        </motion.button>
+      </div>
+      <div className="flex gap-2">
+        <Link href={`/t/${artist.slug}`} target="_blank" className="flex-1">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="w-full flex items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/5 px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors"
+          >
+            <ExternalLink className="h-4 w-4" />
+            Ver mi perfil público
+          </motion.button>
+        </Link>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={handleShare}
+          className="flex items-center gap-2 rounded-lg border border-[#ff6b35]/50 bg-[#ff6b35]/10 px-4 py-2 text-sm text-[#ff6b35] hover:bg-[#ff6b35]/20 transition-colors"
+          title="Compartir"
+        >
+          <ArrowRight className="h-4 w-4" />
+          Compartir
+        </motion.button>
+      </div>
+    </div>
 
         <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-[#00d4ff]/10 to-transparent p-6">
           <h3 className="font-display text-lg font-bold text-white mb-2">

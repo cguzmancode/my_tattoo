@@ -67,21 +67,21 @@ export function ImageUpload({
         canvas.height = height
         ctx?.drawImage(img, 0, 0, width, height)
 
-        canvas.toBlob(
-          (blob) => {
-            if (blob) {
-              const compressedFile = new File([blob], file.name, {
-                type: 'image/jpeg',
-                lastModified: Date.now(),
-              })
-              resolve(compressedFile)
-            } else {
-              resolve(file)
-            }
-          },
-          'image/jpeg',
-          0.8
-        )
+  canvas.toBlob(
+    (blob) => {
+      if (blob) {
+        const compressedFile = new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), {
+          type: 'image/jpeg',
+          lastModified: Date.now(),
+        })
+        resolve(compressedFile)
+      } else {
+        resolve(file)
+      }
+    },
+    'image/jpeg',
+    0.8
+  )
       }
 
       img.src = URL.createObjectURL(file)

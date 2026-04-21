@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, ZoomIn } from 'lucide-react'
+import { X, ZoomIn, ImageIcon } from 'lucide-react'
 
 interface PortfolioGalleryProps {
   images: string[]
@@ -12,6 +12,28 @@ interface PortfolioGalleryProps {
 
 export function PortfolioGallery({ images, artistName }: PortfolioGalleryProps) {
   const [selectedImage, setSelectedImage] = useState<number | null>(null)
+
+  // Si no hay imágenes, mostrar estado vacío
+  if (!images || images.length === 0) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col items-center justify-center py-16 px-6 text-center"
+      >
+        <div className="h-20 w-20 rounded-2xl bg-[#ff6b35]/10 flex items-center justify-center mb-6">
+          <ImageIcon className="h-10 w-10 text-[#ff6b35]" />
+        </div>
+        <h3 className="font-display text-xl font-bold text-white mb-2">
+          Portfolio en construcción
+        </h3>
+        <p className="text-[#a1a1a1] text-sm max-w-md">
+          {artistName} aún no ha subido imágenes de su trabajo.
+          Vuelve pronto para ver su increíble portfolio.
+        </p>
+      </motion.div>
+    )
+  }
 
   // Distribuir imágenes en columnas masonry
   // Patrón: alternar entre diferentes alturas para efecto visual
