@@ -1,8 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createBooking } from '@/lib/api/bookings'
 import { createClient } from '@/lib/supabase/server'
+import { rateLimitMiddleware } from '@/lib/rate-limit'
 
 export async function POST(request: NextRequest) {
+  // Aplicar rate limiting: 5 requests por minuto
+  const rateLimitResult = rateLimitMiddleware(request, { maxRequests: 5, windowMs: 60000 })
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { success: false, error: rateLimitResult.error },
+      { status: rateLimitResult.statusCode }
+    )
+  }
+
   try {
     const formData = await request.formData()
 

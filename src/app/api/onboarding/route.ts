@@ -1,8 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth, currentUser } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
+import { rateLimitMiddleware } from '@/lib/rate-limit'
 
 export async function POST(request: NextRequest) {
+  // Aplicar rate limiting: 3 requests por minuto
+  const rateLimitResult = rateLimitMiddleware(request, { maxRequests: 3, windowMs: 60000 })
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { error: rateLimitResult.error },
+      { status: rateLimitResult.statusCode }
+    )
+  }
+
   try {
     const { userId } = await auth()
     
