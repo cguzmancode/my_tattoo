@@ -33,24 +33,33 @@ export default function OnboardingPage() {
     }))
   }
 
-  const handleSubmit = async () => {
-    setIsLoading(true)
-    try {
-      const response = await fetch('/api/onboarding', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      })
+const [error, setError] = useState<string | null>(null)
 
-      if (response.ok) {
-        router.push('/dashboard')
-      }
-    } catch (error) {
-      console.error('Error:', error)
-    } finally {
-      setIsLoading(false)
+const handleSubmit = async () => {
+  setIsLoading(true)
+  setError(null)
+  
+  try {
+    const response = await fetch('/api/onboarding', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData),
+    })
+
+    const result = await response.json()
+
+    if (response.ok) {
+      router.push('/dashboard')
+    } else {
+      setError(result.error || 'Error al crear el perfil. Intenta de nuevo.')
     }
+  } catch (err) {
+    console.error('Error:', err)
+    setError('Error de conexión. Verifica tu conexión a internet.')
+  } finally {
+    setIsLoading(false)
   }
+}
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-4 py-16">
@@ -268,31 +277,38 @@ export default function OnboardingPage() {
                   </div>
                 </div>
 
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => setStep(2)}
-                    className="flex-1 py-4 rounded-lg border border-white/10 text-white hover:bg-white/5 transition-all"
-                  >
-                    Atrás
-                  </button>
-                  <button
-                    onClick={handleSubmit}
-                    disabled={!formData.depositAmount || isLoading}
-                    className="flex-1 flex items-center justify-center gap-2 bg-[#ff6b35] hover:bg-[#ff8555] text-black font-label text-lg tracking-wider uppercase rounded-lg py-4 transition-all hover:shadow-[0_0_30px_rgba(255,107,53,0.4)] disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="h-5 w-5 animate-spin" />
-                        Creando perfil...
-                      </>
-                    ) : (
-                      <>
-                        Completar registro
-                        <Check className="h-5 w-5" />
-                      </>
-                    )}
-                  </button>
+      {/* Error Message */}
+              {error && (
+                <div className="p-4 rounded-xl bg-[#ef4444]/10 border border-[#ef4444]/20 text-[#ef4444] text-sm">
+                  {error}
                 </div>
+              )}
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setStep(2)}
+                  className="flex-1 py-4 rounded-lg border border-white/10 text-white hover:bg-white/5 transition-all"
+                >
+                  Atrás
+                </button>
+                <button
+                  onClick={handleSubmit}
+                  disabled={!formData.depositAmount || isLoading}
+                  className="flex-1 flex items-center justify-center gap-2 bg-[#ff6b35] hover:bg-[#ff8555] text-black font-label text-lg tracking-wider uppercase rounded-lg py-4 transition-all hover:shadow-[0_0_30px_rgba(255,107,53,0.4)] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      Creando perfil...
+                    </>
+                  ) : (
+                    <>
+                      Completar registro
+                      <Check className="h-5 w-5" />
+                    </>
+                  )}
+                </button>
+              </div>
               </motion.div>
             )}
           </div>
