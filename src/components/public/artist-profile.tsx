@@ -320,7 +320,7 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
               <div className="space-y-4">
                 {[
                   { icon: Calendar, text: 'Elige tu fecha preferida' },
-                  { icon: DollarSign, text: 'Depósito seguro de $50' },
+                  { icon: DollarSign, text: `Depósito seguro de $${(artist.depositAmount / 100).toFixed(2)}` },
                   { icon: Clock, text: 'Respuesta en 24-48 horas' },
                 ].map((feature, index) => (
                   <motion.div
