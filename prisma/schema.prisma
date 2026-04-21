@@ -54,9 +54,9 @@ model Booking {
   reminderSent24h Boolean @default(false)
   reminderSent48h Boolean @default(false)
   // Campos editables por el artista
-  priceEstimate Int?
-  durationEstimate String?
-  artistNotes String?
+  priceEstimate Int? @map("priceestimate")
+  durationEstimate String? @map("durationestimate")
+  artistNotes String? @map("artistnotes")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
