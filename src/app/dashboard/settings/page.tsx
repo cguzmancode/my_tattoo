@@ -14,8 +14,23 @@ export default async function SettingsPage() {
     redirect('/sign-in')
   }
 
-  // En development, usar datos del mock
-  const artist = DEMO_ARTIST
+  // Obtener datos reales del artista
+  let artist
+
+  if (userId) {
+    // Usuario autenticado - obtener datos reales
+    artist = await prisma.artist.findUnique({
+      where: { clerkId: userId },
+    })
+
+    if (!artist) {
+      // Si no existe, redirigir a onboarding
+      redirect('/onboarding')
+    }
+  } else {
+    // Modo development - usar datos del mock
+    artist = DEMO_ARTIST
+  }
 
   return (
     <div className="max-w-3xl">
@@ -31,7 +46,7 @@ export default async function SettingsPage() {
           Tu Perfil
         </h1>
         <p className="text-[#a1a1a1] max-w-xl">
-          Actualiza tu información pública. Estos datos serán visibles para los clientes 
+          Actualiza tu información pública. Estos datos serán visibles para los clientes
           cuando visiten tu página de perfil.
         </p>
       </div>
@@ -40,7 +55,7 @@ export default async function SettingsPage() {
       <div className="relative">
         {/* Glow effect */}
         <div className="absolute -inset-px rounded-2xl bg-gradient-to-r from-[#ff6b35]/20 via-transparent to-[#00d4ff]/20 blur-xl opacity-30" />
-        
+
         <div className="relative rounded-2xl border border-white/10 bg-[#141414] p-8">
           <ProfileForm
             initialData={{
@@ -65,13 +80,13 @@ export default async function SettingsPage() {
             Vista Previa
           </span>
         </div>
-        
+
         <div className="rounded-2xl border border-white/10 bg-[#141414] p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-display text-lg font-bold text-white">
               Así te ven los clientes
             </h3>
-            <a 
+            <a
               href={`/t/${artist.slug}`}
               target="_blank"
               rel="noopener noreferrer"
@@ -80,7 +95,7 @@ export default async function SettingsPage() {
               Ver perfil público →
             </a>
           </div>
-          
+
           <div className="aspect-video rounded-xl bg-[#0a0a0a] border border-white/5 flex items-center justify-center overflow-hidden relative">
             {/* Mock profile preview */}
             <div className="text-center p-8">
@@ -96,7 +111,7 @@ export default async function SettingsPage() {
                 {artist.bio?.slice(0, 100) || 'Sin descripción'}...
               </p>
             </div>
-            
+
             {/* Overlay gradient */}
             <div className="absolute inset-0 bg-gradient-to-t from-[#141414] via-transparent to-transparent" />
           </div>

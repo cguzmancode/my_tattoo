@@ -1,4 +1,4 @@
-import { DEMO_BOOKINGS, MockBooking } from '@/lib/mocks'
+import { MockBooking } from '@/lib/mocks'
 import { TattooBookingCard } from './tattoo-booking-card'
 
 interface BookingListProps {
@@ -6,9 +6,9 @@ interface BookingListProps {
   onBookingClick?: (booking: MockBooking) => void
 }
 
-export function BookingList({ 
-  bookings = DEMO_BOOKINGS, 
-  onBookingClick 
+export function BookingList({
+  bookings = [],
+  onBookingClick
 }: BookingListProps) {
   if (bookings.length === 0) {
     return (
