@@ -10,6 +10,12 @@ interface PublicProfilePageProps {
 export default async function PublicProfilePage({ params }: PublicProfilePageProps) {
   const { slug } = await params
 
+  // Siempre mostrar el perfil demo para alex-rivera-tattoo
+  // Esto sirve como portfolio de ejemplo para visitantes
+  if (slug === DEMO_ARTIST.slug) {
+    return <ArtistProfile artist={DEMO_ARTIST} />
+  }
+
   // En modo demo, retornar datos de ejemplo para el slug demo
   if (slug === DEMO_ARTIST.slug && isDemoMode()) {
     return <ArtistProfile artist={DEMO_ARTIST} />
