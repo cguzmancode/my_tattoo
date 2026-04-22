@@ -22,8 +22,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <html lang="es" className={`${inter.variable} dark`}>
+<ClerkProvider
+      publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+      signInUrl="/sign-in"
+      signUpUrl="/sign-up"
+      fallbackRedirectUrl="/dashboard"
+    >
+    <html lang="es" className={`${inter.variable} dark`}>
         <body className="min-h-screen bg-background text-foreground font-body antialiased">
           <NoiseOverlay />
           <Header />
