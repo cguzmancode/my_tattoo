@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { ClerkProvider, Show, UserButton, SignInButton, SignUpButton } from "@clerk/nextjs";
-import { motion } from "framer-motion";
-import { Header } from "@/components/layout/header";
+import { PublicHeader } from "@/components/layout/public-header";
 import { NoiseOverlay } from "@/components/layout/noise-overlay";
 import "./globals.css";
 
@@ -22,19 +20,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-<ClerkProvider
-      signInUrl="/sign-in"
-      signUpUrl="/sign-up"
-    >
     <html lang="es" className={`${inter.variable} dark`}>
-        <body className="min-h-screen bg-background text-foreground font-body antialiased">
-          <NoiseOverlay />
-          <Header />
-          <main className="relative z-10">
-            {children}
-          </main>
-        </body>
-      </html>
-    </ClerkProvider>
+      <body className="min-h-screen bg-background text-foreground font-body antialiased">
+        <NoiseOverlay />
+        <PublicHeader />
+        <main className="relative z-10">
+          {children}
+        </main>
+      </body>
+    </html>
   );
 }
