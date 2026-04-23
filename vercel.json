@@ -3,5 +3,8 @@
   "framework": "nextjs",
   "env": {
     "NEXT_TELEMETRY_DISABLED": "1"
+  },
+  "git": {
+    "deploymentEnabled": false
   }
 }
