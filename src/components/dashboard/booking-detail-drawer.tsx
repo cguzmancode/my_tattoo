@@ -20,6 +20,7 @@ export function BookingDetailDrawer({ isOpen, onClose, booking }: BookingDetailD
   const [isEditing, setIsEditing] = useState(false)
   const [showSuccessMessage, setShowSuccessMessage] = useState<string | null>(null)
   const [showErrorMessage, setShowErrorMessage] = useState<string | null>(null)
+  const [showContactModal, setShowContactModal] = useState(false)
 
   // Reset editing state when drawer opens
   useEffect(() => {
@@ -457,18 +458,66 @@ export function BookingDetailDrawer({ isOpen, onClose, booking }: BookingDetailD
                     </motion.button>
                   )}
                 </div>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full mt-3 py-3 px-4 rounded-xl border border-white/10 text-white font-medium text-sm hover:bg-white/5 transition-colors"
-                >
-                  Contactar Cliente
-                </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setShowContactModal(true)}
+                className="w-full mt-3 py-3 px-4 rounded-xl border border-white/10 text-white font-medium text-sm hover:bg-white/5 transition-colors"
+              >
+                Contactar Cliente
+              </motion.button>
+            </div>
+          )}
+        </motion.div>
+
+        {/* Contact Modal */}
+        {showContactModal && booking && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowContactModal(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-[#141414] border border-white/10 rounded-2xl p-6 z-[70] shadow-2xl"
+            >
+              <h3 className="text-xl font-bold text-white mb-4">Contactar a {booking.clientName}</h3>
+              <div className="space-y-3 mb-6">
+                <div className="p-4 rounded-xl bg-[#0a0a0a] border border-white/10">
+                  <p className="text-xs text-[#525252] mb-1">Email</p>
+                  <p className="text-white">{booking.clientEmail}</p>
+                </div>
+                {booking.clientPhone && (
+                  <div className="p-4 rounded-xl bg-[#0a0a0a] border border-white/10">
+                    <p className="text-xs text-[#525252] mb-1">Teléfono</p>
+                    <p className="text-white">{booking.clientPhone}</p>
+                  </div>
+                )}
               </div>
-            )}
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
-  )
+              <div className="flex gap-3">
+                <a
+                  href={`mailto:${booking.clientEmail}?subject=Cita de Tatuaje - InkApp`}
+                  className="flex-1 py-3 px-4 rounded-xl bg-[#ff6b35] text-black font-medium text-sm text-center hover:bg-[#ff8555] transition-colors"
+                >
+                  Enviar Email
+                </a>
+                <button
+                  onClick={() => setShowContactModal(false)}
+                  className="flex-1 py-3 px-4 rounded-xl border border-white/10 text-white font-medium text-sm hover:bg-white/5 transition-colors"
+                >
+                  Cerrar
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </>
+    )}
+  </AnimatePresence>
+)
 }

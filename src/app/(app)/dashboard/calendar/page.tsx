@@ -48,13 +48,23 @@ export default async function CalendarPage() {
   }
 
   // Transform bookings to calendar events
-  const events = bookings.map((booking) => ({
-    id: booking.id,
-    date: booking.preferredDates[0] ? new Date(booking.preferredDates[0]) : new Date(),
-    type: 'booking' as const,
-    title: booking.clientName,
-    status: booking.status,
-  }))
+  const events = bookings.map((booking) => {
+    // Usar proposedDate si existe, si no usar preferredDates[0]
+    const proposedDate = (booking as any).proposedDate
+    const preferredDates = (booking as any).preferredDates
+    
+    const eventDate = proposedDate 
+      ? new Date(proposedDate) 
+      : (preferredDates?.[0] ? new Date(preferredDates[0]) : new Date())
+    
+    return {
+      id: booking.id,
+      date: eventDate,
+      type: 'booking' as const,
+      title: (booking as any).clientName,
+      status: (booking as any).status,
+    }
+  })
 
   return (
     <div className="space-y-6">
