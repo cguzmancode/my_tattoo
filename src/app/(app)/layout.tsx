@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
-import { Header } from "@/components/layout/header";
 import { NoiseOverlay } from "@/components/layout/noise-overlay";
 import "../globals.css";
 
@@ -15,13 +14,9 @@ export default function AppLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider
-      signInUrl="/sign-in"
-      signUpUrl="/sign-up"
-    >
+    <ClerkProvider>
       <div className="min-h-screen bg-background text-foreground font-body antialiased">
         <NoiseOverlay />
-        <Header />
         <main className="relative z-10">
           {children}
         </main>

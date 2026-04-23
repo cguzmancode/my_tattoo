@@ -52,7 +52,7 @@ export default function SignInPage() {
 
         {/* Sign In Component */}
         <div className="relative">
-      <SignIn
+<SignIn
         appearance={{
           baseTheme: 'dark',
       variables: {
@@ -77,7 +77,7 @@ export default function SignInPage() {
             dividerText: '!text-[#525252]',
             formFieldLabel: '!text-[#a1a1a1] !font-body !text-sm !mb-2',
             formFieldInput: '!bg-[#0a0a0a] !border !border-white/10 !text-white !placeholder-[#525252] !rounded-lg !px-4 !py-3 focus:!border-[#ff6b35] focus:!ring-1 focus:!ring-[#ff6b35]/50',
-            formButtonPrimary: '!bg-[#ff6b35] hover:!bg-[#ff8555] !text-black !font-label !text-lg !tracking-wider !uppercase !rounded-lg !py-3 hover:!shadow-[0_0_30px_rgba(255,107,53,0.4)]',
+            formButtonPrimary: '!bg-[#ff6b35] hover:!bg-[#ff8555] !text-black !font-label !text-lg !tracking-wider !uppercase !rounded-lg hover:!shadow-[0_0_30px_rgba(255,107,53,0.4)]',
             footer: '!hidden',
             alternativeMethodsBlockButton: '!text-[#ff6b35] hover:!text-[#ff8555]',
             formFieldErrorText: '!text-[#ef4444]',
@@ -86,6 +86,8 @@ export default function SignInPage() {
             otpCodeFieldInput: '!bg-[#0a0a0a] !border !border-white/10 !text-white',
           },
         }}
+        fallbackRedirectUrl="/dashboard"
+        />
 
           />
 

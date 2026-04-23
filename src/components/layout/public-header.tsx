@@ -2,9 +2,13 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
+import { useAuth } from '@clerk/nextjs'
 import { TattooNeedle } from '@/components/icons/tattoo-needle'
+import { UserButton } from '@clerk/nextjs'
 
 export function PublicHeader() {
+  const { isSignedIn } = useAuth()
+  
   return (
     <motion.header
       initial={{ y: -100, opacity: 0 }}
@@ -36,24 +40,47 @@ export function PublicHeader() {
 
         {/* Navigation */}
         <nav className="flex items-center gap-6">
-          <Link href="/sign-in">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="font-label text-sm tracking-widest text-white/70 transition-colors hover:text-white"
-            >
-              INICIAR SESIÓN
-            </motion.button>
-          </Link>
-          <Link href="/sign-up">
-            <motion.button
-              whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(255, 107, 53, 0.4)" }}
-              whileTap={{ scale: 0.95 }}
-              className="btn-primary rounded-full"
-            >
-              REGISTRARSE
-            </motion.button>
-          </Link>
+          {isSignedIn ? (
+            <>
+              <Link href="/dashboard">
+                <motion.button
+                  whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(255, 107, 53, 0.4)" }}
+                  whileTap={{ scale: 0.95 }}
+                  className="btn-primary rounded-full text-sm"
+                >
+                  DASHBOARD
+                </motion.button>
+              </Link>
+              <UserButton 
+                appearance={{
+                  elements: {
+                    avatarBox: "h-10 w-10 rounded-full border-2 border-[#ff6b35]/50"
+                  }
+                }}
+              />
+            </>
+          ) : (
+            <>
+              <Link href="/sign-in">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="font-label text-sm tracking-widest text-white/70 transition-colors hover:text-white"
+                >
+                  INICIAR SESIÓN
+                </motion.button>
+              </Link>
+              <Link href="/sign-up">
+                <motion.button
+                  whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(255, 107, 53, 0.4)" }}
+                  whileTap={{ scale: 0.95 }}
+                  className="btn-primary rounded-full"
+                >
+                  REGISTRARSE
+                </motion.button>
+              </Link>
+            </>
+          )}
         </nav>
       </div>
 
