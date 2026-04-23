@@ -15,7 +15,7 @@ export default function AppLayout({
   return (
     <div className="min-h-screen bg-background text-foreground font-body antialiased">
       <Header />
-      <main className="relative z-10">
+      <main className="relative z-10 pt-16">
         {children}
       </main>
     </div>
