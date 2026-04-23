@@ -135,7 +135,8 @@ export async function updateBookingStatus(
   }
 
   const allowedTransitions = validTransitions[booking.status]
-  if (!allowedTransitions?.includes(input.status)) {
+  // Solo validar transición si el estado está cambiando
+  if (booking.status !== input.status && !allowedTransitions?.includes(input.status)) {
     throw new Error(`Invalid status transition from ${booking.status} to ${input.status}`)
   }
 
