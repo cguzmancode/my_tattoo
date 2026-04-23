@@ -1,6 +1,5 @@
 import { auth } from '@clerk/nextjs/server'
-import { createClient } from '@/lib/supabase/server'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
@@ -26,17 +25,11 @@ export async function POST(request: Request) {
     const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
     const uniqueFilename = `${userId}/${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${ext}`
 
-    // Usar cliente admin con service role key si está disponible
-    let supabase
-    if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      supabase = createAdminClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-      )
-    } else {
-      // Fallback al cliente normal
-      supabase = await createClient()
-    }
+    // Usar cliente admin con service role key para subir sin restricciones
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
 
     const { data, error } = await supabase.storage
       .from('portfolio')
