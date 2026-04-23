@@ -23,13 +23,13 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="es" className={`${inter.variable} dark`}>
-        <body className="min-h-screen bg-background text-foreground font-body antialiased">
-          <NoiseOverlay />
-          <PublicHeader />
-          <main className="relative z-10">
-            {children}
-          </main>
-        </body>
+      <body className="min-h-screen bg-background text-foreground font-body antialiased">
+        <NoiseOverlay />
+        <PublicHeader />
+        <main className="relative z-10 pt-16">
+          {children}
+        </main>
+      </body>
       </html>
     </ClerkProvider>
   );
