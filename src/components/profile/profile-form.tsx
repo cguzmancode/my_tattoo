@@ -203,7 +203,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           onBlur={() => setFocusedField(null)}
           required
           className={inputClasses('name')}
-          placeholder="Ej: Alex Rivera"
+          placeholder="Ej: Tu nombre artístico"
         />
       </motion.div>
 

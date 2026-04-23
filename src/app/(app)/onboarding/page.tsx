@@ -140,7 +140,7 @@ const handleSubmit = async () => {
                       type="text"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="Ej: Alex 'The Needle' Rivera"
+                      placeholder="Ej: Tu nombre artístico"
                       className="w-full bg-[#0a0a0a] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-[#525252] focus:border-[#ff6b35] focus:ring-1 focus:ring-[#ff6b35]/50 outline-none transition-all"
                     />
                   </div>

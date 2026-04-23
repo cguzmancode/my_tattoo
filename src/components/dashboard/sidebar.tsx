@@ -3,9 +3,9 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Calendar, List, CalendarDays, Settings, LogOut } from 'lucide-react'
-import { UserButton } from '@clerk/nextjs'
+import { Calendar, List, CalendarDays, Settings } from 'lucide-react'
 import { TattooNeedle } from '@/components/icons/tattoo-needle'
+import { UserSection } from './user-section'
 
 const navItems = [
   { href: '/dashboard', label: 'Overview', icon: List },
@@ -110,25 +110,7 @@ export function Sidebar() {
       </nav>
 
       {/* User Section */}
-      <div className="p-4 border-t border-white/10">
-        <div className="flex items-center gap-3 p-3 rounded-xl bg-[#141414] border border-white/10">
-          <UserButton 
-            appearance={{
-              elements: {
-                avatarBox: "h-10 w-10 rounded-full border-2 border-[#ff6b35]/50"
-              }
-            }}
-          />
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-white truncate">
-              Alex Rivera
-            </p>
-            <p className="text-xs text-[#525252]">
-              Artista
-            </p>
-          </div>
-        </div>
-      </div>
+      <UserSection />
     </aside>
   )
 }
