@@ -86,12 +86,10 @@ export default function SignInPage() {
             otpCodeFieldInput: '!bg-[#0a0a0a] !border !border-white/10 !text-white',
           },
         }}
-        fallbackRedirectUrl="/dashboard"
-        />
+fallbackRedirectUrl="/dashboard"
+      />
 
-          />
-
-          {/* Glow Effect */}
+      {/* Glow Effect */}
           <div className="absolute -inset-px rounded-2xl bg-gradient-to-r from-[#ff6b35]/20 via-transparent to-[#00d4ff]/20 blur-xl opacity-30 pointer-events-none" />
         </div>
 
