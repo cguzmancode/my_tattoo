@@ -1,36 +1,64 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# InkApp - Sistema de Gestión para Tatuadores
 
-## Getting Started
+Plataforma completa para artistas del tatuaje para gestionar citas, disponibilidad y pagos.
 
-First, run the development server:
+## 🚀 Tecnologías
+
+- **Next.js 16** - Framework React con App Router
+- **Prisma 7** - ORM para PostgreSQL
+- **Supabase** - Base de datos y storage
+- **Clerk** - Autenticación y autorización
+- **Tailwind CSS v4** - Estilos
+- **Framer Motion** - Animaciones
+
+## 📋 Características
+
+- ✅ Gestión de citas (PENDING → ACCEPTED → CONFIRMED → COMPLETED)
+- ✅ Calendario de disponibilidad
+- ✅ Sistema de pagos con Stripe
+- ✅ Perfil público para artistas
+- ✅ Subida de imágenes
+
+## 🛠️ Desarrollo
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+# Instalar dependencias
+pnpm install
+
+# Configurar variables de entorno
+cp .env.example .env
+
+# Ejecutar en desarrollo
 pnpm dev
-# or
-bun dev
+
+# Ejecutar tests
+pnpm test:unit
+pnpm test:integration
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🚀 Despliegue
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Este proyecto usa **despliegue manual por tags**.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Flujo de trabajo
 
-## Learn More
+1. **Desarrollo normal** - commits a `master` no despliegan automáticamente
+2. **Crear tag** para desplegar:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+# Crear tag
+git tag v1.2.3
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Push del tag (esto despliega automáticamente)
+git push origin v1.2.3
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Configuración de despliegue
 
-## Deploy on Vercel
+- Auto-deploy desactivado en `vercel.json`
+- GitHub Actions ejecuta deploy solo en tags `v*`
+- Deploy Hook de Vercel configurado
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Nota**: Commits con `[skip ci]` en el mensaje omiten el workflow de CI/CD.
