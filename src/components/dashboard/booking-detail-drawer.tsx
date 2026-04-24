@@ -14,9 +14,10 @@ interface BookingDetailDrawerProps {
   isOpen: boolean
   onClose: () => void
   booking?: MockBooking | null
+  onBookingUpdated?: (bookingId: string, newDate?: Date) => void
 }
 
-export function BookingDetailDrawer({ isOpen, onClose, booking }: BookingDetailDrawerProps) {
+export function BookingDetailDrawer({ isOpen, onClose, booking, onBookingUpdated }: BookingDetailDrawerProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [showSuccessMessage, setShowSuccessMessage] = useState<string | null>(null)
   const [showErrorMessage, setShowErrorMessage] = useState<string | null>(null)
@@ -64,6 +65,14 @@ export function BookingDetailDrawer({ isOpen, onClose, booking }: BookingDetailD
         durationEstimate: data.durationEstimate,
         artistNotes: data.artistNotes,
       })
+      
+      // Notify parent about the update with the new date if provided
+      if (data.proposedDate) {
+        onBookingUpdated?.(booking!.id, new Date(data.proposedDate))
+      } else {
+        onBookingUpdated?.(booking!.id)
+      }
+      
       setShowSuccessMessage('Cita actualizada correctamente')
       setIsEditing(false)
       setTimeout(() => setShowSuccessMessage(null), 3000)

@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { CalendarView } from '@/components/calendar/calendar-view'
-import { blockDate, unblockDateByDate, updateBookingDate } from '@/app/actions/calendar'
+import { blockDate, unblockDateByDate } from '@/app/actions/calendar'
 import { getBookingById } from '@/app/actions/bookings'
 import { useToast } from '@/components/ui/toast'
 import { BookingDetailDrawer } from '@/components/dashboard/booking-detail-drawer'
@@ -127,23 +127,17 @@ export function CalendarClient({ events: initialEvents, blockedDates: initialBlo
     setSelectedBooking(null)
   }
 
-  const handleBookingUpdate = async (bookingId: string, newDate: Date) => {
-    startTransition(async () => {
-      try {
-        await updateBookingDate(bookingId, newDate.toISOString().split('T')[0])
-        showToast('Cita reprogramada correctamente', 'success')
-        // Update local state
-        setEvents((prevEvents) =>
-          prevEvents.map((event) =>
-            event.id === bookingId ? { ...event, date: newDate } : event
-          )
-        )
-      } catch (error) {
-        console.error('[CalendarClient] Error updating booking:', error)
-        showToast('Error al reprogramar la cita', 'error')
-      }
-    })
+const handleBookingUpdate = (bookingId: string, newDate?: Date) => {
+  if (newDate) {
+    // Optimistic update - update UI immediately
+    setEvents((prevEvents) =>
+      prevEvents.map((event) =>
+        event.id === bookingId ? { ...event, date: newDate } : event
+      )
+    )
+    showToast('Cita reprogramada correctamente', 'success')
   }
+}
 
   return (
     <>
@@ -159,6 +153,7 @@ export function CalendarClient({ events: initialEvents, blockedDates: initialBlo
         isOpen={isDrawerOpen}
         onClose={handleCloseDrawer}
         booking={selectedBooking}
+        onBookingUpdated={handleBookingUpdate}
       />
     </>
   )
