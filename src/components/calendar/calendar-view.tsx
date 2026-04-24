@@ -11,10 +11,14 @@ import {
   useDraggable,
   useDroppable,
   DragEndEvent,
+  DragStartEvent,
+  DragOverEvent,
+  DragOverlay,
+  defaultDropAnimationSideEffects,
+  closestCenter,
   PointerSensor,
   useSensor,
   useSensors,
-  rectIntersection,
 } from '@dnd-kit/core'
 
 interface CalendarEvent {
@@ -59,15 +63,15 @@ function DraggableEvent({ id, title }: { id: string; title: string }) {
 }
 
 // Componente para zonas de drop (días del calendario)
-function DroppableDay({ date, children, className }: { date: Date; children: React.ReactNode; className?: string }) {
-  const { isOver, setNodeRef } = useDroppable({
+function DroppableDay({ date, children, className, isOver }: { date: Date; children: React.ReactNode; className?: string; isOver?: boolean | null }) {
+  const { setNodeRef } = useDroppable({
     id: date.toISOString(),
   })
 
   return (
     <div
       ref={setNodeRef}
-      className={`${className} ${isOver ? 'ring-2 ring-[#ff6b35] ring-offset-2 ring-offset-[#141414]' : ''}`}
+      className={`${className} ${isOver ? 'ring-2 ring-[#ff6b35] ring-offset-2 ring-offset-[#141414] bg-[#ff6b35]/10' : ''}`}
     >
       {children}
     </div>
@@ -85,12 +89,14 @@ export function CalendarView({
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [hoveredDate, setHoveredDate] = useState<Date | null>(null)
+  const [activeDragId, setActiveDragId] = useState<string | null>(null)
+  const [overDate, setOverDate] = useState<Date | null>(null)
 
-  // Configurar sensores con activationConstraint
+  // Configurar sensores
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8, // Requiere mover 8px antes de activar el drag
+        distance: 8,
       },
     })
   )
@@ -138,25 +144,61 @@ export function CalendarView({
   const goToPrevMonth = () => setCurrentDate(subMonths(currentDate, 1))
   const goToNextMonth = () => setCurrentDate(addMonths(currentDate, 1))
 
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveDragId(event.active.id as string)
+  }
+
+  const handleDragOver = (event: DragOverEvent) => {
+    if (event.over) {
+      setOverDate(new Date(event.over.id as string))
+    } else {
+      setOverDate(null)
+    }
+  }
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
+    setActiveDragId(null)
+    setOverDate(null)
 
     if (!over) return
 
     const bookingId = active.id as string
-    const targetDate = new Date(over.id as string)
+    const targetDateStr = over.id as string
+    const targetDate = new Date(targetDateStr)
 
-    // Only move if dropped on a different date
+    // Verificar que es una fecha válida
+    if (isNaN(targetDate.getTime())) return
+
     const activeEvent = events.find(e => e.id === bookingId)
-    if (activeEvent && !isSameDay(new Date(activeEvent.date), targetDate)) {
+    if (!activeEvent) return
+
+    const currentEventDate = new Date(activeEvent.date)
+
+    // Solo mover si es una fecha diferente
+    if (!isSameDay(currentEventDate, targetDate)) {
       onBookingMove?.(bookingId, targetDate)
     }
   }
 
+  const dropAnimation = {
+    sideEffects: defaultDropAnimationSideEffects({
+      styles: {
+        active: {
+          opacity: '0.5',
+        },
+      },
+    }),
+  }
+
+  const activeEvent = activeDragId ? events.find(e => e.id === activeDragId) : null
+
   return (
-    <DndContext 
+    <DndContext
       sensors={sensors}
-      collisionDetection={rectIntersection}
+      collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
       <motion.div
@@ -247,6 +289,7 @@ export function CalendarView({
               const isToday = isSameDay(day, new Date())
               const isSelected = selectedDate && isSameDay(day, selectedDate)
               const isHovered = hoveredDate && isSameDay(day, hoveredDate)
+              const isOverDrop = overDate && isSameDay(day, overDate)
 
               return (
                 <motion.div
@@ -258,6 +301,7 @@ export function CalendarView({
                 >
                   <DroppableDay
                     date={day}
+                    isOver={isOverDrop}
                     className={`
                       relative min-h-[100px] cursor-pointer rounded-xl border p-2 transition-all duration-300
                       ${isCurrentMonth ? 'bg-[#0a0a0a] border-white/5' : 'bg-[#0a0a0a]/50 border-transparent'}
@@ -360,6 +404,15 @@ export function CalendarView({
           </div>
         </div>
       </motion.div>
+
+      {/* Drag Overlay para mostrar el elemento mientras se arrastra */}
+      <DragOverlay dropAnimation={dropAnimation}>
+        {activeEvent ? (
+          <div className="truncate rounded px-1.5 py-0.5 text-xs font-medium bg-[#00d4ff]/10 text-[#00d4ff] border border-[#00d4ff]/20 cursor-grabbing opacity-80 shadow-lg">
+            {activeEvent.title}
+          </div>
+        ) : null}
+      </DragOverlay>
     </DndContext>
   )
 }

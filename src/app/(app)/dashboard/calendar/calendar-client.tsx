@@ -17,7 +17,8 @@ interface CalendarClientProps {
   artistId: string
 }
 
-export function CalendarClient({ events, blockedDates: initialBlockedDates, artistId }: CalendarClientProps) {
+export function CalendarClient({ events: initialEvents, blockedDates: initialBlockedDates, artistId }: CalendarClientProps) {
+  const [events, setEvents] = useState(initialEvents)
   const [blockedDates, setBlockedDates] = useState<Date[]>(initialBlockedDates)
   const [isPending, startTransition] = useTransition()
   const { showToast } = useToast()
@@ -67,11 +68,24 @@ export function CalendarClient({ events, blockedDates: initialBlockedDates, arti
   }
 
   const handleBookingMove = async (bookingId: string, newDate: Date) => {
+    // Optimistic update - update UI immediately
+    setEvents((prevEvents) =>
+      prevEvents.map((event) =>
+        event.id === bookingId ? { ...event, date: newDate } : event
+      )
+    )
+
     startTransition(async () => {
       try {
         await updateBookingDate(bookingId, newDate.toISOString().split('T')[0])
         showToast('Cita reprogramada correctamente', 'success')
       } catch (error) {
+        // Revert on error
+        setEvents((prevEvents) =>
+          prevEvents.map((event) =>
+            event.id === bookingId ? { ...event, date: initialEvents.find(e => e.id === bookingId)?.date || event.date } : event
+          )
+        )
         console.error('[CalendarClient] Error moving booking:', error)
         showToast('Error al reprogramar la cita', 'error')
       }
