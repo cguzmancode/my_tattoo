@@ -14,7 +14,7 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-  pointerWithin,
+  rectIntersection,
 } from '@dnd-kit/core'
 
 interface CalendarEvent {
@@ -156,7 +156,7 @@ export function CalendarView({
   return (
     <DndContext 
       sensors={sensors}
-      collisionDetection={pointerWithin}
+      collisionDetection={rectIntersection}
       onDragEnd={handleDragEnd}
     >
       <motion.div
