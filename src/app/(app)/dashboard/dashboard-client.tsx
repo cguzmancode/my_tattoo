@@ -286,10 +286,18 @@ export function DashboardClient({ artist, bookings, stats, isDemo }: DashboardCl
                 <div className="flex items-center gap-6">
                   <div className="text-right hidden sm:block">
                     <p className="text-sm text-[#a1a1a1]">
-                      {new Date(booking.preferredDates[0]).toLocaleDateString('es-ES', {
-                        day: 'numeric',
-                        month: 'short'
-                      })}
+                      {(booking as any).proposedDate
+                        ? new Date((booking as any).proposedDate).toLocaleDateString('es-ES', {
+                            day: 'numeric',
+                            month: 'short'
+                          })
+                        : booking.preferredDates[0]
+                          ? new Date(booking.preferredDates[0]).toLocaleDateString('es-ES', {
+                              day: 'numeric',
+                              month: 'short'
+                            })
+                          : 'Sin fecha'
+                      }
                     </p>
                   </div>
                   <StatusBadge status={booking.status} />
