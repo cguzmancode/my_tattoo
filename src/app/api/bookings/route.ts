@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createBooking } from '@/lib/api/bookings'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { rateLimitMiddleware } from '@/lib/rate-limit'
 
 export async function POST(request: NextRequest) {
@@ -41,10 +41,10 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Subir imágenes a Supabase Storage
+    // Subir imágenes a Supabase Storage usando admin client (no requiere auth de usuario)
     const imageUrls: string[] = []
     if (images.length > 0) {
-      const supabase = await createClient()
+      const supabase = createAdminClient()
 
       for (const image of images) {
         // Generar nombre único
