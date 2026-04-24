@@ -11,6 +11,10 @@ import {
   useDraggable,
   useDroppable,
   DragEndEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  pointerWithin,
 } from '@dnd-kit/core'
 
 interface CalendarEvent {
@@ -82,6 +86,15 @@ export function CalendarView({
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [hoveredDate, setHoveredDate] = useState<Date | null>(null)
 
+  // Configurar sensores con activationConstraint
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // Requiere mover 8px antes de activar el drag
+      },
+    })
+  )
+
   const monthStart = startOfMonth(currentDate)
   const monthEnd = endOfMonth(monthStart)
   const calendarStart = startOfWeek(monthStart, { weekStartsOn: 1 })
@@ -141,7 +154,11 @@ export function CalendarView({
   }
 
   return (
-    <DndContext onDragEnd={handleDragEnd}>
+    <DndContext 
+      sensors={sensors}
+      collisionDetection={pointerWithin}
+      onDragEnd={handleDragEnd}
+    >
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
