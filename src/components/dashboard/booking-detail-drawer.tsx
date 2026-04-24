@@ -1,12 +1,13 @@
 'use client'
 
-import { useEffect, useCallback, useState } from 'react'
+import { useEffect, useCallback, useState, useOptimistic, startTransition } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Phone, Mail, MapPin, Calendar, Clock, DollarSign, Palette, Edit2, CheckCircle, AlertCircle, FileText } from 'lucide-react'
+import { X, Phone, Mail, MapPin, Calendar, Clock, DollarSign, Palette, Edit2, CheckCircle, AlertCircle, FileText, MessageCircle, Send } from 'lucide-react'
 import Image from 'next/image'
 import { StatusBadge } from './status-badge'
 import { BookingDetailEdit } from './booking-detail-edit'
 import { updateBookingStatus } from '@/app/actions/bookings'
+import { addMessageToBooking } from '@/app/actions/booking-public'
 
 import { MockBooking } from '@/lib/mocks'
 
@@ -17,18 +18,36 @@ interface BookingDetailDrawerProps {
   onBookingUpdated?: (bookingId: string, newDate?: Date) => void
 }
 
+interface Message {
+  id: string
+  sender: string
+  message: string
+  createdAt: Date
+  read: boolean
+}
+
 export function BookingDetailDrawer({ isOpen, onClose, booking, onBookingUpdated }: BookingDetailDrawerProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [showSuccessMessage, setShowSuccessMessage] = useState<string | null>(null)
   const [showErrorMessage, setShowErrorMessage] = useState<string | null>(null)
   const [showContactModal, setShowContactModal] = useState(false)
+  const [newMessage, setNewMessage] = useState('')
+  const [messages, setMessages] = useState<Message[]>([])
+  
+  const [optimisticMessages, addOptimisticMessage] = useOptimistic(
+    messages,
+    (state, newMsg: Message) => [...state, newMsg]
+  )
 
-  // Reset editing state when drawer opens
+  // Reset editing state when drawer opens and load messages
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && booking) {
       setIsEditing(false)
+      // In a real implementation, fetch messages from API
+      // For now, messages would come from booking prop
+      setMessages((booking as any).messages || [])
     }
-  }, [isOpen])
+  }, [isOpen, booking])
 
   // Cerrar con tecla Escape
   const handleEscape = useCallback((e: KeyboardEvent) => {
@@ -85,7 +104,42 @@ export function BookingDetailDrawer({ isOpen, onClose, booking, onBookingUpdated
     }
   }
 
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!booking || !newMessage.trim()) return
+
+    const messageText = newMessage.trim()
+    const tempId = `temp-${Date.now()}`
+    
+    // Optimistic update
+    addOptimisticMessage({
+      id: tempId,
+      sender: 'artist',
+      message: messageText,
+      createdAt: new Date(),
+      read: false,
+    })
+    
+    setNewMessage('')
+
+    // Send to server
+    startTransition(async () => {
+      try {
+        await addMessageToBooking(booking.id, messageText, 'artist')
+        // Refresh messages
+        const updatedBooking = await fetch(`/api/bookings/${booking.id}/messages`).then(r => r.json())
+        if (updatedBooking.messages) {
+          setMessages(updatedBooking.messages)
+        }
+      } catch (error) {
+        console.error('Error sending message:', error)
+      }
+    })
+  }
+
   if (!booking) return null
+
+  const displayMessages = optimisticMessages.length > 0 ? optimisticMessages : messages
 
   return (
     <AnimatePresence>
@@ -340,9 +394,9 @@ export function BookingDetailDrawer({ isOpen, onClose, booking, onBookingUpdated
                         <div className="flex-1">
                           <p className="text-xs text-[#525252]">Fechas preferidas</p>
                           <div className="flex flex-wrap gap-2 mt-1">
-{booking.preferredDates.map((date, index) => (
-                <span
-                key={`date-${index}`}
+                            {booking.preferredDates.map((date, index) => (
+                              <span
+                                key={`date-${index}`}
                                 className="px-3 py-1 rounded-full bg-white/5 text-xs text-white border border-white/10"
                               >
                                 {new Date(date).toLocaleDateString('es-ES', {
@@ -406,6 +460,72 @@ export function BookingDetailDrawer({ isOpen, onClose, booking, onBookingUpdated
                     )}
                   </div>
 
+                  {/* Messages Section */}
+                  <div className="p-6 border-b border-white/10">
+                    <h3 className="font-label text-xs tracking-widest uppercase text-[#ff6b35] mb-4">
+                      Mensajes
+                    </h3>
+                    
+                    {/* Messages List */}
+                    <div className="space-y-4 mb-6">
+                      {displayMessages.length === 0 ? (
+                        <p className="text-sm text-[#525252]">No hay mensajes aún.</p>
+                      ) : (
+                        <AnimatePresence>
+                          {displayMessages.map((msg, index) => (
+                            <motion.div
+                              key={msg.id}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: index * 0.05 }}
+                              className={`p-4 rounded-xl ${
+                                msg.sender === 'artist'
+                                  ? 'bg-[#ff6b35]/10 border border-[#ff6b35]/20 ml-4'
+                                  : 'bg-[#00d4ff]/10 border border-[#00d4ff]/20 mr-4'
+                              }`}
+                            >
+                              <div className="flex justify-between items-start mb-1">
+                                <span className="font-medium text-sm text-white">
+                                  {msg.sender === 'artist' ? 'Tú' : 'Cliente'}
+                                </span>
+                                <span className="text-xs text-[#a1a1a1]">
+                                  {new Date(msg.createdAt).toLocaleDateString('es-ES', {
+                                    day: 'numeric',
+                                    month: 'short',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                  })}
+                                </span>
+                              </div>
+                              <p className="text-white">{msg.message}</p>
+                            </motion.div>
+                          ))}
+                        </AnimatePresence>
+                      )}
+                    </div>
+
+                    {/* Send Message Form */}
+                    <form onSubmit={handleSendMessage} className="space-y-3">
+                      <textarea
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                        placeholder="Escribe tu respuesta..."
+                        className="w-full p-4 rounded-xl bg-[#0a0a0a] border border-white/10 text-white placeholder:text-[#525252] resize-none focus:ring-2 focus:ring-[#ff6b35] focus:border-[#ff6b35] transition-all"
+                        rows={3}
+                      />
+                      <motion.button
+                        type="submit"
+                        disabled={!newMessage.trim()}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="w-full py-3 px-4 bg-[#ff6b35] text-black font-medium rounded-xl hover:bg-[#ff8555] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      >
+                        <Send className="w-4 h-4" />
+                        Enviar mensaje
+                      </motion.button>
+                    </form>
+                  </div>
+
                   {/* Deposit Section */}
                   {booking.depositPaid && (
                     <div className="p-6">
@@ -438,14 +558,14 @@ export function BookingDetailDrawer({ isOpen, onClose, booking, onBookingUpdated
                       >
                         Aceptar
                       </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => handleSave({ status: 'REJECTED', rejectionReason: 'Rechazada desde el calendario' })}
-              className="flex-1 py-3 px-4 rounded-xl bg-[#ef4444] text-white font-medium text-sm hover:bg-[#ef4444]/90 transition-colors"
-            >
-              Rechazar
-            </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => handleSave({ status: 'REJECTED', rejectionReason: 'Rechazada desde el calendario' })}
+                        className="flex-1 py-3 px-4 rounded-xl bg-[#ef4444] text-white font-medium text-sm hover:bg-[#ef4444]/90 transition-colors"
+                      >
+                        Rechazar
+                      </motion.button>
                     </>
                   )}
                   {booking.status === 'ACCEPTED' && (
@@ -469,66 +589,66 @@ export function BookingDetailDrawer({ isOpen, onClose, booking, onBookingUpdated
                     </motion.button>
                   )}
                 </div>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setShowContactModal(true)}
-                className="w-full mt-3 py-3 px-4 rounded-xl border border-white/10 text-white font-medium text-sm hover:bg-white/5 transition-colors"
-              >
-                Contactar Cliente
-              </motion.button>
-            </div>
-          )}
-        </motion.div>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setShowContactModal(true)}
+                  className="w-full mt-3 py-3 px-4 rounded-xl border border-white/10 text-white font-medium text-sm hover:bg-white/5 transition-colors"
+                >
+                  Contactar Cliente
+                </motion.button>
+              </div>
+            )}
+          </motion.div>
 
-        {/* Contact Modal */}
-        {showContactModal && booking && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowContactModal(false)}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]"
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-[#141414] border border-white/10 rounded-2xl p-6 z-[70] shadow-2xl"
-            >
-              <h3 className="text-xl font-bold text-white mb-4">Contactar a {booking.clientName}</h3>
-              <div className="space-y-3 mb-6">
-                <div className="p-4 rounded-xl bg-[#0a0a0a] border border-white/10">
-                  <p className="text-xs text-[#525252] mb-1">Email</p>
-                  <p className="text-white">{booking.clientEmail}</p>
-                </div>
-                {booking.clientPhone && (
+          {/* Contact Modal */}
+          {showContactModal && booking && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setShowContactModal(false)}
+                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]"
+              />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-[#141414] border border-white/10 rounded-2xl p-6 z-[70] shadow-2xl"
+              >
+                <h3 className="text-xl font-bold text-white mb-4">Contactar a {booking.clientName}</h3>
+                <div className="space-y-3 mb-6">
                   <div className="p-4 rounded-xl bg-[#0a0a0a] border border-white/10">
-                    <p className="text-xs text-[#525252] mb-1">Teléfono</p>
-                    <p className="text-white">{booking.clientPhone}</p>
+                    <p className="text-xs text-[#525252] mb-1">Email</p>
+                    <p className="text-white">{booking.clientEmail}</p>
                   </div>
-                )}
-              </div>
-              <div className="flex gap-3">
-                <a
-                  href={`mailto:${booking.clientEmail}?subject=Cita de Tatuaje - InkApp`}
-                  className="flex-1 py-3 px-4 rounded-xl bg-[#ff6b35] text-black font-medium text-sm text-center hover:bg-[#ff8555] transition-colors"
-                >
-                  Enviar Email
-                </a>
-                <button
-                  onClick={() => setShowContactModal(false)}
-                  className="flex-1 py-3 px-4 rounded-xl border border-white/10 text-white font-medium text-sm hover:bg-white/5 transition-colors"
-                >
-                  Cerrar
-                </button>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </>
-    )}
-  </AnimatePresence>
-)
+                  {booking.clientPhone && (
+                    <div className="p-4 rounded-xl bg-[#0a0a0a] border border-white/10">
+                      <p className="text-xs text-[#525252] mb-1">Teléfono</p>
+                      <p className="text-white">{booking.clientPhone}</p>
+                    </div>
+                  )}
+                </div>
+                <div className="flex gap-3">
+                  <a
+                    href={`mailto:${booking.clientEmail}?subject=Cita de Tatuaje - InkApp`}
+                    className="flex-1 py-3 px-4 rounded-xl bg-[#ff6b35] text-black font-medium text-sm text-center hover:bg-[#ff8555] transition-colors"
+                  >
+                    Enviar Email
+                  </a>
+                  <button
+                    onClick={() => setShowContactModal(false)}
+                    className="flex-1 py-3 px-4 rounded-xl border border-white/10 text-white font-medium text-sm hover:bg-white/5 transition-colors"
+                  >
+                    Cerrar
+                  </button>
+                </div>
+              </motion.div>
+            </>
+          )}
+        </>
+      )}
+    </AnimatePresence>
+  )
 }
