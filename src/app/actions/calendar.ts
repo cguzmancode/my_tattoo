@@ -199,3 +199,46 @@ export async function getCalendarData(month: number, year: number) {
 
   return { bookings, blockedDates }
 }
+
+export async function updateBookingDate(bookingId: string, newDate: string) {
+  const { userId } = await auth()
+
+  if (!userId) {
+    throw new Error('Unauthorized')
+  }
+
+  const artist = await prisma.artist.findUnique({
+    where: { clerkId: userId },
+  })
+
+  if (!artist) {
+    throw new Error('Artist not found')
+  }
+
+  const booking = await prisma.booking.findFirst({
+    where: {
+      id: bookingId,
+      artistId: artist.id,
+    },
+  })
+
+  if (!booking) {
+    throw new Error('Booking not found')
+  }
+
+  if (!['ACCEPTED', 'CONFIRMED'].includes(booking.status)) {
+    throw new Error('Can only reschedule bookings in ACCEPTED or CONFIRMED status')
+  }
+
+  const normalizedDate = new Date(newDate + 'T00:00:00.000Z')
+
+  const updated = await prisma.booking.update({
+    where: { id: bookingId },
+    data: { proposedDate: normalizedDate },
+  })
+
+  revalidatePath('/dashboard/calendar')
+  revalidatePath('/dashboard/bookings')
+
+  return updated
+}

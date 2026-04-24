@@ -1,16 +1,25 @@
-'use client'
-
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react'
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isSameDay, addMonths, subMonths } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { BlockedIcon, TattooNeedleIcon } from '@/components/icons/tattoo-icons'
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+  TouchSensor,
+} from '@dnd-kit/core'
+import { DraggableEvent } from './draggable-event'
 
 interface CalendarEvent {
   id: string
   date: Date
-  type: 'booking' | 'blocked'
+  type: 'booking'
   title: string
   status?: string
 }
@@ -21,21 +30,26 @@ interface CalendarViewProps {
   onDateClick?: (date: Date) => void
   onBlockDate?: (date: Date) => void
   onUnblockDate?: (date: Date) => void
+  onBookingMove?: (bookingId: string, newDate: Date) => void
 }
-
-type ViewMode = 'month' | 'week'
 
 export function CalendarView({
   events = [],
   blockedDates = [],
   onDateClick,
   onBlockDate,
-  onUnblockDate
+  onUnblockDate,
+  onBookingMove
 }: CalendarViewProps) {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [hoveredDate, setHoveredDate] = useState<Date | null>(null)
-  const [viewMode, setViewMode] = useState<ViewMode>('month')
+  
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor),
+    useSensor(TouchSensor)
+  )
 
   const monthStart = startOfMonth(currentDate)
   const monthEnd = endOfMonth(monthStart)
@@ -80,12 +94,31 @@ export function CalendarView({
   const goToPrevMonth = () => setCurrentDate(subMonths(currentDate, 1))
   const goToNextMonth = () => setCurrentDate(addMonths(currentDate, 1))
 
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+    
+    if (!over) return
+    
+    const bookingId = active.id as string
+    const targetDate = over.id as Date
+    
+    // Only move if dropped on a different date
+    const activeEvent = events.find(e => e.id === bookingId)
+    if (activeEvent && !isSameDay(new Date(activeEvent.date), targetDate)) {
+      onBookingMove?.(bookingId, targetDate)
+    }
+  }
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="rounded-2xl border border-white/10 bg-[#141414] p-6 relative overflow-hidden"
+    <DndContext 
+      sensors={sensors}
+      onDragEnd={handleDragEnd}
     >
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="rounded-2xl border border-white/10 bg-[#141414] p-6 relative overflow-hidden"
+      >
       {/* Background glow */}
       <div className="absolute -top-32 -right-32 w-64 h-64 bg-[#ff6b35]/5 rounded-full blur-[100px]" />
 
@@ -98,10 +131,7 @@ export function CalendarView({
             animate={{ opacity: 1, x: 0 }}
             className="text-2xl font-display font-bold text-white capitalize"
           >
-            {viewMode === 'month' 
-              ? format(currentDate, 'MMMM yyyy', { locale: es })
-              : `Semana del ${format(currentDate, 'd MMM', { locale: es })}`
-            }
+            {format(currentDate, 'MMMM yyyy', { locale: es })}
           </motion.h2>
           <div className="flex items-center gap-1">
             <motion.button
@@ -135,34 +165,6 @@ export function CalendarView({
         </div>
 
         <div className="flex items-center gap-3">
-          {/* View Mode Toggle */}
-          <div className="flex rounded-lg border border-white/10 bg-black/30 p-1">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => setViewMode('month')}
-              className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${
-                viewMode === 'month' 
-                  ? 'bg-[#ff6b35] text-black' 
-                  : 'text-[#a1a1a1] hover:text-white'
-              }`}
-            >
-              Mes
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => setViewMode('week')}
-              className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${
-                viewMode === 'week' 
-                  ? 'bg-[#ff6b35] text-black' 
-                  : 'text-[#a1a1a1] hover:text-white'
-              }`}
-            >
-              Semana
-            </motion.button>
-          </div>
-
           <motion.button
             whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(255, 107, 53, 0.4)" }}
             whileTap={{ scale: 0.95 }}
@@ -250,24 +252,14 @@ export function CalendarView({
                   )}
                 </div>
 
-                {/* Events */}
+{/* Events */}
                 <div className="mt-1 space-y-1">
                   {dayEvents.slice(0, 2).map((event, eventIndex) => (
-                    <motion.div
-                      key={event.id}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: eventIndex * 0.1 }}
-                      className={`
-                        truncate rounded px-1.5 py-0.5 text-xs font-medium
-                        ${event.type === 'booking'
-                          ? 'bg-[#00d4ff]/10 text-[#00d4ff] border border-[#00d4ff]/20'
-                          : 'bg-red-500/10 text-red-400 border border-red-500/20'
-                        }
-                      `}
-                    >
-                      {event.title}
-                    </motion.div>
+                    <DraggableEvent 
+                      key={event.id} 
+                      id={event.id}
+                      title={event.title}
+                    />
                   ))}
                   {dayEvents.length > 2 && (
                     <div className="text-xs text-[#525252]">
