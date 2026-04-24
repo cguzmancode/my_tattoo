@@ -17,7 +17,6 @@ const isPublicRoute = createRouteMatcher([
   '/api/bookings',
   '/api/bookings/(.*)',
   '/api/payments',
-  '/api/onboarding',
 ])
 
 export default clerkMiddleware(async (auth, req) => {

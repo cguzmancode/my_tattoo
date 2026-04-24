@@ -25,9 +25,9 @@ export default async function CalendarPage() {
       where: { clerkId: userId },
     })
 
-    if (!artist) {
-      redirect('/sign-up')
-    }
+  if (!artist) {
+    redirect('/onboarding')
+  }
 
     blockedDates = await prisma.blockedDate.findMany({
       where: { artistId: artist.id },

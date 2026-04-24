@@ -4,6 +4,9 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { ArrowRight, Calendar, Shield, Zap, Palette, Clock, Users } from 'lucide-react'
 import { TattooNeedle } from '@/components/icons/tattoo-needle'
+import { useAuth } from '@clerk/nextjs'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 import { DEMO_ARTIST, DEMO_STATS } from '@/lib/mocks'
 
 const features = [
@@ -36,6 +39,35 @@ const stats = [
 ]
 
 export default function Home() {
+  const { isSignedIn, isLoaded } = useAuth()
+  const router = useRouter()
+
+  // Redirigir al dashboard si está logueado
+  useEffect(() => {
+    if (isLoaded && isSignedIn) {
+      router.push('/dashboard')
+    }
+  }, [isLoaded, isSignedIn, router])
+
+  // Mostrar loading mientras carga el estado de auth
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+        >
+          <TattooNeedle className="h-12 w-12 text-[#ff6b35]" />
+        </motion.div>
+      </div>
+    )
+  }
+
+  // Si está logueado, no renderizar nada (ya se está redirigiendo)
+  if (isSignedIn) {
+    return null
+  }
+
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
       {/* Hero Section */}
@@ -45,13 +77,13 @@ export default function Home() {
           {/* Gradient orbs */}
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#ff6b35]/20 rounded-full blur-[128px]" />
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#00d4ff]/10 rounded-full blur-[128px]" />
-          
+
           {/* Grid pattern */}
-          <div 
+          <div
             className="absolute inset-0 opacity-[0.03]"
             style={{
               backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-                               linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
+              linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
               backgroundSize: '50px 50px'
             }}
           />
@@ -98,8 +130,8 @@ export default function Home() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="mx-auto max-w-2xl text-lg text-[#a1a1a1] sm:text-xl mb-10"
           >
-            La plataforma todo-en-uno para tatuadores profesionales. 
-            Gestiona citas, recibe pagos y crece tu marca. 
+            La plataforma todo-en-uno para tatuadores profesionales.
+            Gestiona citas, recibe pagos y crece tu marca.
           </motion.p>
 
           {/* CTA Buttons */}
@@ -120,7 +152,7 @@ export default function Home() {
                 <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
               </motion.button>
             </Link>
-            
+
             <Link href={`/t/${DEMO_ARTIST.slug}`}>
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -151,7 +183,7 @@ export default function Home() {
                   <span className="text-xs text-[#525252] font-mono">inkapp.com/t/{DEMO_ARTIST.slug}</span>
                 </div>
               </div>
-              
+
               {/* Preview content */}
               <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
@@ -172,7 +204,7 @@ export default function Home() {
                   ))}
                 </div>
               </div>
-              
+
               {/* Glow effect */}
               <div className="absolute -inset-px rounded-2xl bg-gradient-to-r from-[#ff6b35]/20 via-transparent to-[#00d4ff]/20 blur-xl opacity-50" />
             </div>
@@ -243,7 +275,7 @@ export default function Home() {
                 <p className="text-[#a1a1a1] leading-relaxed">
                   {feature.description}
                 </p>
-                
+
                 {/* Hover glow */}
                 <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#ff6b35]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
               </motion.div>
@@ -283,7 +315,7 @@ export default function Home() {
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-b from-[#ff6b35]/10 to-transparent" />
         </div>
-        
+
         <div className="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -297,7 +329,7 @@ export default function Home() {
               Únete a cientos de tatuadores que ya gestionan sus citas profesionalmente.
               Empieza gratis hoy.
             </p>
-            
+
             <Link href="/sign-up">
               <motion.button
                 whileHover={{ scale: 1.05, boxShadow: "0 0 40px rgba(255, 107, 53, 0.5)" }}
@@ -321,11 +353,11 @@ export default function Home() {
                 Ink<span className="text-[#ff6b35]">App</span>
               </span>
             </div>
-            
+
             <p className="text-[#525252] text-sm">
               © 2024 InkApp. Hecho con ❤️ para la comunidad tattoo.
             </p>
-            
+
             <div className="flex gap-6">
               <a href="#" className="text-[#a1a1a1] hover:text-[#ff6b35] transition-colors">Instagram</a>
               <a href="#" className="text-[#a1a1a1] hover:text-[#ff6b35] transition-colors">Twitter</a>

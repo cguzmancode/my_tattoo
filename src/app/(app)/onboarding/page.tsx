@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { TattooNeedle } from '@/components/icons/tattoo-needle'
 import { User, Palette, DollarSign, Check, ArrowRight, Loader2, AtSign } from 'lucide-react'
+import { useAuth } from '@clerk/nextjs'
 
 const tattooStyles = [
   'Traditional', 'Neotraditional', 'Blackwork', 'Japanese', 'Tribal',
@@ -14,6 +15,8 @@ const tattooStyles = [
 
 export default function OnboardingPage() {
   const router = useRouter()
+  const { userId, isLoaded } = useAuth()
+  const [isCheckingProfile, setIsCheckingProfile] = useState(true)
   const [step, setStep] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
@@ -23,6 +26,51 @@ export default function OnboardingPage() {
     depositAmount: '',
     instagramUrl: '',
   })
+
+  // Verificar si el usuario ya tiene perfil
+  useEffect(() => {
+    if (!isLoaded) return
+
+    if (!userId) {
+      router.push('/sign-in')
+      return
+    }
+
+    // Verificar si ya tiene perfil de artista
+    const checkProfile = async () => {
+      try {
+        const response = await fetch('/api/artist/check')
+        const data = await response.json()
+        
+        if (data.exists) {
+          // Ya tiene perfil, redirigir a dashboard
+          router.push('/dashboard')
+        } else {
+          // No tiene perfil, mostrar onboarding
+          setIsCheckingProfile(false)
+        }
+      } catch (error) {
+        console.error('Error checking profile:', error)
+        setIsCheckingProfile(false)
+      }
+    }
+
+    checkProfile()
+  }, [isLoaded, userId, router])
+
+  // Mostrar loading mientras verifica
+  if (isCheckingProfile) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+        >
+          <TattooNeedle className="h-12 w-12 text-[#ff6b35]" />
+        </motion.div>
+      </div>
+    )
+  }
 
   const toggleStyle = (style: string) => {
     setFormData(prev => ({
