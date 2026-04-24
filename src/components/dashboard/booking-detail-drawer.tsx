@@ -54,6 +54,7 @@ export function BookingDetailDrawer({ isOpen, onClose, booking, onBookingUpdated
     priceEstimate?: number
     durationEstimate?: string
     artistNotes?: string
+    rejectionReason?: string
   }) => {
     try {
       // Cast status to BookingStatus enum
@@ -64,6 +65,7 @@ export function BookingDetailDrawer({ isOpen, onClose, booking, onBookingUpdated
         priceEstimate: data.priceEstimate,
         durationEstimate: data.durationEstimate,
         artistNotes: data.artistNotes,
+        rejectionReason: data.rejectionReason,
       })
       
       // Notify parent about the update with the new date if provided
@@ -436,14 +438,14 @@ export function BookingDetailDrawer({ isOpen, onClose, booking, onBookingUpdated
                       >
                         Aceptar
                       </motion.button>
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => handleSave({ status: 'CANCELLED' })}
-                        className="flex-1 py-3 px-4 rounded-xl bg-[#ef4444] text-white font-medium text-sm hover:bg-[#ef4444]/90 transition-colors"
-                      >
-                        Rechazar
-                      </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => handleSave({ status: 'REJECTED', rejectionReason: 'Rechazada desde el calendario' })}
+              className="flex-1 py-3 px-4 rounded-xl bg-[#ef4444] text-white font-medium text-sm hover:bg-[#ef4444]/90 transition-colors"
+            >
+              Rechazar
+            </motion.button>
                     </>
                   )}
                   {booking.status === 'ACCEPTED' && (

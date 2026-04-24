@@ -38,6 +38,12 @@ const statusConfig = {
     border: 'border-[#22c55e]/30',
     label: 'Confirmada',
   },
+  REJECTED: {
+    bg: 'bg-[#ef4444]/10',
+    text: 'text-[#ef4444]',
+    border: 'border-[#ef4444]/30',
+    label: 'Rechazada',
+  },
   CANCELLED: {
     bg: 'bg-[#ef4444]/10',
     text: 'text-[#ef4444]',
