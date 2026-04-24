@@ -129,18 +129,6 @@ export function CalendarView({
             </motion.button>
           </div>
         </div>
-
-        <div className="flex items-center gap-3">
-          <motion.button
-            whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(255, 107, 53, 0.4)" }}
-            whileTap={{ scale: 0.95 }}
-            data-testid="block-date-button"
-            className="flex items-center gap-2 rounded-lg bg-[#ff6b35] px-4 py-2 text-sm font-label tracking-wider text-black transition-colors hover:bg-[#ff8555] uppercase btn-glow"
-          >
-            <BlockedIcon className="h-4 w-4" />
-            Bloquear
-          </motion.button>
-        </div>
       </div>
 
       {/* Week day headers */}
