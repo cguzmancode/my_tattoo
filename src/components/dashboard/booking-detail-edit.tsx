@@ -2,12 +2,12 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Save, X, Loader2, DollarSign, Clock, Calendar, FileText, Tag } from 'lucide-react'
+import { Save, X, Loader2, DollarSign, Clock, Calendar, FileText, Tag, AlertTriangle } from 'lucide-react'
 
 interface BookingDetailEditProps {
   booking: {
     id: string
-    status: 'PENDING' | 'ACCEPTED' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED'
+    status: 'PENDING' | 'ACCEPTED' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED' | 'REJECTED'
     proposedDate?: Date
     priceEstimate?: number
     durationEstimate?: string
@@ -19,6 +19,7 @@ interface BookingDetailEditProps {
     priceEstimate?: number
     durationEstimate?: string
     artistNotes?: string
+    rejectionReason?: string
   }) => Promise<void>
   onCancel: () => void
 }
@@ -27,7 +28,8 @@ const statusOptions = [
   { value: 'PENDING', label: 'Pendiente', color: '#eab308' },
   { value: 'ACCEPTED', label: 'Aceptada', color: '#00d4ff' },
   { value: 'CONFIRMED', label: 'Confirmada', color: '#22c55e' },
-  { value: 'CANCELLED', label: 'Cancelada', color: '#ef4444' },
+  { value: 'REJECTED', label: 'Rechazada', color: '#ef4444' },
+  { value: 'CANCELLED', label: 'Cancelada', color: '#6b7280' },
   { value: 'COMPLETED', label: 'Completada', color: '#a1a1a1' },
 ]
 
@@ -46,6 +48,7 @@ export function BookingDetailEdit({ booking, onSave, onCancel }: BookingDetailEd
     priceEstimate: booking.priceEstimate || '',
     durationEstimate: booking.durationEstimate || '',
     artistNotes: booking.artistNotes || '',
+    rejectionReason: '',
   })
 
   const handleChange = (field: string, value: string) => {
@@ -183,6 +186,27 @@ export function BookingDetailEdit({ booking, onSave, onCancel }: BookingDetailEd
                      transition-all resize-none placeholder:text-[#525252]"
         />
       </div>
+
+      {/* Rejection Reason - Only show when rejecting */}
+      {formData.status === 'REJECTED' && (
+        <div className="space-y-2">
+          <label htmlFor="rejectionReason" className="flex items-center gap-2 text-sm font-medium text-red-400">
+            <AlertTriangle className="h-4 w-4 text-red-400" />
+            Motivo del rechazo (obligatorio)
+          </label>
+          <textarea
+            id="rejectionReason"
+            value={formData.rejectionReason}
+            onChange={(e) => handleChange('rejectionReason', e.target.value)}
+            placeholder="Explica al cliente por qué no puedes atender la cita..."
+            rows={3}
+            required
+            className="w-full px-4 py-3 rounded-xl bg-[#0a0a0a] border border-red-500/30 text-white text-sm
+                       focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500/20
+                       transition-all resize-none placeholder:text-[#525252]"
+          />
+        </div>
+      )}
 
       {/* Actions */}
       <div className="flex gap-3 pt-4 border-t border-white/10">

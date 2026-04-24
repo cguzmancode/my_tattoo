@@ -4,6 +4,8 @@ import { auth } from '@clerk/nextjs/server'
 import { BookingStatus } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import { sendEmail } from '@/lib/email/resend'
+import { BookingAcceptedTemplate, BookingRejectedTemplate } from '@/lib/email/templates'
 
 export interface BookingFilters {
   status?: BookingStatus
@@ -121,6 +123,9 @@ export async function updateBookingStatus(
       id: bookingId,
       artistId: artist.id,
     },
+    include: {
+      artist: true,
+    },
   })
 
   if (!booking) {
@@ -158,6 +163,47 @@ export async function updateBookingStatus(
       artistNotes: input.artistNotes,
     },
   })
+
+  // Enviar email según el nuevo estado
+  if (input.status === 'ACCEPTED') {
+    await sendEmail({
+      to: booking.clientEmail,
+      subject: '¡Tu cita ha sido aceptada!',
+      react: BookingAcceptedTemplate({
+        clientName: booking.clientName,
+        bookingId: booking.id,
+        artistName: artist.name,
+        proposedDate: input.proposedDate || updated.proposedDate || new Date(),
+        priceEstimate: input.priceEstimate,
+        bodyZone: booking.bodyZone,
+        size: booking.size,
+        description: booking.description,
+      }),
+    })
+  } else if (input.status === 'REJECTED' && input.rejectionReason) {
+    // Crear mensaje de rechazo para el cliente
+    await prisma.bookingMessage.create({
+      data: {
+        bookingId: booking.id,
+        sender: 'artist',
+        message: input.rejectionReason,
+      },
+    })
+
+    await sendEmail({
+      to: booking.clientEmail,
+      subject: 'Tu cita ha sido rechazada',
+      react: BookingRejectedTemplate({
+        clientName: booking.clientName,
+        bookingId: booking.id,
+        artistName: artist.name,
+        rejectionReason: input.rejectionReason,
+        bodyZone: booking.bodyZone,
+        size: booking.size,
+        description: booking.description,
+      }),
+    })
+  }
 
   revalidatePath('/dashboard/bookings')
   revalidatePath(`/dashboard/bookings/${bookingId}`)

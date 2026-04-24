@@ -50,6 +50,7 @@ model Booking {
   artistNotes      String?       @map("artistnotes")
   artist           Artist        @relation(fields: [artistId], references: [id], onDelete: Cascade)
   payments         Payment[]
+  messages         BookingMessage[]
 
   @@map("bookings")
 }
@@ -64,6 +65,18 @@ model BlockedDate {
 
   @@unique([artistId, date])
   @@map("blocked_dates")
+}
+
+model BookingMessage {
+  id        String   @id @default(cuid())
+  bookingId String
+  sender    String   // "client" | "artist"
+  message   String
+  createdAt DateTime @default(now())
+  read      Boolean  @default(false)
+  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@map("booking_messages")
 }
 
 model Payment {
