@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Calendar, Clock, DollarSign, TrendingUp, ArrowRight, AlertCircle, ExternalLink, Copy, Check } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
@@ -9,6 +9,8 @@ import { ArtistStatsDashboard } from '@/components/dashboard/artist-stats-dashbo
 import { EmptyBookings } from '@/components/ui/empty-state'
 import { useToast } from '@/components/ui/toast'
 import { MockBooking } from '@/lib/mocks'
+import { BookingDetailDrawer } from '@/components/dashboard/booking-detail-drawer'
+import { getBookingById } from '@/app/actions/bookings'
 
 interface Artist {
   id: string
@@ -63,6 +65,18 @@ interface DashboardClientProps {
 export function DashboardClient({ artist, bookings, stats, isDemo }: DashboardClientProps) {
   const { showToast } = useToast()
   const [copied, setCopied] = useState(false)
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null)
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+
+  const handleOpenBooking = (booking: Booking) => {
+    setSelectedBooking(booking)
+    setIsDrawerOpen(true)
+  }
+
+  const handleCloseDrawer = () => {
+    setIsDrawerOpen(false)
+    setSelectedBooking(null)
+  }
 
   const handleCopyLink = async () => {
     try {
@@ -247,13 +261,14 @@ export function DashboardClient({ artist, bookings, stats, isDemo }: DashboardCl
           <EmptyBookings />
         ) : (
           bookings.map((booking, index) => (
-              <motion.div
-                key={booking.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5 + index * 0.1 }}
-                className="p-6 flex items-center justify-between group hover:bg-white/5 transition-colors cursor-pointer"
-              >
+<motion.div
+                  key={booking.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.5 + index * 0.1 }}
+                  onClick={() => handleOpenBooking(booking)}
+                  className="p-6 flex items-center justify-between group hover:bg-white/5 transition-colors cursor-pointer"
+                >
                 <div className="flex items-center gap-4">
                   <div className="h-12 w-12 rounded-full bg-gradient-to-br from-[#ff6b35] to-[#c0a062] flex items-center justify-center text-black font-bold text-lg">
                     {booking.clientName.charAt(0)}
@@ -358,11 +373,18 @@ export function DashboardClient({ artist, bookings, stats, isDemo }: DashboardCl
               whileTap={{ scale: 0.95 }}
               className="btn-primary rounded-lg text-sm"
             >
-              Ir al calendario
-            </motion.button>
-          </Link>
-        </div>
-      </motion.div>
-    </div>
-  )
+          Ir al calendario
+          </motion.button>
+        </Link>
+      </div>
+    </motion.div>
+
+    {/* Booking Detail Drawer */}
+    <BookingDetailDrawer
+      isOpen={isDrawerOpen}
+      onClose={handleCloseDrawer}
+      booking={selectedBooking as MockBooking | null}
+    />
+  </div>
+)
 }
