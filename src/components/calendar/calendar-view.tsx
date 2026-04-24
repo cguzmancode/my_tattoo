@@ -206,21 +206,33 @@ export function CalendarView({
                   )}
                 </div>
 
-                {/* Events - Clickable */}
+                {/* Events - Clickable with status colors */}
                 <div className="mt-1 space-y-1">
-                  {dayEvents.slice(0, 2).map((event) => (
-                    <motion.div
-                      key={event.id}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        onBookingClick?.(event.id)
-                      }}
-                      whileHover={{ scale: 1.02 }}
-                      className="truncate rounded px-1.5 py-0.5 text-xs font-medium bg-[#00d4ff]/10 text-[#00d4ff] border border-[#00d4ff]/20 cursor-pointer hover:bg-[#00d4ff]/20 transition-colors"
-                    >
-                      {event.title}
-                    </motion.div>
-                  ))}
+                  {dayEvents.slice(0, 2).map((event) => {
+                    const statusColors = {
+                      PENDING: 'bg-[#eab308]/20 text-[#eab308] border-[#eab308]/30',
+                      ACCEPTED: 'bg-[#00d4ff]/20 text-[#00d4ff] border-[#00d4ff]/30',
+                      CONFIRMED: 'bg-[#22c55e]/20 text-[#22c55e] border-[#22c55e]/30',
+                      REJECTED: 'bg-[#ef4444]/20 text-[#ef4444] border-[#ef4444]/30',
+                      CANCELLED: 'bg-[#6b7280]/20 text-[#a1a1a1] border-[#6b7280]/30',
+                      COMPLETED: 'bg-[#a1a1a1]/20 text-[#a1a1a1] border-[#a1a1a1]/30',
+                    }
+                    const colorClass = statusColors[event.status as keyof typeof statusColors] || statusColors.PENDING
+                    
+                    return (
+                      <motion.div
+                        key={event.id}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onBookingClick?.(event.id)
+                        }}
+                        whileHover={{ scale: 1.02 }}
+                        className={`truncate rounded px-1.5 py-0.5 text-xs font-medium border cursor-pointer transition-colors ${colorClass}`}
+                      >
+                        {event.title}
+                      </motion.div>
+                    )
+                  })}
                   {dayEvents.length > 2 && (
                     <div className="text-xs text-[#525252]">
                       +{dayEvents.length - 2} más
