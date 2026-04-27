@@ -78,6 +78,37 @@ export function DashboardClient({ artist, bookings, stats, isDemo }: DashboardCl
     setSelectedBooking(null)
   }
 
+  const refreshMessages = async () => {
+    if (!selectedBooking) return
+
+    try {
+      // Re-fetch booking data to get updated messages
+      const bookingData = await getBookingById(selectedBooking.id)
+
+      // Transform messages to expected format
+      const updatedMessages = (bookingData.messages || []).map((m: any) => ({
+        id: m.id,
+        bookingId: m.bookingId,
+        sender: m.sender,
+        message: m.message,
+        createdAt: new Date(m.createdAt),
+        read: m.read,
+      }))
+
+      // Update the selected booking with new messages
+      setSelectedBooking((prev) =>
+        prev
+          ? {
+              ...prev,
+              messages: updatedMessages,
+            }
+          : null
+      )
+    } catch (error) {
+      console.error('Error refreshing messages:', error)
+    }
+  }
+
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(`inkapp.com/t/${artist.slug}`)
@@ -387,12 +418,13 @@ export function DashboardClient({ artist, bookings, stats, isDemo }: DashboardCl
       </div>
     </motion.div>
 
-    {/* Booking Detail Drawer */}
-    <BookingDetailDrawer
-      isOpen={isDrawerOpen}
-      onClose={handleCloseDrawer}
-      booking={selectedBooking as MockBooking | null}
-    />
-  </div>
+      {/* Booking Detail Drawer */}
+      <BookingDetailDrawer
+        isOpen={isDrawerOpen}
+        onClose={handleCloseDrawer}
+        booking={selectedBooking as MockBooking | null}
+        onRefreshMessages={refreshMessages}
+      />
+    </div>
 )
 }

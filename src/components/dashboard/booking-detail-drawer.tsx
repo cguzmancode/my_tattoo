@@ -1,13 +1,13 @@
 'use client'
 
-import { useEffect, useCallback, useState } from 'react'
+import { useEffect, useCallback, useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Phone, Mail, MapPin, Calendar, Clock, DollarSign, Palette, Edit2, CheckCircle, AlertCircle, FileText, MessageCircle, Send } from 'lucide-react'
 import Image from 'next/image'
 import { StatusBadge } from './status-badge'
 import { BookingDetailEdit } from './booking-detail-edit'
 import { updateBookingStatus } from '@/app/actions/bookings'
-import { addMessageToBooking, getBookingMessages } from '@/app/actions/booking-public'
+import { addMessageToBooking } from '@/app/actions/booking-public'
 
 import { MockBooking } from '@/lib/mocks'
 
@@ -16,6 +16,7 @@ interface BookingDetailDrawerProps {
   onClose: () => void
   booking?: MockBooking | null
   onBookingUpdated?: (bookingId: string, newDate?: Date) => void
+  onRefreshMessages?: () => Promise<void>
 }
 
 interface Message {
@@ -26,36 +27,27 @@ interface Message {
   read: boolean
 }
 
-export function BookingDetailDrawer({ isOpen, onClose, booking, onBookingUpdated }: BookingDetailDrawerProps) {
+export function BookingDetailDrawer({ isOpen, onClose, booking, onBookingUpdated, onRefreshMessages }: BookingDetailDrawerProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [showSuccessMessage, setShowSuccessMessage] = useState<string | null>(null)
   const [showErrorMessage, setShowErrorMessage] = useState<string | null>(null)
   const [showContactModal, setShowContactModal] = useState(false)
   const [newMessage, setNewMessage] = useState('')
-  const [messages, setMessages] = useState<Message[]>([])
-  const [isLoadingMessages, setIsLoadingMessages] = useState(false)
+  const [isSendingMessage, setIsSendingMessage] = useState(false)
 
-  // Reset editing state when drawer opens and load messages
+  // Use messages from booking prop directly (passed from server)
+  const messages = useMemo(() => {
+    if (!booking?.messages) return []
+    return booking.messages.map((m: any) => ({
+      ...m,
+      createdAt: m.createdAt instanceof Date ? m.createdAt : new Date(m.createdAt)
+    }))
+  }, [booking?.messages])
+
+  // Reset editing state when drawer opens
   useEffect(() => {
     if (isOpen && booking) {
       setIsEditing(false)
-      setIsLoadingMessages(true)
-      
-      // Always fetch fresh messages from server
-      const fetchMessages = async () => {
-        try {
-          const freshMessages = await getBookingMessages(booking.id)
-          setMessages(freshMessages.map((m: any) => ({
-            ...m,
-            createdAt: new Date(m.createdAt)
-          })))
-        } catch (error) {
-          console.error('Error fetching messages:', error)
-        } finally {
-          setIsLoadingMessages(false)
-        }
-      }
-      fetchMessages()
     }
   }, [isOpen, booking])
 
@@ -119,21 +111,20 @@ const handleSendMessage = async (e: React.FormEvent) => {
   if (!booking || !newMessage.trim()) return
 
   const messageText = newMessage.trim()
-  
+
   // Clear input immediately
   setNewMessage('')
+  setIsSendingMessage(true)
 
   // Send to server
   try {
     await addMessageToBooking(booking.id, messageText, 'artist')
-    // Refresh messages from server
-    const updatedMessages = await getBookingMessages(booking.id)
-    setMessages(updatedMessages.map((m: any) => ({
-      ...m,
-      createdAt: new Date(m.createdAt)
-    })))
+    // Refresh messages via parent callback (re-fetches from server)
+    await onRefreshMessages?.()
   } catch (error) {
     console.error('Error sending message:', error)
+  } finally {
+    setIsSendingMessage(false)
   }
 }
 
@@ -466,9 +457,7 @@ const handleSendMessage = async (e: React.FormEvent) => {
                     
         {/* Messages List */}
         <div className="space-y-4 mb-6">
-          {isLoadingMessages ? (
-            <p className="text-sm text-[#525252]">Cargando mensajes...</p>
-          ) : messages.length === 0 ? (
+          {messages.length === 0 ? (
             <p className="text-sm text-[#525252]">No hay mensajes aún.</p>
           ) : (
             <AnimatePresence>
@@ -513,16 +502,16 @@ const handleSendMessage = async (e: React.FormEvent) => {
                         className="w-full p-4 rounded-xl bg-[#0a0a0a] border border-white/10 text-white placeholder:text-[#525252] resize-none focus:ring-2 focus:ring-[#ff6b35] focus:border-[#ff6b35] transition-all"
                         rows={3}
                       />
-                      <motion.button
-                        type="submit"
-                        disabled={!newMessage.trim()}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="w-full py-3 px-4 bg-[#ff6b35] text-black font-medium rounded-xl hover:bg-[#ff8555] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                      >
-                        <Send className="w-4 h-4" />
-                        Enviar mensaje
-                      </motion.button>
+          <motion.button
+            type="submit"
+            disabled={!newMessage.trim() || isSendingMessage}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="w-full py-3 px-4 bg-[#ff6b35] text-black font-medium rounded-xl hover:bg-[#ff8555] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            <Send className="w-4 h-4" />
+            {isSendingMessage ? 'Enviando...' : 'Enviar mensaje'}
+          </motion.button>
                     </form>
                   </div>
 

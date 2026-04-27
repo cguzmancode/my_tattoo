@@ -135,7 +135,33 @@ export function CalendarClient({ events: initialEvents, blockedDates: initialBlo
     setSelectedBooking(null)
   }
 
-const handleBookingUpdate = (bookingId: string, newDate?: Date) => {
+  const refreshMessages = async () => {
+    if (!selectedBooking) return
+
+    try {
+      // Re-fetch booking data to get updated messages
+      const bookingData = await getBookingById(selectedBooking.id)
+
+      // Transform messages to expected format
+      const updatedMessages = (bookingData.messages || []).map((m: any) => ({
+        id: m.id,
+        bookingId: m.bookingId,
+        sender: m.sender,
+        message: m.message,
+        createdAt: new Date(m.createdAt),
+        read: m.read,
+      }))
+
+      // Update the selected booking with new messages
+      setSelectedBooking((prev) =>
+        prev ? { ...prev, messages: updatedMessages } : null
+      )
+    } catch (error) {
+      console.error('Error refreshing messages:', error)
+    }
+  }
+
+  const handleBookingUpdate = (bookingId: string, newDate?: Date) => {
   if (newDate) {
     // Optimistic update - update UI immediately
     setEvents((prevEvents) =>
@@ -162,6 +188,7 @@ const handleBookingUpdate = (bookingId: string, newDate?: Date) => {
         onClose={handleCloseDrawer}
         booking={selectedBooking}
         onBookingUpdated={handleBookingUpdate}
+        onRefreshMessages={refreshMessages}
       />
     </>
   )
