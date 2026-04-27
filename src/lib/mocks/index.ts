@@ -53,6 +53,14 @@ export interface MockBooking {
   priceEstimate?: number
   durationEstimate?: string
   artistNotes?: string
+  messages?: Array<{
+    id: string
+    bookingId: string
+    sender: 'client' | 'artist'
+    message: string
+    createdAt: Date
+    read: boolean
+  }>
 }
 
 export const DEMO_BOOKINGS: MockBooking[] = [

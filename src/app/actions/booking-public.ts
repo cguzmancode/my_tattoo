@@ -28,6 +28,15 @@ export async function getPublicBookingById(bookingId: string) {
   return booking
 }
 
+export async function getBookingMessages(bookingId: string) {
+  const messages = await prisma.bookingMessage.findMany({
+    where: { bookingId },
+    orderBy: { createdAt: 'asc' },
+  })
+
+  return messages
+}
+
 export async function addMessageToBooking(bookingId: string, message: string, sender: 'client' | 'artist') {
   const booking = await prisma.booking.findUnique({
     where: { id: bookingId },

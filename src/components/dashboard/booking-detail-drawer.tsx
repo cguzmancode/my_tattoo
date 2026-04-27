@@ -7,7 +7,7 @@ import Image from 'next/image'
 import { StatusBadge } from './status-badge'
 import { BookingDetailEdit } from './booking-detail-edit'
 import { updateBookingStatus } from '@/app/actions/bookings'
-import { addMessageToBooking } from '@/app/actions/booking-public'
+import { addMessageToBooking, getBookingMessages } from '@/app/actions/booking-public'
 
 import { MockBooking } from '@/lib/mocks'
 
@@ -43,9 +43,19 @@ export function BookingDetailDrawer({ isOpen, onClose, booking, onBookingUpdated
   useEffect(() => {
     if (isOpen && booking) {
       setIsEditing(false)
-      // In a real implementation, fetch messages from API
-      // For now, messages would come from booking prop
+      // Load messages from booking prop initially
       setMessages((booking as any).messages || [])
+
+      // Fetch fresh messages from server
+      const fetchMessages = async () => {
+        try {
+          const freshMessages = await getBookingMessages(booking.id)
+          setMessages(freshMessages)
+        } catch (error) {
+          console.error('Error fetching messages:', error)
+        }
+      }
+      fetchMessages()
     }
   }, [isOpen, booking])
 
@@ -122,19 +132,17 @@ export function BookingDetailDrawer({ isOpen, onClose, booking, onBookingUpdated
     
     setNewMessage('')
 
-    // Send to server
-    startTransition(async () => {
-      try {
-        await addMessageToBooking(booking.id, messageText, 'artist')
-        // Refresh messages
-        const updatedBooking = await fetch(`/api/bookings/${booking.id}/messages`).then(r => r.json())
-        if (updatedBooking.messages) {
-          setMessages(updatedBooking.messages)
-        }
-      } catch (error) {
-        console.error('Error sending message:', error)
-      }
-    })
+  // Send to server
+  startTransition(async () => {
+    try {
+      await addMessageToBooking(booking.id, messageText, 'artist')
+      // Refresh messages from server
+      const updatedMessages = await getBookingMessages(booking.id)
+      setMessages(updatedMessages)
+    } catch (error) {
+      console.error('Error sending message:', error)
+    }
+  })
   }
 
   if (!booking) return null

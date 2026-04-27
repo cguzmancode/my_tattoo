@@ -31,13 +31,16 @@ export default async function DashboardPage() {
       redirect('/onboarding')
     }
 
-    // Obtener bookings reales
-    bookings = await prisma.booking.findMany({
-      where: { artistId: artist.id },
-      orderBy: { createdAt: 'desc' },
-      take: 5,
-      include: { payments: true },
-    })
+  // Obtener bookings reales
+  bookings = await prisma.booking.findMany({
+    where: { artistId: artist.id },
+    orderBy: { createdAt: 'desc' },
+    take: 5,
+    include: { 
+      payments: true,
+      messages: { orderBy: { createdAt: 'asc' } },
+    },
+  })
 
     // Calcular estadísticas reales
     const [

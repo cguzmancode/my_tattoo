@@ -80,6 +80,9 @@ export async function getBookingById(bookingId: string) {
     },
     include: {
       payments: true,
+      messages: {
+        orderBy: { createdAt: 'asc' },
+      },
     },
   })
 

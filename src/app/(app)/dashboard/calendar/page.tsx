@@ -34,10 +34,13 @@ export default async function CalendarPage() {
     })
 
     bookings = await prisma.booking.findMany({
-      where: { 
+      where: {
         artistId: artist.id,
         // Incluir todos los estados excepto REJECTED y CANCELLED
         status: { notIn: ['REJECTED', 'CANCELLED'] },
+      },
+      include: {
+        messages: { orderBy: { createdAt: 'asc' } },
       },
     })
   } else {
