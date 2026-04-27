@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useCallback, useState, useOptimistic, startTransition } from 'react'
+import { useEffect, useCallback, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Phone, Mail, MapPin, Calendar, Clock, DollarSign, Palette, Edit2, CheckCircle, AlertCircle, FileText, MessageCircle, Send } from 'lucide-react'
 import Image from 'next/image'
@@ -20,7 +20,7 @@ interface BookingDetailDrawerProps {
 
 interface Message {
   id: string
-  sender: string
+  sender: 'client' | 'artist'
   message: string
   createdAt: Date
   read: boolean
@@ -33,26 +33,26 @@ export function BookingDetailDrawer({ isOpen, onClose, booking, onBookingUpdated
   const [showContactModal, setShowContactModal] = useState(false)
   const [newMessage, setNewMessage] = useState('')
   const [messages, setMessages] = useState<Message[]>([])
-  
-  const [optimisticMessages, addOptimisticMessage] = useOptimistic(
-    messages,
-    (state, newMsg: Message) => [...state, newMsg]
-  )
+  const [isLoadingMessages, setIsLoadingMessages] = useState(false)
 
   // Reset editing state when drawer opens and load messages
   useEffect(() => {
     if (isOpen && booking) {
       setIsEditing(false)
-      // Load messages from booking prop initially
-      setMessages((booking as any).messages || [])
-
-      // Fetch fresh messages from server
+      setIsLoadingMessages(true)
+      
+      // Always fetch fresh messages from server
       const fetchMessages = async () => {
         try {
           const freshMessages = await getBookingMessages(booking.id)
-          setMessages(freshMessages)
+          setMessages(freshMessages.map((m: any) => ({
+            ...m,
+            createdAt: new Date(m.createdAt)
+          })))
         } catch (error) {
           console.error('Error fetching messages:', error)
+        } finally {
+          setIsLoadingMessages(false)
         }
       }
       fetchMessages()
@@ -114,40 +114,30 @@ export function BookingDetailDrawer({ isOpen, onClose, booking, onBookingUpdated
     }
   }
 
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!booking || !newMessage.trim()) return
+const handleSendMessage = async (e: React.FormEvent) => {
+  e.preventDefault()
+  if (!booking || !newMessage.trim()) return
 
-    const messageText = newMessage.trim()
-    const tempId = `temp-${Date.now()}`
-    
-    // Optimistic update
-    addOptimisticMessage({
-      id: tempId,
-      sender: 'artist',
-      message: messageText,
-      createdAt: new Date(),
-      read: false,
-    })
-    
-    setNewMessage('')
+  const messageText = newMessage.trim()
+  
+  // Clear input immediately
+  setNewMessage('')
 
   // Send to server
-  startTransition(async () => {
-    try {
-      await addMessageToBooking(booking.id, messageText, 'artist')
-      // Refresh messages from server
-      const updatedMessages = await getBookingMessages(booking.id)
-      setMessages(updatedMessages)
-    } catch (error) {
-      console.error('Error sending message:', error)
-    }
-  })
+  try {
+    await addMessageToBooking(booking.id, messageText, 'artist')
+    // Refresh messages from server
+    const updatedMessages = await getBookingMessages(booking.id)
+    setMessages(updatedMessages.map((m: any) => ({
+      ...m,
+      createdAt: new Date(m.createdAt)
+    })))
+  } catch (error) {
+    console.error('Error sending message:', error)
   }
+}
 
   if (!booking) return null
-
-  const displayMessages = optimisticMessages.length > 0 ? optimisticMessages : messages
 
   return (
     <AnimatePresence>
@@ -474,13 +464,15 @@ export function BookingDetailDrawer({ isOpen, onClose, booking, onBookingUpdated
                       Mensajes
                     </h3>
                     
-                    {/* Messages List */}
-                    <div className="space-y-4 mb-6">
-                      {displayMessages.length === 0 ? (
-                        <p className="text-sm text-[#525252]">No hay mensajes aún.</p>
-                      ) : (
-                        <AnimatePresence>
-                          {displayMessages.map((msg, index) => (
+        {/* Messages List */}
+        <div className="space-y-4 mb-6">
+          {isLoadingMessages ? (
+            <p className="text-sm text-[#525252]">Cargando mensajes...</p>
+          ) : messages.length === 0 ? (
+            <p className="text-sm text-[#525252]">No hay mensajes aún.</p>
+          ) : (
+            <AnimatePresence>
+              {messages.map((msg, index) => (
                             <motion.div
                               key={msg.id}
                               initial={{ opacity: 0, y: 10 }}
