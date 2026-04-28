@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+// NOTE: This in-memory rate limiter does NOT work in serverless environments (Vercel).
+// Each lambda has its own memory, so the Map is reset between requests.
+// For production, use: Upstash Redis, Vercel KV, or a dedicated rate limiting service.
+
 const rateLimitMap = new Map<string, { count: number; timestamp: number }>()
 
 export function rateLimit(request: NextRequest, maxRequests = 10, windowMs = 60000) {

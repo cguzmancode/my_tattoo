@@ -2,6 +2,8 @@ import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
+const MAX_FILE_SIZE = 2 * 1024 * 1024 // 2MB
+
 export async function POST(request: Request) {
   try {
     const { userId } = await auth()
@@ -17,15 +19,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
     }
 
+    // Validate file size
+    if (file.size > MAX_FILE_SIZE) {
+      return NextResponse.json({ error: 'File too large (max 2MB)' }, { status: 400 })
+    }
+
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
     if (!allowedTypes.includes(file.type)) {
       return NextResponse.json({ error: 'Invalid file type' }, { status: 400 })
     }
 
+    // Sanitize extension - only allow safe extensions
     const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
-    const uniqueFilename = `${userId}/${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${ext}`
+    const safeExt = ['jpg', 'jpeg', 'png', 'webp'].includes(ext) ? ext : 'jpg'
+    const uniqueFilename = `${userId}/${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${safeExt}`
 
-    // Usar cliente admin con service role key para subir sin restricciones
+    // NOTE: Using service role key because authenticated users need to upload
+    // to their own user folder. The userId validation above ensures they
+    // can only write to their own path. Consider using signed URLs for
+    // additional security in production.
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
