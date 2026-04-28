@@ -12,27 +12,22 @@ export function BookingList({
 }: BookingListProps) {
   if (bookings.length === 0) {
     return (
-      <div className="text-center py-12">
+      <div className="text-center py-12" role="status" aria-live="polite">
         <p className="text-[#a1a1a1]">No bookings yet</p>
       </div>
     )
   }
 
   return (
-    <div className="space-y-4">
+    <ul className="space-y-4" role="list" aria-label="Lista de reservas">
       {bookings.map((booking) => (
-        <div
-          key={booking.id}
-          data-testid="booking-card"
-          onClick={() => onBookingClick?.(booking)}
-          className="cursor-pointer"
-        >
+        <li key={booking.id}>
           <TattooBookingCard
             booking={booking}
             onClick={() => onBookingClick?.(booking)}
           />
-        </div>
+        </li>
       ))}
-    </div>
+    </ul>
   )
 }

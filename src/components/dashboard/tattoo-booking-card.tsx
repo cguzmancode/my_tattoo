@@ -145,10 +145,14 @@ export function TattooBookingCard({ booking, onClick }: TattooBookingCardProps) 
     : booking.description
 
   return (
-    <motion.div
+    <motion.article
       whileHover={{ scale: 1.02, y: -4 }}
       transition={{ type: 'spring', stiffness: 400, damping: 25 }}
       onClick={onClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => e.key === 'Enter' && onClick?.()}
+      aria-label={`Reserva de ${booking.clientName}, estado: ${config.label}, zona: ${booking.bodyZone}`}
       className="group relative rounded-xl border border-white/10 bg-[#141414] p-5 card-glow cursor-pointer overflow-hidden"
     >
       {/* Inner glow effect */}
@@ -176,6 +180,8 @@ export function TattooBookingCard({ booking, onClick }: TattooBookingCardProps) 
         {/* Status Badge */}
         <span
           className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full border ${config.bg} ${config.text} ${config.border}`}
+          role="status"
+          aria-label={`Estado: ${config.label}`}
         >
           {config.label}
         </span>
@@ -228,6 +234,6 @@ export function TattooBookingCard({ booking, onClick }: TattooBookingCardProps) 
       <div className="absolute top-0 right-0 w-20 h-20 overflow-hidden rounded-tr-xl">
         <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-bl from-[#ff6b35]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
       </div>
-    </motion.div>
+    </motion.article>
   )
 }

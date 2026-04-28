@@ -133,12 +133,12 @@ export function BookingRequestForm({ artistSlug }: BookingRequestFormProps) {
   }
 
   return (
-    <form data-testid="booking-form" onSubmit={handleSubmit} className="space-y-5">
+    <form data-testid="booking-form" onSubmit={handleSubmit} className="space-y-5" role="form" aria-label="Solicitar reserva de tatuaje">
       {error && (
-        <div className="rounded-lg border border-red-800 bg-red-950/30 p-4">
+        <div className="rounded-lg border border-red-800 bg-red-950/30 p-4" role="alert" aria-live="assertive">
           <div className="flex items-start gap-3">
             <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-400" />
-            <p className="text-sm text-red-300">{error}</p>
+            <p id="booking-error" className="text-sm text-red-300">{error}</p>
           </div>
         </div>
       )}
@@ -154,6 +154,7 @@ export function BookingRequestForm({ artistSlug }: BookingRequestFormProps) {
           value={formData.clientName}
           onChange={handleChange}
           required
+          aria-describedby={error ? 'booking-error' : undefined}
           placeholder="John Doe"
           className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
         />
