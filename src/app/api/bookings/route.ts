@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createBooking } from '@/lib/api/bookings'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { rateLimitMiddleware } from '@/lib/rate-limit'
+import { validateBooking } from '@/lib/schemas/booking'
 
 export async function POST(request: NextRequest) {
   // Aplicar rate limiting: 5 requests por minuto
@@ -29,6 +30,23 @@ export async function POST(request: NextRequest) {
     if (!artistSlug || !clientName || !clientEmail || !description || !preferredDate) {
       return NextResponse.json(
         { success: false, error: 'Missing required fields' },
+        { status: 400 }
+      )
+    }
+
+    // Validar con Zod schema
+    const validation = validateBooking({
+      clientName,
+      clientEmail,
+      bodyZone,
+      size,
+      description,
+      preferredDates: [preferredDate],
+    })
+
+    if (!validation.success) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid data', details: validation.errors },
         { status: 400 }
       )
     }
