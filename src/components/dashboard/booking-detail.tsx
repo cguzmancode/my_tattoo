@@ -102,10 +102,10 @@ export function BookingDetail({ booking }: BookingDetailProps) {
   const canReject = status === 'PENDING' || status === 'ACCEPTED'
 
   return (
-    <div className="bg-[#141414] rounded-2xl shadow-lg border border-white/10 p-6 space-y-6">
+    <section className="bg-[#141414] rounded-2xl shadow-lg border border-white/10 p-6 space-y-6" aria-label="Detalles de la reserva">
       {/* Conflict Warning */}
       {showConflicts && conflicts.length > 0 && (
-        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mb-4">
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mb-4" role="alert" aria-live="assertive">
           <h3 className="text-amber-400 font-semibold mb-2">⚠️ Conflicto de Fecha</h3>
           <p className="text-amber-200/80 text-sm mb-2">
             Ya tienes {conflicts.length} cita(s) programada(s) para este día:
@@ -355,6 +355,6 @@ export function BookingDetail({ booking }: BookingDetailProps) {
           </div>
         </div>
       )}
-    </div>
+    </section>
   )
 }
