@@ -1,64 +1,167 @@
-# InkApp - Sistema de Gestión para Tatuadores
+# InkApp — Sistema de Gestión para Tatuadores
 
-Plataforma completa para artistas del tatuaje para gestionar citas, disponibilidad y pagos.
+> Plataforma fullstack para artistas freelance del tatuaje. Centraliza solicitudes de cita, calendario, mensajería cliente↔artista y perfil público con portfolio.
 
-## 🚀 Tecnologías
-
-- **Next.js 16** - Framework React con App Router
-- **Prisma 7** - ORM para PostgreSQL
-- **Supabase** - Base de datos y storage
-- **Clerk** - Autenticación y autorización
-- **Tailwind CSS v4** - Estilos
-- **Framer Motion** - Animaciones
-
-## 📋 Características
-
-- ✅ Gestión de citas (PENDING → ACCEPTED → CONFIRMED → COMPLETED)
-- ✅ Calendario de disponibilidad
-- ✅ Sistema de pagos con Stripe
-- ✅ Perfil público para artistas
-- ✅ Subida de imágenes
-
-## 🛠️ Desarrollo
-
-```bash
-# Instalar dependencias
-pnpm install
-
-# Configurar variables de entorno
-cp .env.example .env
-
-# Ejecutar en desarrollo
-pnpm dev
-
-# Ejecutar tests
-pnpm test:unit
-pnpm test:integration
-```
-
-## 🚀 Despliegue
-
-Este proyecto usa **despliegue manual por tags**.
-
-### Flujo de trabajo
-
-1. **Desarrollo normal** - commits a `master` no despliegan automáticamente
-2. **Crear tag** para desplegar:
-
-```bash
-# Crear tag
-git tag v1.2.3
-
-# Push del tag (esto despliega automáticamente)
-git push origin v1.2.3
-```
-
-### Configuración de despliegue
-
-- Auto-deploy desactivado en `vercel.json`
-- GitHub Actions ejecuta deploy solo en tags `v*`
-- Deploy Hook de Vercel configurado
+Proyecto personal construido sobre el stack más reciente de Next.js + Prisma + Clerk + Supabase, con énfasis en **arquitectura limpia y testabilidad**, no solo en hacer que funcione.
 
 ---
 
-**Nota**: Commits con `[skip ci]` en el mensaje omiten el workflow de CI/CD.
+## 🧱 Stack
+
+| Capa             | Tecnología                                  |
+|------------------|---------------------------------------------|
+| Framework        | **Next.js 16** (App Router, Server Actions) |
+| Lenguaje         | TypeScript (strict)                         |
+| ORM              | **Prisma 7** + `@prisma/adapter-pg`          |
+| Base de datos    | PostgreSQL (Supabase)                       |
+| Auth             | Clerk                                       |
+| Storage          | Supabase Storage                            |
+| Estilos          | Tailwind CSS v4                             |
+| Animaciones      | Framer Motion 12                            |
+| Email            | Resend + React Email                        |
+| Validación       | Zod                                         |
+| Testing          | Vitest 4 (unit + integration) + Playwright   |
+| Package manager  | pnpm                                        |
+
+---
+
+## 🏛️ Arquitectura
+
+El módulo `bookings` —el corazón del dominio— está implementado siguiendo **Clean Architecture / Hexagonal**:
+
+```
+src/modules/bookings/
+├── domain/            # TypeScript puro, sin dependencias externas
+│   ├── booking.ts             # Entidad inmutable con transiciones de estado
+│   ├── booking-message.ts     # Entidad con validación de contenido
+│   ├── booking-status.ts      # Enum + canTransitionTo()
+│   ├── booking-id.ts          # Value object UUID
+│   ├── proposed-date.ts       # Value object con regla "fecha futura"
+│   └── errors.ts              # Errores tipados de dominio
+│
+├── application/       # Use cases + ports (interfaces)
+│   ├── ports/
+│   │   ├── booking-repository.ts
+│   │   ├── booking-message-repository.ts
+│   │   ├── notification-service.ts
+│   │   └── clock.ts
+│   └── use-cases/
+│       ├── create-booking.ts
+│       ├── accept-booking.ts
+│       ├── reject-booking.ts
+│       ├── confirm-booking.ts
+│       ├── complete-booking.ts
+│       ├── cancel-booking.ts
+│       ├── add-message-to-booking.ts
+│       └── get-artist-bookings.ts
+│
+├── infrastructure/    # Adapters reales contra el mundo exterior
+│   ├── prisma-booking-repository.ts
+│   ├── prisma-booking-message-repository.ts
+│   ├── resend-notification-service.ts
+│   └── system-clock.ts
+│
+├── test-support/      # Fakes/in-memory adapters reutilizables en tests
+│
+└── composition-root.ts   # Cableado manual de dependencias
+```
+
+Las **Server Actions** (`src/app/actions/bookings.ts`, `src/app/actions/booking-public.ts`) son thin controllers: hacen autenticación con Clerk, resuelven el `artistId` y delegan en los use cases vía el `composition-root`.
+
+📄 Lee el ADR completo en [`ARCHITECTURE.md`](./ARCHITECTURE.md) — incluye decisiones técnicas, alternativas consideradas y métricas de éxito.
+
+### Regla de oro
+
+Las flechas de dependencia apuntan hacia adentro:
+
+```
+Presentation → Application → Domain ← Infrastructure
+```
+
+`Domain` no conoce a nadie. `Application` solo conoce `Domain` y sus propios `ports`. `Infrastructure` implementa esos ports. La consecuencia práctica: **el dominio se testea en milisegundos**, sin DB, sin red, sin mocks.
+
+---
+
+## ✅ Tests
+
+| Tipo              | Comando                  | Notas                                                  |
+|-------------------|--------------------------|--------------------------------------------------------|
+| Unit              | `pnpm test:unit`         | Dominio + use cases con fakes. **~150 ms, 94 tests.**  |
+| Integration       | `pnpm test:integration`  | Adapters Prisma contra DB real. Requiere `DATABASE_URL`. |
+| E2E (screenshots) | `pnpm test:e2e`          | Playwright sobre flujos visuales.                      |
+
+Los tests de dominio no tocan red ni DB. Los tests de use cases usan **adapters in-memory** (ver `src/modules/bookings/test-support/`). Solo los tests de adapters concretos pegan a Postgres.
+
+---
+
+## 🚀 Setup
+
+```bash
+# 1. Instalar dependencias
+pnpm install
+
+# 2. Variables de entorno
+cp .env.example .env
+# Rellena DATABASE_URL, NEXT_PUBLIC_SUPABASE_URL, CLERK_SECRET_KEY, etc.
+
+# 3. Sincronizar el esquema (solo dev)
+pnpm db:push
+
+# 4. Servidor de desarrollo
+pnpm dev
+```
+
+Para ver el dashboard sin login, exporta `NEXT_PUBLIC_DEMO_MODE=true` y ejecuta en modo desarrollo.
+
+---
+
+## 📦 Deploy
+
+Despliegue **manual por tags** — los commits a `master` no despliegan.
+
+```bash
+git tag v1.2.3
+git push origin v1.2.3
+```
+
+- Auto-deploy desactivado en `vercel.json` (`"deploymentEnabled": false`).
+- GitHub Actions (`.github/workflows/deploy-on-tag.yml`) dispara deploy solo en tags `v*`.
+
+---
+
+## 🎯 Qué aprendí construyendo esto
+
+> Sección honesta. No todo lo que está en producción es perfecto; este es un proyecto demo y se nota dónde se invirtió esfuerzo y dónde no.
+
+- **Server Actions ≠ panaceas.** Llamar Server Actions desde `useEffect` es un antipatrón sutil pero importante: te trae datos *después* del primer paint, te impide hacer streaming, y no aprovecha la red de Vercel. Lo correcto es pasar datos como prop desde un Server Component padre. [Ver commit del fix](https://github.com/Cristiangp/my_tattoo/commits/master).
+- **Adapter Pattern paga sus dividendos pronto.** Migrar `updateBookingStatus` de una Server Action mezclada (Prisma + Resend + estado + emails inline) a un pipeline de use cases tomó tiempo. Pero hoy puedo ejecutar 94 tests en 150 ms y saber que la lógica de negocio funciona, sin levantar nada.
+- **`Result<T,E>` no siempre es la respuesta.** En TypeScript, errores tipados con clases (`InvalidStatusTransitionError`, `UnauthorizedBookingAccessError`) dan stack traces útiles y se integran natural con el `try/catch` que ya existe en las Server Actions. Adoptarlo costó menos y rinde lo mismo.
+- **Las queries pueden saltarse el dominio.** No todo necesita pasar por un use case. Lecturas que devuelven datos enriquecidos con relations (`include: { payments, messages }`) viven mejor como queries directas a Prisma — forzarlas por un repositorio "puro" sería sobre-ingeniería.
+
+---
+
+## 🔒 Notas sobre seguridad (proyecto demo)
+
+InkApp es un **proyecto demo de portfolio**, no una app con tráfico real ni dinero real. Algunas medidas que se esperan en producción están deliberadamente fuera de alcance:
+
+- Stripe webhooks firmados (`stripe.webhooks.constructEvent`)
+- Rate limiting distribuido (Upstash / Vercel KV)
+- Sistema de cola para reintentos de email
+
+Sí se aplican:
+
+- Validación de transiciones de estado a nivel de dominio (no en el caller).
+- Verificación de propiedad del booking en cada mutación (`booking.isOwnedBy(artistId)`).
+- Validación de identidad en mensajes: el cliente solo puede escribir si su email coincide con el booking; el artista solo si autenticó con Clerk y es el dueño.
+
+---
+
+## 📁 Más documentación
+
+- [`ARCHITECTURE.md`](./ARCHITECTURE.md) — ADR completo con decisiones técnicas
+- [`AGENTS.md`](./AGENTS.md) — Convenciones del proyecto para agentes y colaboradores
+- [`plans/`](./plans/) — Roadmap y blueprints internos
+
+---
+
+*"Concepts > Code. AI is a tool, we direct."*
