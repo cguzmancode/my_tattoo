@@ -1,7 +1,9 @@
 'use server'
 
+import { randomUUID } from 'node:crypto'
+import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
-import { BookingStatus } from '@prisma/client'
+import { bookingsModule } from '@/modules/bookings/composition-root'
 
 export async function getPublicBookingById(bookingId: string) {
   const booking = await prisma.booking.findUnique({
@@ -37,22 +39,57 @@ export async function getBookingMessages(bookingId: string) {
   return messages
 }
 
-export async function addMessageToBooking(bookingId: string, message: string, sender: 'client' | 'artist') {
-  const booking = await prisma.booking.findUnique({
-    where: { id: bookingId },
-  })
+export async function addMessageToBooking(
+  bookingId: string,
+  message: string,
+  sender: 'client' | 'artist',
+) {
+  const messageId = randomUUID()
 
-  if (!booking) {
-    throw new Error('Booking not found')
+  if (sender === 'artist') {
+    const { userId } = await auth()
+    if (!userId) {
+      throw new Error('Unauthorized')
+    }
+
+    const artist = await prisma.artist.findUnique({
+      where: { clerkId: userId },
+      select: { id: true },
+    })
+    if (!artist) {
+      throw new Error('Artist not found')
+    }
+
+    await bookingsModule.addMessageToBooking.execute({
+      bookingId,
+      messageId,
+      message,
+      sender: 'ARTIST',
+      artistId: artist.id,
+    })
+  } else {
+    const booking = await prisma.booking.findUnique({
+      where: { id: bookingId },
+      select: { clientEmail: true },
+    })
+    if (!booking) {
+      throw new Error('Booking not found')
+    }
+
+    await bookingsModule.addMessageToBooking.execute({
+      bookingId,
+      messageId,
+      message,
+      sender: 'CLIENT',
+      clientEmail: booking.clientEmail,
+    })
   }
 
-  const newMessage = await prisma.bookingMessage.create({
-    data: {
-      bookingId,
-      sender,
-      message,
-    },
+  const created = await prisma.bookingMessage.findUnique({
+    where: { id: messageId },
   })
-
-  return newMessage
+  if (!created) {
+    throw new Error('Message was not persisted')
+  }
+  return created
 }

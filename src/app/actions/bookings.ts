@@ -1,11 +1,11 @@
 'use server'
 
+import { randomUUID } from 'node:crypto'
 import { auth } from '@clerk/nextjs/server'
 import { BookingStatus } from '@prisma/client'
-import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
-import { sendEmail } from '@/lib/email/resend'
-import { BookingAcceptedTemplate, BookingRejectedTemplate } from '@/lib/email/templates'
+import { prisma } from '@/lib/prisma'
+import { bookingsModule } from '@/modules/bookings/composition-root'
 
 export interface BookingFilters {
   status?: BookingStatus
@@ -20,7 +20,6 @@ export async function getArtistBookings(filters?: BookingFilters) {
     throw new Error('Unauthorized')
   }
 
-  // Buscar el artista por clerkId
   const artist = await prisma.artist.findUnique({
     where: { clerkId: userId },
   })
@@ -29,7 +28,6 @@ export async function getArtistBookings(filters?: BookingFilters) {
     throw new Error('Artist not found')
   }
 
-  // Construir where clause
   const where: { artistId: string; status?: BookingStatus; createdAt?: { gte?: Date; lte?: Date } } = {
     artistId: artist.id,
   }
@@ -104,7 +102,7 @@ export interface UpdateBookingStatusInput {
 
 export async function updateBookingStatus(
   bookingId: string,
-  input: UpdateBookingStatusInput
+  input: UpdateBookingStatusInput,
 ) {
   const { userId } = await auth()
 
@@ -120,97 +118,97 @@ export async function updateBookingStatus(
     throw new Error('Artist not found')
   }
 
-  // Verificar que el booking pertenezca al artista
-  const booking = await prisma.booking.findFirst({
-    where: {
-      id: bookingId,
-      artistId: artist.id,
-    },
-    include: {
-      artist: true,
-    },
+  const current = await prisma.booking.findFirst({
+    where: { id: bookingId, artistId: artist.id },
+    select: { status: true },
   })
 
-  if (!booking) {
+  if (!current) {
     throw new Error('Booking not found')
   }
 
-  // Validar transiciones de estado
-  const validTransitions: { [key in BookingStatus]?: BookingStatus[] } = {
-    PENDING: ['ACCEPTED', 'REJECTED'],
-    ACCEPTED: ['CONFIRMED', 'REJECTED'],
-    CONFIRMED: ['COMPLETED', 'CANCELLED'],
+  if (current.status !== input.status) {
+    switch (input.status) {
+      case BookingStatus.ACCEPTED: {
+        if (!input.proposedDate) {
+          throw new Error('proposedDate is required when accepting a booking')
+        }
+        const iso =
+          typeof input.proposedDate === 'string'
+            ? input.proposedDate
+            : input.proposedDate.toISOString()
+        await bookingsModule.acceptBooking.execute({
+          bookingId,
+          artistId: artist.id,
+          proposedDateISO: iso,
+        })
+        break
+      }
+      case BookingStatus.REJECTED: {
+        await bookingsModule.rejectBooking.execute({
+          bookingId,
+          artistId: artist.id,
+        })
+        if (input.rejectionReason && input.rejectionReason.trim().length > 0) {
+          await bookingsModule.addMessageToBooking.execute({
+            bookingId,
+            messageId: randomUUID(),
+            message: input.rejectionReason,
+            sender: 'ARTIST',
+            artistId: artist.id,
+          })
+        }
+        break
+      }
+      case BookingStatus.CONFIRMED: {
+        await bookingsModule.confirmBooking.execute({
+          bookingId,
+          artistId: artist.id,
+        })
+        break
+      }
+      case BookingStatus.COMPLETED: {
+        await bookingsModule.completeBooking.execute({
+          bookingId,
+          artistId: artist.id,
+        })
+        break
+      }
+      case BookingStatus.CANCELLED: {
+        await bookingsModule.cancelBooking.execute({
+          bookingId,
+          artistId: artist.id,
+        })
+        break
+      }
+      default: {
+        throw new Error(`Unsupported target status: ${input.status}`)
+      }
+    }
   }
 
-  const allowedTransitions = validTransitions[booking.status]
-  // Solo validar transición si el estado está cambiando
-  if (booking.status !== input.status && !allowedTransitions?.includes(input.status)) {
-    throw new Error(`Invalid status transition from ${booking.status} to ${input.status}`)
-  }
-
-  // Convertir proposedDate a Date si es string
-  const proposedDate = input.proposedDate
-    ? typeof input.proposedDate === 'string'
-      ? new Date(input.proposedDate)
-      : input.proposedDate
-    : undefined
-
-  // Actualizar booking
-  const updated = await prisma.booking.update({
-    where: { id: bookingId },
-    data: {
-      status: input.status,
-      proposedDate,
-      priceEstimate: input.priceEstimate,
-      durationEstimate: input.durationEstimate,
-      artistNotes: input.artistNotes,
-    },
-  })
-
-  // Enviar email según el nuevo estado
-  if (input.status === 'ACCEPTED') {
-    await sendEmail({
-      to: booking.clientEmail,
-      subject: '¡Tu cita ha sido aceptada!',
-      react: BookingAcceptedTemplate({
-        clientName: booking.clientName,
-        bookingId: booking.id,
-        artistName: artist.name,
-        proposedDate: input.proposedDate || updated.proposedDate || new Date(),
-        priceEstimate: input.priceEstimate,
-        bodyZone: booking.bodyZone,
-        size: booking.size,
-        description: booking.description,
-      }),
-    })
-  } else if (input.status === 'REJECTED' && input.rejectionReason) {
-    // Crear mensaje de rechazo para el cliente
-    await prisma.bookingMessage.create({
+  if (
+    input.priceEstimate !== undefined ||
+    input.durationEstimate !== undefined ||
+    input.artistNotes !== undefined
+  ) {
+    await prisma.booking.update({
+      where: { id: bookingId },
       data: {
-        bookingId: booking.id,
-        sender: 'artist',
-        message: input.rejectionReason,
+        priceEstimate: input.priceEstimate,
+        durationEstimate: input.durationEstimate,
+        artistNotes: input.artistNotes,
       },
-    })
-
-    await sendEmail({
-      to: booking.clientEmail,
-      subject: 'Tu cita ha sido rechazada',
-      react: BookingRejectedTemplate({
-        clientName: booking.clientName,
-        bookingId: booking.id,
-        artistName: artist.name,
-        rejectionReason: input.rejectionReason,
-        bodyZone: booking.bodyZone,
-        size: booking.size,
-        description: booking.description,
-      }),
     })
   }
 
   revalidatePath('/dashboard/bookings')
   revalidatePath(`/dashboard/bookings/${bookingId}`)
 
+  const updated = await prisma.booking.findUnique({ where: { id: bookingId } })
+  if (!updated) {
+    throw new Error('Booking not found after update')
+  }
   return updated
 }
 

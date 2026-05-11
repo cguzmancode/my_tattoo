@@ -14,7 +14,11 @@ const navItems = [
   { href: '/dashboard/settings', label: 'Ajustes', icon: Settings },
 ]
 
-export function Sidebar() {
+interface SidebarProps {
+  artist: { name: string; isActive: boolean } | null
+}
+
+export function Sidebar({ artist }: SidebarProps) {
   const pathname = usePathname()
 
   return (
@@ -110,7 +114,7 @@ export function Sidebar() {
       </nav>
 
       {/* User Section */}
-      <UserSection />
+      <UserSection artist={artist} />
     </aside>
   )
 }
