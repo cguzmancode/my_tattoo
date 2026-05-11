@@ -17,6 +17,10 @@ export class ProposedDate {
     return ProposedDate.fromDate(new Date(value), now)
   }
 
+  static fromPersistence(value: Date): ProposedDate {
+    return new ProposedDate(new Date(value.getTime()))
+  }
+
   toISOString(): string {
     return this.value.toISOString()
   }
