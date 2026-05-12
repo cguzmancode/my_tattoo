@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Save, X, Loader2, DollarSign, Clock, Calendar, FileText, Tag, AlertTriangle } from 'lucide-react'
+import { BookingStatus, allowedTransitionsFrom } from '@/modules/bookings/domain/booking-status'
 
 interface BookingDetailEditProps {
   booking: {
@@ -24,13 +25,13 @@ interface BookingDetailEditProps {
   onCancel: () => void
 }
 
-const statusOptions = [
-  { value: 'PENDING', label: 'Pendiente', color: '#eab308' },
-  { value: 'ACCEPTED', label: 'Aceptada', color: '#00d4ff' },
-  { value: 'CONFIRMED', label: 'Confirmada', color: '#22c55e' },
-  { value: 'REJECTED', label: 'Rechazada', color: '#ef4444' },
-  { value: 'CANCELLED', label: 'Cancelada', color: '#6b7280' },
-  { value: 'COMPLETED', label: 'Completada', color: '#a1a1a1' },
+const statusOptions: ReadonlyArray<{ value: BookingStatus; label: string; color: string }> = [
+  { value: BookingStatus.PENDING, label: 'Pendiente', color: '#eab308' },
+  { value: BookingStatus.ACCEPTED, label: 'Aceptada', color: '#00d4ff' },
+  { value: BookingStatus.CONFIRMED, label: 'Confirmada', color: '#22c55e' },
+  { value: BookingStatus.REJECTED, label: 'Rechazada', color: '#ef4444' },
+  { value: BookingStatus.CANCELLED, label: 'Cancelada', color: '#6b7280' },
+  { value: BookingStatus.COMPLETED, label: 'Completada', color: '#a1a1a1' },
 ]
 
 const durationOptions = [
@@ -50,6 +51,11 @@ export function BookingDetailEdit({ booking, onSave, onCancel }: BookingDetailEd
     artistNotes: booking.artistNotes || '',
     rejectionReason: '',
   })
+
+  const visibleStatusOptions = useMemo(() => {
+    const allowed = allowedTransitionsFrom(booking.status as BookingStatus)
+    return statusOptions.filter((option) => allowed.includes(option.value))
+  }, [booking.status])
 
   const handleChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -77,7 +83,7 @@ export function BookingDetailEdit({ booking, onSave, onCancel }: BookingDetailEd
           Estado
         </label>
         <div className="grid grid-cols-2 gap-2">
-          {statusOptions.map((option) => (
+          {visibleStatusOptions.map((option) => (
             <motion.button
               key={option.value}
               type="button"

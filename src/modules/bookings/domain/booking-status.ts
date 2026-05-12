@@ -25,3 +25,7 @@ export function canTransitionTo(from: BookingStatus, to: BookingStatus): boolean
 export function isTerminal(status: BookingStatus): boolean {
   return TRANSITIONS[status].length === 0
 }
+
+export function allowedTransitionsFrom(from: BookingStatus): readonly BookingStatus[] {
+  return [from, ...TRANSITIONS[from]]
+}

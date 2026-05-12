@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest'
-import { BookingStatus, canTransitionTo, isTerminal } from './booking-status'
+import {
+  BookingStatus,
+  allowedTransitionsFrom,
+  canTransitionTo,
+  isTerminal,
+} from './booking-status'
 
 describe('BookingStatus transitions', () => {
   describe('PENDING', () => {
@@ -51,5 +56,39 @@ describe('BookingStatus transitions', () => {
         expect(isTerminal(status)).toBe(false)
       },
     )
+  })
+
+  describe('allowedTransitionsFrom', () => {
+    it('includes the current status plus all valid next statuses for PENDING', () => {
+      expect(allowedTransitionsFrom(BookingStatus.PENDING)).toEqual([
+        BookingStatus.PENDING,
+        BookingStatus.ACCEPTED,
+        BookingStatus.REJECTED,
+        BookingStatus.CANCELLED,
+      ])
+    })
+
+    it('excludes REJECTED for ACCEPTED status (no backwards rejection)', () => {
+      const allowed = allowedTransitionsFrom(BookingStatus.ACCEPTED)
+      expect(allowed).toContain(BookingStatus.ACCEPTED)
+      expect(allowed).toContain(BookingStatus.CONFIRMED)
+      expect(allowed).toContain(BookingStatus.CANCELLED)
+      expect(allowed).not.toContain(BookingStatus.REJECTED)
+      expect(allowed).not.toContain(BookingStatus.PENDING)
+    })
+
+    it('returns only itself for terminal states', () => {
+      expect(allowedTransitionsFrom(BookingStatus.REJECTED)).toEqual([BookingStatus.REJECTED])
+      expect(allowedTransitionsFrom(BookingStatus.COMPLETED)).toEqual([BookingStatus.COMPLETED])
+      expect(allowedTransitionsFrom(BookingStatus.CANCELLED)).toEqual([BookingStatus.CANCELLED])
+    })
+
+    it('never duplicates the current status', () => {
+      for (const status of Object.values(BookingStatus)) {
+        const allowed = allowedTransitionsFrom(status)
+        const occurrences = allowed.filter((s) => s === status).length
+        expect(occurrences).toBe(1)
+      }
+    })
   })
 })
