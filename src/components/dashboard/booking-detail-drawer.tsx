@@ -118,11 +118,18 @@ const handleSendMessage = async (e: React.FormEvent) => {
 
   // Send to server
   try {
-    await addMessageToBooking(booking.id, messageText, 'artist')
-    // Refresh messages via parent callback (re-fetches from server)
-    await onRefreshMessages?.()
+    const result = await addMessageToBooking(booking.id, { sender: 'artist', message: messageText })
+    if (!result.ok) {
+      console.error('Error sending message:', result.error)
+      setShowErrorMessage('No se pudo enviar el mensaje')
+      setTimeout(() => setShowErrorMessage(null), 3000)
+    } else {
+      await onRefreshMessages?.()
+    }
   } catch (error) {
     console.error('Error sending message:', error)
+    setShowErrorMessage('No se pudo enviar el mensaje')
+    setTimeout(() => setShowErrorMessage(null), 3000)
   } finally {
     setIsSendingMessage(false)
   }
