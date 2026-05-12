@@ -6,7 +6,7 @@ import { Calendar, Filter, Search, AlertCircle } from 'lucide-react'
 import { BookingList } from '@/components/dashboard/booking-list'
 import { BookingDetailDrawer } from '@/components/dashboard/booking-detail-drawer'
 import { MockBooking } from '@/lib/mocks'
-import { getBookingById } from '@/app/actions/bookings'
+import { useBookingMessages } from '@/hooks/use-booking-messages'
 
 type BookingStatus = 'PENDING' | 'ACCEPTED' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED'
 
@@ -29,6 +29,7 @@ export function BookingsClient({ initialBookings, isDemo }: BookingsClientProps)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<BookingStatus | 'ALL'>('ALL')
+  const refreshMessages = useBookingMessages(selectedBooking, setSelectedBooking)
 
   const filteredBookings = useMemo(() => {
     let result = [...initialBookings]
@@ -60,32 +61,6 @@ export function BookingsClient({ initialBookings, isDemo }: BookingsClientProps)
   const handleCloseDrawer = () => {
     setIsDrawerOpen(false)
     setTimeout(() => setSelectedBooking(null), 300)
-  }
-
-  const refreshMessages = async () => {
-    if (!selectedBooking) return
-
-    try {
-      // Re-fetch booking data to get updated messages
-      const bookingData = await getBookingById(selectedBooking.id)
-
-      // Transform messages to expected format
-      const updatedMessages = (bookingData.messages || []).map((m: any) => ({
-        id: m.id,
-        bookingId: m.bookingId,
-        sender: m.sender,
-        message: m.message,
-        createdAt: new Date(m.createdAt),
-        read: m.read,
-      }))
-
-      // Update the selected booking with new messages
-      setSelectedBooking((prev) =>
-        prev ? { ...prev, messages: updatedMessages } : null
-      )
-    } catch (error) {
-      console.error('Error refreshing messages:', error)
-    }
   }
 
   return (

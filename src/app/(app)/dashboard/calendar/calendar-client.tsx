@@ -7,6 +7,7 @@ import { getBookingById } from '@/app/actions/bookings'
 import { useToast } from '@/components/ui/toast'
 import { BookingDetailDrawer } from '@/components/dashboard/booking-detail-drawer'
 import { MockBooking } from '@/lib/mocks'
+import { useBookingMessages } from '@/hooks/use-booking-messages'
 
 interface CalendarClientProps {
   events: Array<{
@@ -29,6 +30,7 @@ export function CalendarClient({ events: initialEvents, blockedDates: initialBlo
   // Drawer state
   const [selectedBooking, setSelectedBooking] = useState<MockBooking | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const refreshMessages = useBookingMessages(selectedBooking, setSelectedBooking)
 
   const handleBlockDate = async (date: Date) => {
     const dateString = date.toISOString().split('T')[0]
@@ -118,32 +120,6 @@ export function CalendarClient({ events: initialEvents, blockedDates: initialBlo
   const handleCloseDrawer = () => {
     setIsDrawerOpen(false)
     setSelectedBooking(null)
-  }
-
-  const refreshMessages = async () => {
-    if (!selectedBooking) return
-
-    try {
-      // Re-fetch booking data to get updated messages
-      const bookingData = await getBookingById(selectedBooking.id)
-
-      // Transform messages to expected format
-      const updatedMessages = (bookingData.messages || []).map((m: any) => ({
-        id: m.id,
-        bookingId: m.bookingId,
-        sender: m.sender,
-        message: m.message,
-        createdAt: new Date(m.createdAt),
-        read: m.read,
-      }))
-
-      // Update the selected booking with new messages
-      setSelectedBooking((prev) =>
-        prev ? { ...prev, messages: updatedMessages } : null
-      )
-    } catch (error) {
-      console.error('Error refreshing messages:', error)
-    }
   }
 
   const handleBookingUpdate = (bookingId: string, newDate?: Date) => {

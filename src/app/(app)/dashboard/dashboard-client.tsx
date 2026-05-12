@@ -10,7 +10,7 @@ import { EmptyBookings } from '@/components/ui/empty-state'
 import { useToast } from '@/components/ui/toast'
 import { MockBooking } from '@/lib/mocks'
 import { BookingDetailDrawer } from '@/components/dashboard/booking-detail-drawer'
-import { getBookingById } from '@/app/actions/bookings'
+import { useBookingMessages } from '@/hooks/use-booking-messages'
 
 interface Artist {
   id: string
@@ -59,48 +59,18 @@ interface DashboardClientProps {
 export function DashboardClient({ artist, bookings, stats, isDemo }: DashboardClientProps) {
   const { showToast } = useToast()
   const [copied, setCopied] = useState(false)
-  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null)
+  const [selectedBooking, setSelectedBooking] = useState<MockBooking | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const refreshMessages = useBookingMessages(selectedBooking, setSelectedBooking)
 
   const handleOpenBooking = (booking: Booking) => {
-    setSelectedBooking(booking)
+    setSelectedBooking(booking as unknown as MockBooking)
     setIsDrawerOpen(true)
   }
 
   const handleCloseDrawer = () => {
     setIsDrawerOpen(false)
     setSelectedBooking(null)
-  }
-
-  const refreshMessages = async () => {
-    if (!selectedBooking) return
-
-    try {
-      // Re-fetch booking data to get updated messages
-      const bookingData = await getBookingById(selectedBooking.id)
-
-      // Transform messages to expected format
-      const updatedMessages = (bookingData.messages || []).map((m: any) => ({
-        id: m.id,
-        bookingId: m.bookingId,
-        sender: m.sender,
-        message: m.message,
-        createdAt: new Date(m.createdAt),
-        read: m.read,
-      }))
-
-      // Update the selected booking with new messages
-      setSelectedBooking((prev) =>
-        prev
-          ? {
-              ...prev,
-              messages: updatedMessages,
-            }
-          : null
-      )
-    } catch (error) {
-      console.error('Error refreshing messages:', error)
-    }
   }
 
   const handleCopyLink = async () => {
@@ -416,7 +386,7 @@ export function DashboardClient({ artist, bookings, stats, isDemo }: DashboardCl
       <BookingDetailDrawer
         isOpen={isDrawerOpen}
         onClose={handleCloseDrawer}
-        booking={selectedBooking as MockBooking | null}
+        booking={selectedBooking}
         onRefreshMessages={refreshMessages}
       />
     </div>
