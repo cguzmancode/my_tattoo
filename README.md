@@ -162,15 +162,15 @@ git push origin v1.2.3
 - **Server Actions ≠ panaceas.** Llamar Server Actions desde `useEffect` es un antipatrón sutil pero importante: te trae datos *después* del primer paint, te impide hacer streaming, y no aprovecha la red de Vercel. Lo correcto es pasar datos como prop desde un Server Component padre. [Ver commit del fix](https://github.com/Cristiangp/my_tattoo/commits/master).
 - **Adapter Pattern paga sus dividendos pronto.** Migrar `updateBookingStatus` de una Server Action mezclada (Prisma + Resend + estado + emails inline) a un pipeline de use cases tomó tiempo. Pero hoy puedo ejecutar 94 tests en 150 ms y saber que la lógica de negocio funciona, sin levantar nada.
 - **`Result<T,E>` no siempre es la respuesta.** En TypeScript, errores tipados con clases (`InvalidStatusTransitionError`, `UnauthorizedBookingAccessError`) dan stack traces útiles y se integran natural con el `try/catch` que ya existe en las Server Actions. Adoptarlo costó menos y rinde lo mismo.
-- **Las queries pueden saltarse el dominio.** No todo necesita pasar por un use case. Lecturas que devuelven datos enriquecidos con relations (`include: { payments, messages }`) viven mejor como queries directas a Prisma — forzarlas por un repositorio "puro" sería sobre-ingeniería.
+- **Las queries pueden saltarse el dominio.** No todo necesita pasar por un use case. Lecturas que devuelven datos enriquecidos con relations (`include: { messages }`) viven mejor como queries directas a Prisma — forzarlas por un repositorio "puro" sería sobre-ingeniería.
 
 ---
 
 ## 🔒 Notas sobre seguridad (proyecto demo)
 
-InkApp es un **proyecto demo de portfolio**, no una app con tráfico real ni dinero real. Algunas medidas que se esperan en producción están deliberadamente fuera de alcance:
+InkApp es un **proyecto demo de portfolio**, no una app con tráfico real ni dinero real. El MVP cubre el ciclo de bookings (solicitud → aceptación → confirmación → completada). El cobro real está deliberadamente fuera de alcance — el artista coordina el depósito con el cliente por canales propios. Algunas medidas que se esperan en producción tampoco entran:
 
-- Stripe webhooks firmados (`stripe.webhooks.constructEvent`)
+- Pagos online (Stripe / Adyen / similares) y sus webhooks firmados
 - Rate limiting distribuido (Upstash / Vercel KV)
 - Sistema de cola para reintentos de email
 

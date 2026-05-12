@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { ArrowRight, Calendar, Shield, Zap, Palette, Clock, Users } from 'lucide-react'
+import { ArrowRight, Calendar, MessageCircle, Zap, Palette, Clock, Users } from 'lucide-react'
 import { TattooNeedle } from '@/components/icons/tattoo-needle'
 import { useAuth } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
@@ -16,9 +16,9 @@ const features = [
     description: 'Organiza tu agenda, bloquea fechas y mantén el control de tu tiempo.',
   },
   {
-    icon: Shield,
-    title: 'Pagos Seguros',
-    description: 'Depósitos integrados con Stripe. Sin preocupaciones, solo arte.',
+    icon: MessageCircle,
+    title: 'Mensajería Integrada',
+    description: 'Comunícate con tus clientes sin salir de la app. Cada cita tiene su hilo.',
   },
   {
     icon: Zap,
@@ -28,7 +28,7 @@ const features = [
   {
     icon: Palette,
     title: 'Portfolio Online',
-    description: 'Muestra tu trabajo al mundo. Tu estilo, tu reglas, tu negocio.',
+    description: 'Muestra tu trabajo al mundo. Tu estilo, tus reglas, tu negocio.',
   },
 ]
 
