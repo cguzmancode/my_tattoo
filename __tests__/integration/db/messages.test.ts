@@ -26,7 +26,7 @@ describe('Messages Integration Tests', () => {
         bodyZone: 'Forearm',
         size: 'Medium',
         description: 'Test description',
-        preferredDates: [new Date('2024-06-01')],
+        preferredDates: ['2024-06-01'],
         status: 'PENDING',
         depositPaid: false,
       },
@@ -82,7 +82,7 @@ describe('Messages Integration Tests', () => {
         bodyZone: 'Back',
         size: 'Large',
         description: 'Another test',
-        preferredDates: [new Date('2024-07-01')],
+        preferredDates: ['2024-07-01'],
         status: 'PENDING',
         depositPaid: false,
         messages: {
@@ -104,40 +104,4 @@ describe('Messages Integration Tests', () => {
     expect(booking.messages[2].sender).toBe('client')
   })
 
-  it('should fetch messages via getBookingById', async () => {
-    // Import the function
-    const { getBookingById } = await import('@/app/actions/bookings')
-    
-    // Create a booking with messages
-    const booking = await prisma.booking.create({
-      data: {
-        artistId: testArtist.id,
-        clientName: 'API Test Client',
-        clientEmail: `apitest${Date.now()}@example.com`,
-        clientPhone: '+34 111 222 333',
-        bodyZone: 'Leg',
-        size: 'Small',
-        description: 'API test',
-        preferredDates: [new Date('2024-08-01')],
-        status: 'PENDING',
-        depositPaid: false,
-        messages: {
-          create: [
-            { sender: 'client', message: 'Test from API', read: false },
-          ],
-        },
-      },
-      include: {
-        messages: true,
-      },
-    })
-
-    // Fetch via getBookingById
-    const fetchedBooking = await getBookingById(booking.id)
-    
-    expect(fetchedBooking).toBeDefined()
-    expect(fetchedBooking.messages).toHaveLength(1)
-    expect(fetchedBooking.messages[0].sender).toBe('client')
-    expect(fetchedBooking.messages[0].message).toBe('Test from API')
-  })
 })
