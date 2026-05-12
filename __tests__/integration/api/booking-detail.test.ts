@@ -114,7 +114,6 @@ describe('updateBookingStatus', () => {
         description: 'Test',
         preferredDates: ['2026-05-15'],
         status: BookingStatus.ACCEPTED,
-        depositPaid: true,
       },
     })
 

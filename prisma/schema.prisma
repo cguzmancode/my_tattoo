@@ -39,8 +39,6 @@ model Booking {
   preferredDates   String[]      @default([])
   status           BookingStatus @default(PENDING)
   proposedDate     DateTime?
-  depositPaid      Boolean       @default(false)
-  paymentIntentId  String?
   reminderSent24h  Boolean       @default(false)
   reminderSent48h  Boolean       @default(false)
   createdAt        DateTime      @default(now())
@@ -49,7 +47,6 @@ model Booking {
   durationEstimate String?       @map("durationestimate")
   artistNotes      String?       @map("artistnotes")
   artist           Artist        @relation(fields: [artistId], references: [id], onDelete: Cascade)
-  payments         Payment[]
   messages         BookingMessage[]
 
   @@map("bookings")
@@ -79,20 +76,6 @@ model BookingMessage {
   @@map("booking_messages")
 }
 
-model Payment {
-  id                    String        @id @default(uuid())
-  bookingId             String
-  stripePaymentIntentId String        @unique
-  amount                Int
-  currency              String        @default("eur")
-  status                PaymentStatus @default(PENDING)
-  createdAt             DateTime      @default(now())
-  updatedAt             DateTime      @updatedAt
-  booking               Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-
-  @@map("payments")
-}
-
 enum BookingStatus {
   PENDING
   ACCEPTED
@@ -100,11 +83,4 @@ enum BookingStatus {
   CONFIRMED
   COMPLETED
   CANCELLED
-}
-
-enum PaymentStatus {
-  PENDING
-  CAPTURED
-  REFUNDED
-  FAILED
 }

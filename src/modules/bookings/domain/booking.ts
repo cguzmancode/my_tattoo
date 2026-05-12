@@ -19,7 +19,6 @@ export interface BookingProps {
   preferredDates: readonly string[]
   status: BookingStatus
   proposedDate: ProposedDate | null
-  depositPaid: boolean
   priceEstimate: number | null
   durationEstimate: string | null
   artistNotes: string | null
@@ -29,7 +28,7 @@ export interface BookingProps {
 
 export type NewBookingProps = Omit<
   BookingProps,
-  'id' | 'status' | 'proposedDate' | 'depositPaid' | 'priceEstimate'
+  'id' | 'status' | 'proposedDate' | 'priceEstimate'
     | 'durationEstimate' | 'artistNotes' | 'createdAt' | 'updatedAt'
 > & {
   id: BookingId
@@ -44,7 +43,6 @@ export class Booking {
       ...input,
       status: BookingStatus.PENDING,
       proposedDate: null,
-      depositPaid: false,
       priceEstimate: null,
       durationEstimate: null,
       artistNotes: null,
@@ -68,7 +66,6 @@ export class Booking {
   get preferredDates(): readonly string[] { return this.props.preferredDates }
   get status(): BookingStatus { return this.props.status }
   get proposedDate(): ProposedDate | null { return this.props.proposedDate }
-  get depositPaid(): boolean { return this.props.depositPaid }
   get priceEstimate(): number | null { return this.props.priceEstimate }
   get durationEstimate(): string | null { return this.props.durationEstimate }
   get artistNotes(): string | null { return this.props.artistNotes }
@@ -96,11 +93,7 @@ export class Booking {
 
   confirm(now: Date): Booking {
     this.assertCanTransitionTo(BookingStatus.CONFIRMED)
-    return this.with({
-      status: BookingStatus.CONFIRMED,
-      depositPaid: true,
-      updatedAt: now,
-    })
+    return this.with({ status: BookingStatus.CONFIRMED, updatedAt: now })
   }
 
   complete(now: Date): Booking {

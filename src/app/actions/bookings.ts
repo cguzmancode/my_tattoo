@@ -45,12 +45,6 @@ export async function getArtistBookings(filters?: BookingFilters) {
   const bookings = await prisma.booking.findMany({
     where,
     orderBy: { createdAt: 'desc' },
-    include: {
-      payments: {
-        where: { status: { not: 'FAILED' } },
-        select: { id: true, status: true, amount: true },
-      },
-    },
   })
 
   return bookings
@@ -77,7 +71,6 @@ export async function getBookingById(bookingId: string) {
       artistId: artist.id,
     },
     include: {
-      payments: true,
       messages: {
         orderBy: { createdAt: 'asc' },
       },

@@ -523,20 +523,6 @@ const handleSendMessage = async (e: React.FormEvent) => {
                     </form>
                   </div>
 
-                  {/* Deposit Section */}
-                  {booking.depositPaid && (
-                    <div className="p-6">
-                      <div className="flex items-center gap-3 p-4 rounded-xl bg-[#22c55e]/10 border border-[#22c55e]/20">
-                        <div className="h-10 w-10 rounded-lg bg-[#22c55e]/20 flex items-center justify-center">
-                          <DollarSign className="h-5 w-5 text-[#22c55e]" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-[#22c55e]">Depósito</p>
-                          <p className="text-sm text-white font-medium">Pagado</p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </>
               )}
             </div>

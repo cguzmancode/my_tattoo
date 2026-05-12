@@ -37,7 +37,6 @@ export class PrismaBookingRepository implements BookingRepository {
         preferredDates: [...booking.preferredDates],
         status: booking.status,
         proposedDate: booking.proposedDate?.value ?? null,
-        depositPaid: booking.depositPaid,
         priceEstimate: booking.priceEstimate,
         durationEstimate: booking.durationEstimate,
         artistNotes: booking.artistNotes,
@@ -47,7 +46,6 @@ export class PrismaBookingRepository implements BookingRepository {
       update: {
         status: booking.status,
         proposedDate: booking.proposedDate?.value ?? null,
-        depositPaid: booking.depositPaid,
         priceEstimate: booking.priceEstimate,
         durationEstimate: booking.durationEstimate,
         artistNotes: booking.artistNotes,
@@ -70,7 +68,6 @@ export class PrismaBookingRepository implements BookingRepository {
       preferredDates: row.preferredDates,
       status: row.status as BookingStatus,
       proposedDate: row.proposedDate ? ProposedDate.fromPersistence(row.proposedDate) : null,
-      depositPaid: row.depositPaid,
       priceEstimate: row.priceEstimate,
       durationEstimate: row.durationEstimate,
       artistNotes: row.artistNotes,

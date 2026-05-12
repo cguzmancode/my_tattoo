@@ -11,7 +11,6 @@ export interface BookingDetailsInput {
   artistNotes?: string
   proposedDate?: Date
   status?: BookingStatus
-  depositPaid?: boolean
 }
 
 export async function updateBookingDetails(
@@ -44,7 +43,6 @@ export async function updateBookingDetails(
         artistNotes: input.artistNotes,
         proposedDate: input.proposedDate,
         status: input.status,
-        depositPaid: input.depositPaid,
       },
     })
 

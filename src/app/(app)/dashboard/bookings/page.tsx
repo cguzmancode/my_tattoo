@@ -29,8 +29,7 @@ export default async function BookingsPage() {
     bookings = await prisma.booking.findMany({
       where: { artistId: artist.id },
       orderBy: { createdAt: 'desc' },
-      include: { 
-        payments: true,
+      include: {
         messages: { orderBy: { createdAt: 'asc' } },
       },
     })

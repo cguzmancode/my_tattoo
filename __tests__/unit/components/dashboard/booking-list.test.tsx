@@ -19,11 +19,9 @@ describe('BookingList', () => {
       referenceImages: [],
       preferredDates: [new Date('2026-06-01')],
       status: BookingStatus.PENDING,
-      depositPaid: false,
       createdAt: new Date('2026-05-01'),
       updatedAt: new Date('2026-05-01'),
       artistId: 'demo-artist-001',
-      payments: [],
     },
     {
       id: '2',
@@ -37,21 +35,9 @@ describe('BookingList', () => {
       referenceImages: [],
       preferredDates: [new Date('2026-06-02')],
       status: BookingStatus.ACCEPTED,
-      depositPaid: false,
       createdAt: new Date('2026-05-02'),
       updatedAt: new Date('2026-05-02'),
       artistId: 'demo-artist-001',
-      payments: [
-        {
-          id: 'p1',
-          bookingId: '2',
-          stripePaymentIntentId: 'pi_test_2',
-          amount: 2000,
-          status: 'PENDING',
-          createdAt: new Date('2026-05-02'),
-          updatedAt: new Date('2026-05-02'),
-        },
-      ],
     },
   ]
 

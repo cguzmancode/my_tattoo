@@ -44,15 +44,9 @@ interface Booking {
   referenceImages: string[]
   preferredDates: Date[]
   status: 'PENDING' | 'ACCEPTED' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED'
-  depositPaid: boolean
   createdAt: Date
   updatedAt: Date
   artistId: string
-  payments?: Array<{
-    id: string
-    status: string
-    amount: number
-  }>
 }
 
 interface DashboardClientProps {

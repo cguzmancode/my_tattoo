@@ -35,19 +35,9 @@ export interface MockBooking {
   referenceImages: string[]
   preferredDates: Date[]
   status: 'PENDING' | 'ACCEPTED' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED'
-  depositPaid: boolean
   createdAt: Date
   updatedAt: Date
   artistId: string
-  payments: Array<{
-    id: string
-    bookingId: string
-    stripePaymentIntentId: string
-    amount: number
-    status: 'PENDING' | 'COMPLETED' | 'CANCELLED'
-    createdAt: Date
-    updatedAt: Date
-  }>
   proposedDate?: Date
   priceEstimate?: number
   durationEstimate?: string
@@ -75,11 +65,9 @@ export const DEMO_BOOKINGS: MockBooking[] = [
     referenceImages: [],
     preferredDates: [new Date('2024-02-15'), new Date('2024-02-16')],
     status: 'PENDING' as const,
-    depositPaid: false,
     createdAt: new Date('2024-01-10'),
     updatedAt: new Date('2024-01-10'),
     artistId: 'demo-artist-001',
-    payments: [],
   },
   {
     id: 'booking-002',
@@ -93,11 +81,9 @@ export const DEMO_BOOKINGS: MockBooking[] = [
     referenceImages: [],
     preferredDates: [new Date('2024-02-20')],
     status: 'PENDING' as const,
-    depositPaid: false,
     createdAt: new Date('2024-01-12'),
     updatedAt: new Date('2024-01-12'),
     artistId: 'demo-artist-001',
-    payments: [],
   },
   {
     id: 'booking-003',
@@ -111,11 +97,9 @@ export const DEMO_BOOKINGS: MockBooking[] = [
     referenceImages: [],
     preferredDates: [new Date('2024-02-10')],
     status: 'ACCEPTED' as const,
-    depositPaid: false,
     createdAt: new Date('2024-01-08'),
     updatedAt: new Date('2024-01-11'),
     artistId: 'demo-artist-001',
-    payments: [],
   },
   {
     id: 'booking-004',
@@ -129,21 +113,9 @@ export const DEMO_BOOKINGS: MockBooking[] = [
     referenceImages: [],
     preferredDates: [new Date('2024-03-01'), new Date('2024-03-02')],
     status: 'ACCEPTED' as const,
-    depositPaid: false,
     createdAt: new Date('2024-01-05'),
     updatedAt: new Date('2024-01-09'),
     artistId: 'demo-artist-001',
-    payments: [
-      {
-        id: 'payment-001',
-        bookingId: 'booking-004',
-        stripePaymentIntentId: 'pi_demo_001',
-        amount: 5000,
-        status: 'PENDING' as const,
-        createdAt: new Date('2024-01-09'),
-        updatedAt: new Date('2024-01-09'),
-      }
-    ],
   },
   {
     id: 'booking-005',
@@ -157,21 +129,9 @@ export const DEMO_BOOKINGS: MockBooking[] = [
     referenceImages: [],
     preferredDates: [new Date('2024-01-25')],
     status: 'CONFIRMED' as const,
-    depositPaid: true,
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-06'),
     artistId: 'demo-artist-001',
-    payments: [
-      {
-        id: 'payment-002',
-        bookingId: 'booking-005',
-        stripePaymentIntentId: 'pi_demo_002',
-        amount: 5000,
-        status: 'COMPLETED' as const,
-        createdAt: new Date('2024-01-06'),
-        updatedAt: new Date('2024-01-06'),
-      }
-    ],
   },
   {
     id: 'booking-006',
@@ -185,21 +145,9 @@ export const DEMO_BOOKINGS: MockBooking[] = [
     referenceImages: [],
     preferredDates: [new Date('2024-01-28')],
     status: 'CONFIRMED' as const,
-    depositPaid: true,
     createdAt: new Date('2023-12-28'),
     updatedAt: new Date('2024-01-03'),
     artistId: 'demo-artist-001',
-    payments: [
-      {
-        id: 'payment-003',
-        bookingId: 'booking-006',
-        stripePaymentIntentId: 'pi_demo_003',
-        amount: 5000,
-        status: 'COMPLETED' as const,
-        createdAt: new Date('2024-01-03'),
-        updatedAt: new Date('2024-01-03'),
-      }
-    ],
   },
   {
     id: 'booking-007',
@@ -213,11 +161,9 @@ export const DEMO_BOOKINGS: MockBooking[] = [
     referenceImages: [],
     preferredDates: [new Date('2024-01-20')],
     status: 'CANCELLED' as const,
-    depositPaid: false,
     createdAt: new Date('2024-01-03'),
     updatedAt: new Date('2024-01-07'),
     artistId: 'demo-artist-001',
-    payments: [],
   },
   {
     id: 'booking-008',
@@ -231,11 +177,9 @@ export const DEMO_BOOKINGS: MockBooking[] = [
     referenceImages: [],
     preferredDates: [new Date('2024-02-05')],
     status: 'PENDING' as const,
-    depositPaid: false,
     createdAt: new Date('2024-01-13'),
     updatedAt: new Date('2024-01-13'),
     artistId: 'demo-artist-001',
-    payments: [],
   },
 ]
 

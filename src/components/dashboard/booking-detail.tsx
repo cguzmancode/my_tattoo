@@ -21,7 +21,6 @@ interface BookingDetailProps {
     preferredDates: string[]
     status: BookingStatus
     proposedDate: Date | null
-    depositPaid: boolean
     createdAt: Date
     referenceImages: string[]
     priceEstimate: number | null
@@ -276,12 +275,6 @@ export function BookingDetail({ booking }: BookingDetailProps) {
             ))}
           </div>
         </div>
-        {booking.depositPaid && (
-          <div>
-            <h3 className="text-sm font-medium text-zinc-500 uppercase tracking-wide">Depósito</h3>
-            <p className="mt-1 text-emerald-400 font-semibold">Pagado</p>
-          </div>
-        )}
       </div>
 
       {/* Actions */}

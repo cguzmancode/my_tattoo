@@ -28,7 +28,7 @@ describe('ConfirmBookingUseCase', () => {
     acceptUseCase = new AcceptBookingUseCase(bookings, notifications, clock)
   })
 
-  it('marks deposit as paid and transitions to CONFIRMED', async () => {
+  it('transitions ACCEPTED to CONFIRMED', async () => {
     bookings.preload(buildBooking({ artistId: 'owner' }))
     await acceptUseCase.execute({
       bookingId: VALID_ID,
@@ -40,7 +40,6 @@ describe('ConfirmBookingUseCase', () => {
 
     const stored = await bookings.findById(BookingId.fromString(VALID_ID))
     expect(stored!.status).toBe(BookingStatus.CONFIRMED)
-    expect(stored!.depositPaid).toBe(true)
   })
 
   it('rejects confirmation from PENDING', async () => {

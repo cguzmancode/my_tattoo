@@ -28,7 +28,6 @@ describe('Messages Integration Tests', () => {
         description: 'Test description',
         preferredDates: ['2024-06-01'],
         status: 'PENDING',
-        depositPaid: false,
       },
     })
   })
@@ -84,7 +83,6 @@ describe('Messages Integration Tests', () => {
         description: 'Another test',
         preferredDates: ['2024-07-01'],
         status: 'PENDING',
-        depositPaid: false,
         messages: {
           create: [
             { sender: 'client', message: 'First message', read: false },

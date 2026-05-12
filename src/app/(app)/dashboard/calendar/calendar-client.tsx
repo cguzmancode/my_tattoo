@@ -76,52 +76,37 @@ export function CalendarClient({ events: initialEvents, blockedDates: initialBlo
 
   const handleBookingClick = async (bookingId: string) => {
     try {
-      // Fetch full booking data
       const bookingData = await getBookingById(bookingId)
-      
-      // Transform payments to expected format
-      const transformedPayments = (bookingData.payments || []).map((p: any) => ({
-        id: p.id,
-        bookingId: p.bookingId,
-        stripePaymentIntentId: p.stripePaymentIntentId,
-        amount: p.amount,
-        status: p.status === 'CAPTURED' ? 'COMPLETED' : p.status as 'PENDING' | 'COMPLETED' | 'CANCELLED',
-        createdAt: new Date(p.createdAt),
-        updatedAt: new Date(p.updatedAt),
-      }))
 
-  // Transform to MockBooking format expected by drawer
-  const booking: MockBooking = {
-    id: bookingData.id,
-    clientName: bookingData.clientName,
-    clientEmail: bookingData.clientEmail,
-    clientPhone: bookingData.clientPhone ?? '',
-    bodyZone: bookingData.bodyZone,
-    size: bookingData.size,
-    description: bookingData.description,
-    style: '',
-    referenceImages: bookingData.referenceImages || [],
-    preferredDates: (bookingData.preferredDates || []).map((d: string) => new Date(d)),
-    status: bookingData.status as any,
-    depositPaid: bookingData.depositPaid,
-    createdAt: new Date(bookingData.createdAt),
-    updatedAt: new Date(bookingData.updatedAt),
-    artistId: bookingData.artistId,
-    payments: transformedPayments,
-    proposedDate: bookingData.proposedDate ? new Date(bookingData.proposedDate) : undefined,
-    priceEstimate: bookingData.priceEstimate || undefined,
-    durationEstimate: bookingData.durationEstimate || undefined,
-    artistNotes: bookingData.artistNotes || undefined,
-    messages: (bookingData.messages || []).map((m: any) => ({
-      id: m.id,
-      bookingId: m.bookingId,
-      sender: m.sender,
-      message: m.message,
-      createdAt: new Date(m.createdAt),
-      read: m.read,
-    })),
-  }
-      
+      const booking: MockBooking = {
+        id: bookingData.id,
+        clientName: bookingData.clientName,
+        clientEmail: bookingData.clientEmail,
+        clientPhone: bookingData.clientPhone ?? '',
+        bodyZone: bookingData.bodyZone,
+        size: bookingData.size,
+        description: bookingData.description,
+        style: '',
+        referenceImages: bookingData.referenceImages || [],
+        preferredDates: (bookingData.preferredDates || []).map((d: string) => new Date(d)),
+        status: bookingData.status as MockBooking['status'],
+        createdAt: new Date(bookingData.createdAt),
+        updatedAt: new Date(bookingData.updatedAt),
+        artistId: bookingData.artistId,
+        proposedDate: bookingData.proposedDate ? new Date(bookingData.proposedDate) : undefined,
+        priceEstimate: bookingData.priceEstimate || undefined,
+        durationEstimate: bookingData.durationEstimate || undefined,
+        artistNotes: bookingData.artistNotes || undefined,
+        messages: (bookingData.messages || []).map((m) => ({
+          id: m.id,
+          bookingId: m.bookingId,
+          sender: m.sender as 'client' | 'artist',
+          message: m.message,
+          createdAt: new Date(m.createdAt),
+          read: m.read,
+        })),
+      }
+
       setSelectedBooking(booking)
       setIsDrawerOpen(true)
     } catch (error) {

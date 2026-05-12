@@ -50,7 +50,6 @@ export interface UpdateBookingResult {
     description: string
     status: string
     proposedDate: Date | null
-    depositPaid: boolean
     createdAt: Date
     updatedAt: Date
   }
@@ -202,7 +201,6 @@ export async function updateBookingStatus(
       description: booking.description,
       status: booking.status,
       proposedDate: booking.proposedDate,
-      depositPaid: booking.depositPaid,
       createdAt: booking.createdAt,
       updatedAt: booking.updatedAt,
     },

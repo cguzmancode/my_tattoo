@@ -27,11 +27,10 @@ function newBookingInput(overrides: Partial<NewBookingProps> = {}): NewBookingPr
 }
 
 describe('Booking.create', () => {
-  it('starts in PENDING with no proposed date and deposit unpaid', () => {
+  it('starts in PENDING with no proposed date', () => {
     const booking = Booking.create(newBookingInput())
     expect(booking.status).toBe(BookingStatus.PENDING)
     expect(booking.proposedDate).toBeNull()
-    expect(booking.depositPaid).toBe(false)
     expect(booking.createdAt).toEqual(NOW)
     expect(booking.updatedAt).toEqual(NOW)
   })
@@ -92,12 +91,11 @@ describe('Booking.reject', () => {
 })
 
 describe('Booking.confirm', () => {
-  it('transitions ACCEPTED to CONFIRMED and marks deposit as paid', () => {
+  it('transitions ACCEPTED to CONFIRMED', () => {
     const proposed = ProposedDate.fromDate(FUTURE, NOW)
     const accepted = Booking.create(newBookingInput()).accept(LATER, proposed)
     const confirmed = accepted.confirm(LATER)
     expect(confirmed.status).toBe(BookingStatus.CONFIRMED)
-    expect(confirmed.depositPaid).toBe(true)
   })
 
   it('cannot be confirmed directly from PENDING', () => {
@@ -160,7 +158,6 @@ describe('Booking.fromPersistence', () => {
       preferredDates: [],
       status: BookingStatus.CONFIRMED,
       proposedDate: proposed,
-      depositPaid: true,
       priceEstimate: 25000,
       durationEstimate: '3h',
       artistNotes: 'Bring reference',
@@ -168,7 +165,6 @@ describe('Booking.fromPersistence', () => {
       updatedAt: LATER,
     })
     expect(booking.status).toBe(BookingStatus.CONFIRMED)
-    expect(booking.depositPaid).toBe(true)
     expect(booking.priceEstimate).toBe(25000)
   })
 })

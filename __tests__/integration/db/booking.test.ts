@@ -39,7 +39,6 @@ describe('Booking Model', () => {
     expect(booking).toBeDefined()
     expect(booking.clientName).toBe('María García')
     expect(booking.status).toBe(BookingStatus.PENDING)
-    expect(booking.depositPaid).toBe(false)
   })
 
   it('should update status to ACCEPTED', async () => {
