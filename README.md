@@ -100,9 +100,7 @@ Los tests de dominio no tocan red ni DB. Los tests de use cases usan **adapters 
 # 1. Instalar dependencias
 pnpm install
 
-# 2. Variables de entorno
-cp .env.example .env
-# Rellena DATABASE_URL, NEXT_PUBLIC_SUPABASE_URL, CLERK_SECRET_KEY, etc.
+# 2. Crear .env en la raíz (ver bloque "Variables de entorno" abajo)
 
 # 3. Sincronizar el esquema (solo dev)
 pnpm db:push
@@ -111,7 +109,35 @@ pnpm db:push
 pnpm dev
 ```
 
-Para ver el dashboard sin login, exporta `NEXT_PUBLIC_DEMO_MODE=true` y ejecuta en modo desarrollo.
+### Variables de entorno
+
+`.env*` está en `.gitignore`. Crea un fichero `.env` en la raíz con estas claves (todos los valores aquí son **placeholders**, no secretos):
+
+```bash
+# Supabase Postgres (usado vía @prisma/adapter-pg en src/lib/prisma.ts)
+DATABASE_URL=postgresql://user:password@host:5432/db
+
+# Supabase Auth + Storage (Service Role key se usa en la API route de upload)
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+SUPABASE_SERVICE_ROLE_KEY=eyJ...
+
+# Clerk Auth (publishable + secret los lee @clerk/nextjs implícitamente)
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
+CLERK_WEBHOOK_SECRET=whsec_...
+
+# Resend (notificaciones de email del módulo Bookings)
+RESEND_API_KEY=re_...
+
+# App URL (enlaces de acción en plantillas de email)
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# Opcional: bypass de auth + datos mock en desarrollo
+# NEXT_PUBLIC_DEMO_MODE=true
+```
+
+Para ver el dashboard sin login, descomenta `NEXT_PUBLIC_DEMO_MODE=true` y ejecuta en modo desarrollo.
 
 ---
 
