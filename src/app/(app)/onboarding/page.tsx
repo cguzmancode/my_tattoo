@@ -19,6 +19,7 @@ export default function OnboardingPage() {
   const [isCheckingProfile, setIsCheckingProfile] = useState(true)
   const [step, setStep] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     name: '',
     bio: '',
@@ -80,8 +81,6 @@ export default function OnboardingPage() {
         : [...prev.styles, style]
     }))
   }
-
-const [error, setError] = useState<string | null>(null)
 
 const handleSubmit = async () => {
   setIsLoading(true)
