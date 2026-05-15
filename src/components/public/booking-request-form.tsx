@@ -32,6 +32,9 @@ export function BookingRequestForm({ artistSlug }: BookingRequestFormProps) {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+  const [isDemoSuccess, setIsDemoSuccess] = useState(false)
+  const [demoEmailHtml, setDemoEmailHtml] = useState<string | null>(null)
+  const [demoEmailTo, setDemoEmailTo] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [formData, setFormData] = useState<FormData>({
     clientName: '',
@@ -104,6 +107,9 @@ export function BookingRequestForm({ artistSlug }: BookingRequestFormProps) {
       }
 
       setIsSuccess(true)
+      setIsDemoSuccess(data.demo === true)
+      setDemoEmailHtml(typeof data.emailHtml === 'string' ? data.emailHtml : null)
+      setDemoEmailTo(typeof data.emailTo === 'string' ? data.emailTo : null)
       setFormData({ clientName: '', clientEmail: '', description: '', preferredDate: '', bodyZone: '', size: 'medium', referenceImages: [] })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
@@ -114,20 +120,48 @@ export function BookingRequestForm({ artistSlug }: BookingRequestFormProps) {
 
   if (isSuccess) {
     return (
-      <div className="rounded-xl border border-emerald-800 bg-emerald-950/30 p-6 text-center">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/20">
-          <CheckCircle className="h-6 w-6 text-emerald-400" />
+      <div className="space-y-4">
+        <div className="rounded-xl border border-emerald-800 bg-emerald-950/30 p-6 text-center">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/20">
+            <CheckCircle className="h-6 w-6 text-emerald-400" />
+          </div>
+          <h3 className="text-lg font-semibold text-emerald-400">¡Solicitud enviada!</h3>
+          <p className="mt-2 text-sm text-emerald-200/70">
+            {isDemoSuccess
+              ? 'Esto es una demo — no se guardó nada en la base de datos ni se envió ningún email.'
+              : 'El artista revisará tu solicitud y te contactará pronto.'}
+          </p>
+          <button
+            onClick={() => {
+              setIsSuccess(false)
+              setIsDemoSuccess(false)
+              setDemoEmailHtml(null)
+              setDemoEmailTo(null)
+            }}
+            className="mt-4 text-sm text-emerald-400 hover:text-emerald-300"
+          >
+            Enviar otra solicitud
+          </button>
         </div>
-        <h3 className="text-lg font-semibold text-emerald-400">¡Solicitud enviada!</h3>
-        <p className="mt-2 text-sm text-emerald-200/70">
-          El artista revisará tu solicitud y te contactará pronto.
-        </p>
-        <button
-          onClick={() => setIsSuccess(false)}
-          className="mt-4 text-sm text-emerald-400 hover:text-emerald-300"
-        >
-          Enviar otra solicitud
-        </button>
+
+        {isDemoSuccess && demoEmailHtml && (
+          <div className="rounded-xl border border-zinc-700 bg-zinc-950/50 p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-xs font-medium uppercase tracking-wide text-zinc-400">
+                Preview del email que se enviaría
+              </p>
+              {demoEmailTo && (
+                <p className="text-xs text-zinc-500">a {demoEmailTo}</p>
+              )}
+            </div>
+            <iframe
+              srcDoc={demoEmailHtml}
+              title="Preview del email"
+              sandbox=""
+              className="h-[480px] w-full rounded-lg border border-zinc-800 bg-white"
+            />
+          </div>
+        )}
       </div>
     )
   }

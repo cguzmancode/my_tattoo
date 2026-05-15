@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createElement } from 'react'
+import { render as renderEmail } from '@react-email/components'
 import { createBooking } from '@/lib/api/bookings'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { rateLimitMiddleware } from '@/lib/rate-limit'
 import { validateBooking } from '@/lib/schemas/booking'
+import { DEMO_ARTIST } from '@/lib/mocks'
+import { BookingSubmittedTemplate } from '@/lib/email/templates'
 
 export async function POST(request: NextRequest) {
   // Aplicar rate limiting: 5 requests por minuto
@@ -49,6 +53,30 @@ export async function POST(request: NextRequest) {
         { success: false, error: 'Invalid data', details: validation.errors },
         { status: 400 }
       )
+    }
+
+    // Demo path: el slug demo no existe en la DB, así que simulamos el envío
+    // para no escribir nada en Storage ni en bookings, y devolvemos el HTML
+    // del email que se habría mandado para que el recruiter lo vea inline.
+    if (artistSlug === DEMO_ARTIST.slug) {
+      const bookingId = `demo-${Date.now()}`
+      const emailHtml = await renderEmail(
+        createElement(BookingSubmittedTemplate, {
+          clientName,
+          bookingId,
+          artistName: DEMO_ARTIST.name,
+          bodyZone,
+          size,
+          description,
+        })
+      )
+      return NextResponse.json({
+        success: true,
+        demo: true,
+        booking: { id: bookingId, status: 'PENDING' },
+        emailTo: clientEmail,
+        emailHtml,
+      })
     }
 
     // Extraer imágenes
