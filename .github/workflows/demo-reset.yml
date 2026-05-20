@@ -1,0 +1,37 @@
+name: Demo Reset
+
+# Wipes and re-seeds the demo artist's data every day at 03:00 UTC,
+# so visitors who fiddle with the dashboard always find a clean account
+# the next morning.
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Seed demo data
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
+          DEMO_CLERK_USER_ID: ${{ secrets.DEMO_CLERK_USER_ID }}
+        run: pnpm dlx tsx prisma/seed.ts
