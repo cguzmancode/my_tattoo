@@ -2,7 +2,7 @@ import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { ProfileForm } from '@/components/profile/profile-form'
-import { DEMO_ARTIST } from '@/lib/mocks/data'
+import { DEMO_ARTIST } from '@/lib/mocks'
 
 export default async function SettingsPage() {
   const { userId } = await auth()

@@ -2,7 +2,7 @@ import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { CalendarClient } from './calendar-client'
-import { DEMO_ARTIST, DEMO_BLOCKED_DATES, DEMO_BOOKINGS } from '@/lib/mocks/data'
+import { DEMO_ARTIST, DEMO_BLOCKED_DATES, DEMO_BOOKINGS } from '@/lib/mocks'
 
 export default async function CalendarPage() {
   const { userId } = await auth()
