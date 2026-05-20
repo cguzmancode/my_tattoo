@@ -8,6 +8,7 @@ import { useAuth } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { DEMO_ARTIST, DEMO_STATS } from '@/lib/mocks'
+import { EnterAsDemoButton } from '@/components/public/enter-as-demo-button'
 
 const features = [
   {
@@ -153,13 +154,15 @@ export default function Home() {
               </motion.button>
             </Link>
 
+            <EnterAsDemoButton />
+
             <Link href={`/t/${DEMO_ARTIST.slug}`}>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="btn-outline rounded-full px-8 py-4 text-lg"
               >
-                VER DEMO
+                VER PERFIL PÚBLICO
               </motion.button>
             </Link>
           </motion.div>
