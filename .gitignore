@@ -40,10 +40,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# documentation files (excluded from commits)
-CLAUDE.md
-AGENTS.md
-
 # project plans directory
 /plans/
 
