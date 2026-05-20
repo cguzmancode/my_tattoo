@@ -2,20 +2,17 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 
 const mockEnterAsDemo = vi.fn()
-const mockTicket = vi.fn()
-const mockFinalize = vi.fn()
+const mockCreate = vi.fn()
+const mockSetActive = vi.fn()
 const mockPush = vi.fn()
 
 const signInState = {
-  fetchStatus: 'idle' as 'idle' | 'fetching',
-  signIn: {
-    ticket: mockTicket,
-    finalize: mockFinalize,
-    status: 'complete' as 'needs_identifier' | 'complete',
-  },
+  isLoaded: true,
+  signIn: { create: mockCreate },
+  setActive: mockSetActive,
 }
 
-vi.mock('@clerk/nextjs', () => ({
+vi.mock('@clerk/nextjs/legacy', () => ({
   useSignIn: () => signInState,
 }))
 
@@ -32,11 +29,10 @@ const { EnterAsDemoButton } = await import('../../../src/components/public/enter
 describe('<EnterAsDemoButton />', () => {
   beforeEach(() => {
     mockEnterAsDemo.mockReset()
-    mockTicket.mockReset()
-    mockFinalize.mockReset()
+    mockCreate.mockReset()
+    mockSetActive.mockReset()
     mockPush.mockReset()
-    signInState.fetchStatus = 'idle'
-    signInState.signIn.status = 'complete'
+    signInState.isLoaded = true
   })
 
   it('renders the demo entry label', () => {
@@ -44,17 +40,16 @@ describe('<EnterAsDemoButton />', () => {
     expect(screen.getByRole('button')).toHaveTextContent(/entrar como demo/i)
   })
 
-  it('signs in with the ticket and navigates to /dashboard on success', async () => {
+  it('signs in via ticket and navigates to /dashboard on success', async () => {
     mockEnterAsDemo.mockResolvedValueOnce({ token: 'sit_xxx' })
-    mockTicket.mockResolvedValueOnce({ error: null })
-    mockFinalize.mockResolvedValueOnce({ error: null })
+    mockCreate.mockResolvedValueOnce({ status: 'complete', createdSessionId: 'sess_1' })
 
     render(<EnterAsDemoButton />)
     fireEvent.click(screen.getByRole('button'))
 
     await waitFor(() => {
-      expect(mockTicket).toHaveBeenCalledWith({ ticket: 'sit_xxx' })
-      expect(mockFinalize).toHaveBeenCalled()
+      expect(mockCreate).toHaveBeenCalledWith({ strategy: 'ticket', ticket: 'sit_xxx' })
+      expect(mockSetActive).toHaveBeenCalledWith({ session: 'sess_1' })
       expect(mockPush).toHaveBeenCalledWith('/dashboard')
     })
   })
@@ -68,13 +63,13 @@ describe('<EnterAsDemoButton />', () => {
     await waitFor(() => {
       expect(screen.getByRole('alert')).toHaveTextContent('Demo is not configured')
     })
-    expect(mockTicket).not.toHaveBeenCalled()
+    expect(mockCreate).not.toHaveBeenCalled()
     expect(mockPush).not.toHaveBeenCalled()
   })
 
-  it('does not navigate when ticket sign-in returns an error', async () => {
+  it('shows an error when signIn.create does not return complete', async () => {
     mockEnterAsDemo.mockResolvedValueOnce({ token: 'sit_xxx' })
-    mockTicket.mockResolvedValueOnce({ error: { message: 'bad ticket' } })
+    mockCreate.mockResolvedValueOnce({ status: 'needs_first_factor' })
 
     render(<EnterAsDemoButton />)
     fireEvent.click(screen.getByRole('button'))
@@ -82,7 +77,16 @@ describe('<EnterAsDemoButton />', () => {
     await waitFor(() => {
       expect(screen.getByRole('alert')).toHaveTextContent(/could not be completed/i)
     })
-    expect(mockFinalize).not.toHaveBeenCalled()
+    expect(mockSetActive).not.toHaveBeenCalled()
     expect(mockPush).not.toHaveBeenCalled()
+  })
+
+  it('does not call the server action while Clerk is loading', () => {
+    signInState.isLoaded = false
+
+    render(<EnterAsDemoButton />)
+    fireEvent.click(screen.getByRole('button'))
+
+    expect(mockEnterAsDemo).not.toHaveBeenCalled()
   })
 })
