@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
-import { PublicHeader } from "@/components/layout/public-header";
-import { NoiseOverlay } from "@/components/layout/noise-overlay";
 import "./globals.css";
 
 const inter = Inter({
@@ -23,13 +21,9 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="es" className={`${inter.variable} dark`}>
-      <body className="min-h-screen bg-background text-foreground font-body antialiased">
-        <NoiseOverlay />
-        <PublicHeader />
-        <main className="relative z-10 pt-16">
+        <body className="min-h-screen bg-background text-foreground font-body antialiased">
           {children}
-        </main>
-      </body>
+        </body>
       </html>
     </ClerkProvider>
   );
