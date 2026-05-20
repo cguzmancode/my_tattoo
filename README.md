@@ -136,11 +136,39 @@ RESEND_API_KEY=re_...
 # App URL (enlaces de acción en plantillas de email)
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 
+# Clerk user_id de la cuenta demo (ver sección "Cuenta demo" más abajo)
+DEMO_CLERK_USER_ID=user_xxxxxxxxxxxxxxxxxx
+
 # Opcional: bypass de auth + datos mock en desarrollo
 # NEXT_PUBLIC_DEMO_MODE=true
 ```
 
 Para ver el dashboard sin login, descomenta `NEXT_PUBLIC_DEMO_MODE=true` y ejecuta en modo desarrollo.
+
+---
+
+## 🎭 Cuenta demo
+
+La landing tiene un botón **"Entrar como demo"** que loguea a cualquiera como artista demo, sin email ni password. Sirve para que un recruiter pueda trastear el dashboard real (no mocks) en segundos.
+
+**Cómo funciona**:
+
+1. Click → server action `enterAsDemo()` usa `clerkClient.signInTokens.createSignInToken({ userId: DEMO_CLERK_USER_ID })` para emitir un ticket de Clerk.
+2. El cliente lo consume con `signIn.create({ strategy: 'ticket', ticket })` + `setActive({ session })` (API legacy de `@clerk/nextjs/legacy`).
+3. Redirect a `/dashboard` con la sesión activa.
+
+**Reset diario**: a las 03:00 UTC el workflow `.github/workflows/demo-reset.yml` borra y vuelve a sembrar la cuenta (artist + 9 bookings + 3 blocked dates + 3 messages, con fechas relativas a hoy). Así nadie puede destrozar la demo permanentemente.
+
+### Configurar la cuenta demo (fork del repo)
+
+1. **Crear el usuario en Clerk**: dashboard de Clerk → Users → Create user. Email cualquiera (`demo@tuapp.dev`), password cualquiera (no se usará). Copia el `user_id`.
+2. **Local**: añade `DEMO_CLERK_USER_ID=user_xxx` a `.env`.
+3. **Sembrar la DB la primera vez**: `pnpm dlx tsx prisma/seed.ts`. Verás `Seeded 9 bookings + 3 blocked dates for alex-rivera-tattoo`.
+4. **Activar el cron**: en GitHub → Settings → Secrets → Actions, crea dos secretos:
+   - `DATABASE_URL_PROD` — la URL completa de la DB de producción
+   - `DEMO_CLERK_USER_ID` — el mismo `user_id`
+
+A partir de ese momento el workflow corre solo cada día.
 
 ---
 
