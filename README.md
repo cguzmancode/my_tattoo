@@ -1,5 +1,7 @@
 # InkApp — Sistema de Gestión para Tatuadores
 
+> 🌐 **Read this in [English](./README.en.md)**.
+
 > Plataforma fullstack para artistas freelance del tatuaje. Centraliza solicitudes de cita, calendario, mensajería cliente↔artista y perfil público con portfolio.
 
 Proyecto personal construido sobre el stack más reciente de Next.js + Prisma + Clerk + Supabase, con énfasis en **arquitectura limpia y testabilidad**, no solo en hacer que funcione.
