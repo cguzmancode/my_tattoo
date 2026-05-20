@@ -105,7 +105,10 @@ pnpm install
 # 3. Sincronizar el esquema (solo dev)
 pnpm db:push
 
-# 4. Servidor de desarrollo
+# 4. Aplicar la lockdown de RLS y revokes (idempotente)
+psql "$DATABASE_URL" -f prisma/security/01-rls-lockdown.sql
+
+# 5. Servidor de desarrollo
 pnpm dev
 ```
 
