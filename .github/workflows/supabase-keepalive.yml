@@ -1,0 +1,24 @@
+name: Supabase Keepalive
+
+# Free-tier Supabase projects pause after 7 days of inactivity.
+# This workflow pings both DBs every 3 days to keep them awake.
+
+on:
+  schedule:
+    - cron: '0 9 */3 * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping prod DB (my_tattoo)
+        env:
+          DB_URL: ${{ secrets.SUPABASE_KEEPALIVE_PROD_URL }}
+        run: psql "$DB_URL" -c "SELECT 1;"
+
+      - name: Ping dev DB (my_tattoo_dev)
+        if: always()
+        env:
+          DB_URL: ${{ secrets.SUPABASE_KEEPALIVE_DEV_URL }}
+        run: psql "$DB_URL" -c "SELECT 1;"
