@@ -1,7 +1,8 @@
 name: Supabase Keepalive
 
 # Free-tier Supabase projects pause after 7 days of inactivity.
-# This workflow pings both DBs every 3 days to keep them awake.
+# Supabase only counts writes against user tables as activity, so we UPDATE
+# the public._keepalive row (see prisma/keepalive/01-init.sql).
 
 on:
   schedule:
@@ -15,10 +16,10 @@ jobs:
       - name: Ping prod DB (my_tattoo)
         env:
           DB_URL: ${{ secrets.SUPABASE_KEEPALIVE_PROD_URL }}
-        run: psql "$DB_URL" -c "SELECT 1;"
+        run: psql "$DB_URL" -c "UPDATE public._keepalive SET last_ping = now() WHERE id = 1;"
 
       - name: Ping dev DB (my_tattoo_dev)
         if: always()
         env:
           DB_URL: ${{ secrets.SUPABASE_KEEPALIVE_DEV_URL }}
-        run: psql "$DB_URL" -c "SELECT 1;"
+        run: psql "$DB_URL" -c "UPDATE public._keepalive SET last_ping = now() WHERE id = 1;"
