@@ -1,8 +1,12 @@
 name: Supabase Keepalive
 
 # Free-tier Supabase projects pause after 7 days of inactivity.
-# Supabase only counts writes against user tables as activity, so we UPDATE
-# the public._keepalive row (see prisma/keepalive/01-init.sql).
+# Activity is measured at the auto-generated API layer (PostgREST), NOT at
+# the Postgres connection layer — direct psql writes do not register. We
+# therefore PATCH the public._keepalive row via PostgREST so the request
+# flows through the layer the inactivity detector observes.
+#
+# The _keepalive table is seeded by prisma/keepalive/01-init.sql.
 
 on:
   schedule:
@@ -13,13 +17,29 @@ jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping prod DB (my_tattoo)
+      - name: Ping prod project (my_tattoo) via PostgREST
         env:
-          DB_URL: ${{ secrets.SUPABASE_KEEPALIVE_PROD_URL }}
-        run: psql "$DB_URL" -c "UPDATE public._keepalive SET last_ping = now() WHERE id = 1;"
+          PROJECT_REF: rxkycdzfylerkffnpony
+          SERVICE_ROLE: ${{ secrets.SUPABASE_PROD_SERVICE_ROLE_KEY }}
+        run: |
+          curl -fsS -w "\nHTTP %{http_code}\n" -X PATCH \
+            "https://${PROJECT_REF}.supabase.co/rest/v1/_keepalive?id=eq.1" \
+            -H "apikey: ${SERVICE_ROLE}" \
+            -H "Authorization: Bearer ${SERVICE_ROLE}" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: return=minimal" \
+            -d "{\"last_ping\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}"
 
-      - name: Ping dev DB (my_tattoo_dev)
+      - name: Ping dev project (my_tattoo_dev) via PostgREST
         if: always()
         env:
-          DB_URL: ${{ secrets.SUPABASE_KEEPALIVE_DEV_URL }}
-        run: psql "$DB_URL" -c "UPDATE public._keepalive SET last_ping = now() WHERE id = 1;"
+          PROJECT_REF: pmcdrhgjycowyttdvvdo
+          SERVICE_ROLE: ${{ secrets.SUPABASE_DEV_SERVICE_ROLE_KEY }}
+        run: |
+          curl -fsS -w "\nHTTP %{http_code}\n" -X PATCH \
+            "https://${PROJECT_REF}.supabase.co/rest/v1/_keepalive?id=eq.1" \
+            -H "apikey: ${SERVICE_ROLE}" \
+            -H "Authorization: Bearer ${SERVICE_ROLE}" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: return=minimal" \
+            -d "{\"last_ping\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}"

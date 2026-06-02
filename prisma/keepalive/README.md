@@ -1,9 +1,10 @@
 # Database keepalive
 
 Singleton table that the `Supabase Keepalive` GitHub Actions workflow updates
-on every run. Supabase's free-tier inactivity detector only counts writes
-against user tables — `SELECT 1;` does not register, which is why this
-table exists.
+on every run. Supabase's free-tier inactivity detector measures activity at
+the auto-generated API (PostgREST) — direct Postgres connections do not
+register. The workflow therefore PATCHes this row through PostgREST so the
+request flows through the layer the detector observes.
 
 ## When to run
 
@@ -17,13 +18,30 @@ The script is idempotent — re-running it is safe.
 
 ## What the workflow does
 
-`.github/workflows/supabase-keepalive.yml` runs every 3 days and executes:
+`.github/workflows/supabase-keepalive.yml` runs every 3 days and sends, for
+each project:
 
-```sql
-UPDATE public._keepalive SET last_ping = now() WHERE id = 1;
+```http
+PATCH https://<project-ref>.supabase.co/rest/v1/_keepalive?id=eq.1
+apikey: <service_role>
+Authorization: Bearer <service_role>
+Content-Type: application/json
+Prefer: return=minimal
+
+{"last_ping": "<runner UTC timestamp, ISO 8601>"}
 ```
 
-against both `SUPABASE_KEEPALIVE_DEV_URL` and `SUPABASE_KEEPALIVE_PROD_URL`.
+Required GitHub secrets:
+
+- `SUPABASE_PROD_SERVICE_ROLE_KEY` — service_role key for `my_tattoo`
+- `SUPABASE_DEV_SERVICE_ROLE_KEY` — service_role key for `my_tattoo_dev`
+
+The project refs are hardcoded in the workflow because they live in the
+public host name.
+
+`service_role` is used so the request bypasses RLS while still being
+explicitly scoped to this single-row table (which has RLS on and revokes
+`anon`/`authenticated` access).
 
 ## Why outside Prisma
 
