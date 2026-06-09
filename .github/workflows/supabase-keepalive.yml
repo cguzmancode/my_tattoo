@@ -1,12 +1,10 @@
 name: Supabase Keepalive
 
 # Free-tier Supabase projects pause after 7 days of inactivity.
-# Activity is measured at the auto-generated API layer (PostgREST), NOT at
-# the Postgres connection layer — direct psql writes do not register. We
-# therefore PATCH the public._keepalive row via PostgREST so the request
-# flows through the layer the inactivity detector observes.
-#
-# The _keepalive table is seeded by prisma/keepalive/01-init.sql.
+# The auto-pause detector ignores service_role traffic (treated as internal
+# admin activity). We hit /auth/v1/settings with the anon key — the same
+# request the supabase-js SDK makes when a client initializes, so it counts
+# as real user traffic.
 
 on:
   schedule:
@@ -17,29 +15,23 @@ jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping prod project (my_tattoo) via PostgREST
+      - name: Ping prod project (my_tattoo)
         env:
           PROJECT_REF: rxkycdzfylerkffnpony
-          SERVICE_ROLE: ${{ secrets.SUPABASE_PROD_SERVICE_ROLE_KEY }}
+          ANON_KEY: ${{ secrets.SUPABASE_PROD_ANON_KEY }}
         run: |
-          curl -fsS -w "\nHTTP %{http_code}\n" -X PATCH \
-            "https://${PROJECT_REF}.supabase.co/rest/v1/_keepalive?id=eq.1" \
-            -H "apikey: ${SERVICE_ROLE}" \
-            -H "Authorization: Bearer ${SERVICE_ROLE}" \
-            -H "Content-Type: application/json" \
-            -H "Prefer: return=minimal" \
-            -d "{\"last_ping\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}"
+          curl -fsS -w "\nHTTP %{http_code}\n" \
+            "https://${PROJECT_REF}.supabase.co/auth/v1/settings" \
+            -H "apikey: ${ANON_KEY}" \
+            -H "Authorization: Bearer ${ANON_KEY}"
 
-      - name: Ping dev project (my_tattoo_dev) via PostgREST
+      - name: Ping dev project (my_tattoo_dev)
         if: always()
         env:
           PROJECT_REF: pmcdrhgjycowyttdvvdo
-          SERVICE_ROLE: ${{ secrets.SUPABASE_DEV_SERVICE_ROLE_KEY }}
+          ANON_KEY: ${{ secrets.SUPABASE_DEV_ANON_KEY }}
         run: |
-          curl -fsS -w "\nHTTP %{http_code}\n" -X PATCH \
-            "https://${PROJECT_REF}.supabase.co/rest/v1/_keepalive?id=eq.1" \
-            -H "apikey: ${SERVICE_ROLE}" \
-            -H "Authorization: Bearer ${SERVICE_ROLE}" \
-            -H "Content-Type: application/json" \
-            -H "Prefer: return=minimal" \
-            -d "{\"last_ping\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}"
+          curl -fsS -w "\nHTTP %{http_code}\n" \
+            "https://${PROJECT_REF}.supabase.co/auth/v1/settings" \
+            -H "apikey: ${ANON_KEY}" \
+            -H "Authorization: Bearer ${ANON_KEY}"
