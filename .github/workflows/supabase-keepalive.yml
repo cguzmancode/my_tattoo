@@ -1,10 +1,11 @@
 name: Supabase Keepalive
 
-# Free-tier Supabase projects pause after 7 days of inactivity.
-# The auto-pause detector ignores service_role traffic (treated as internal
-# admin activity). We hit /auth/v1/settings with the anon key — the same
-# request the supabase-js SDK makes when a client initializes, so it counts
-# as real user traffic.
+# Free-tier Supabase projects pause after 7 days of inactivity. The detector
+# is driven by DATABASE activity, not Auth config reads — hitting
+# /auth/v1/settings does NOT touch Postgres and never resets the timer.
+# Instead we call the public.keepalive() RPC via PostgREST: it runs a trivial
+# query against Postgres, so the ping registers as real database activity.
+# The function returns only server time and reads no application data.
 
 on:
   schedule:
@@ -20,10 +21,12 @@ jobs:
           PROJECT_REF: rxkycdzfylerkffnpony
           ANON_KEY: ${{ secrets.SUPABASE_PROD_ANON_KEY }}
         run: |
-          curl -fsS -w "\nHTTP %{http_code}\n" \
-            "https://${PROJECT_REF}.supabase.co/auth/v1/settings" \
+          curl -fsS -w "\nHTTP %{http_code}\n" -X POST \
+            "https://${PROJECT_REF}.supabase.co/rest/v1/rpc/keepalive" \
             -H "apikey: ${ANON_KEY}" \
-            -H "Authorization: Bearer ${ANON_KEY}"
+            -H "Authorization: Bearer ${ANON_KEY}" \
+            -H "Content-Type: application/json" \
+            -d '{}'
 
       - name: Ping dev project (my_tattoo_dev)
         if: always()
@@ -31,7 +34,9 @@ jobs:
           PROJECT_REF: pmcdrhgjycowyttdvvdo
           ANON_KEY: ${{ secrets.SUPABASE_DEV_ANON_KEY }}
         run: |
-          curl -fsS -w "\nHTTP %{http_code}\n" \
-            "https://${PROJECT_REF}.supabase.co/auth/v1/settings" \
+          curl -fsS -w "\nHTTP %{http_code}\n" -X POST \
+            "https://${PROJECT_REF}.supabase.co/rest/v1/rpc/keepalive" \
             -H "apikey: ${ANON_KEY}" \
-            -H "Authorization: Bearer ${ANON_KEY}"
+            -H "Authorization: Bearer ${ANON_KEY}" \
+            -H "Content-Type: application/json" \
+            -d '{}'
