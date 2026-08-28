@@ -2,8 +2,6 @@ name: Deploy to Production on Tag
 
 on:
   push:
-    branches:
-      - master
     tags:
       - 'v*'
 
