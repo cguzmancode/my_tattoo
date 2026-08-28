@@ -1,6 +1,9 @@
 import { z } from 'zod'
 
 const bookingSchema = z.object({
+  artistSlug: z
+    .string()
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Invalid artist slug'),
   clientName: z.string().min(1, 'Name is required'),
   clientEmail: z.string().email('Invalid email format'),
   bodyZone: z.string().min(1, 'Body zone is required'),

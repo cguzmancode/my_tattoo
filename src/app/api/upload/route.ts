@@ -1,8 +1,7 @@
 import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
-
-const MAX_FILE_SIZE = 2 * 1024 * 1024 // 2MB
+import { safeExtensionFor, validateImageFile } from '@/lib/uploads/image-validation'
 
 export async function POST(request: Request) {
   try {
@@ -19,19 +18,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
     }
 
-    // Validate file size
-    if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json({ error: 'File too large (max 2MB)' }, { status: 400 })
+    const validation = validateImageFile(file)
+    if (!validation.ok) {
+      return NextResponse.json({ error: validation.error }, { status: 400 })
     }
 
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
-    if (!allowedTypes.includes(file.type)) {
-      return NextResponse.json({ error: 'Invalid file type' }, { status: 400 })
-    }
-
-    // Sanitize extension - only allow safe extensions
-    const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
-    const safeExt = ['jpg', 'jpeg', 'png', 'webp'].includes(ext) ? ext : 'jpg'
+    // La extensión se deriva del MIME type validado, nunca del nombre del fichero
+    const safeExt = safeExtensionFor(file.type)
     const uniqueFilename = `${userId}/${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${safeExt}`
 
     // NOTE: Using service role key because authenticated users need to upload

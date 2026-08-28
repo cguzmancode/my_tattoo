@@ -1,16 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createElement } from 'react'
 import { render as renderEmail } from '@react-email/components'
+import { prisma } from '@/lib/prisma'
 import { createBooking } from '@/lib/api/bookings'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { rateLimitMiddleware } from '@/lib/rate-limit'
 import { validateBooking } from '@/lib/schemas/booking'
+import {
+  MAX_FILES_PER_BOOKING,
+  safeExtensionFor,
+  validateImageFile,
+} from '@/lib/uploads/image-validation'
 import { DEMO_ARTIST } from '@/lib/mocks'
 import { BookingSubmittedTemplate } from '@/lib/email/templates'
 
 export async function POST(request: NextRequest) {
   // Aplicar rate limiting: 5 requests por minuto
-  const rateLimitResult = rateLimitMiddleware(request, { maxRequests: 5, windowMs: 60000 })
+  const rateLimitResult = await rateLimitMiddleware(request, { maxRequests: 5, windowMs: 60000 })
   if (!rateLimitResult.success) {
     return NextResponse.json(
       { success: false, error: rateLimitResult.error },
@@ -38,8 +44,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validar con Zod schema
+    // Validar con Zod schema (incluye el formato del slug, que luego se usa
+    // como segmento de ruta en Storage)
     const validation = validateBooking({
+      artistSlug,
       clientName,
       clientEmail,
       bodyZone,
@@ -79,11 +87,41 @@ export async function POST(request: NextRequest) {
       })
     }
 
+    // Resolver el artista ANTES de tocar Storage: un slug inexistente no debe
+    // dejar ningún fichero escrito.
+    const artist = await prisma.artist.findUnique({
+      where: { slug: artistSlug },
+      select: { id: true },
+    })
+    if (!artist) {
+      return NextResponse.json(
+        { success: false, error: 'Artist not found' },
+        { status: 404 }
+      )
+    }
+
     // Extraer imágenes
     const images: File[] = []
     for (const [key, value] of formData.entries()) {
       if (key.startsWith('image_') && value instanceof File) {
         images.push(value)
+      }
+    }
+
+    // Validar TODAS las imágenes antes de subir ninguna
+    if (images.length > MAX_FILES_PER_BOOKING) {
+      return NextResponse.json(
+        { success: false, error: `Too many files (max ${MAX_FILES_PER_BOOKING})` },
+        { status: 400 }
+      )
+    }
+    for (const image of images) {
+      const result = validateImageFile(image)
+      if (!result.ok) {
+        return NextResponse.json(
+          { success: false, error: result.error },
+          { status: 400 }
+        )
       }
     }
 
@@ -96,13 +134,14 @@ export async function POST(request: NextRequest) {
         // Generar nombre único
         const timestamp = Date.now()
         const random = Math.random().toString(36).substring(2, 9)
-        const filename = `bookings/${artistSlug}/${timestamp}-${random}.jpg`
+        const ext = safeExtensionFor(image.type)
+        const filename = `bookings/${artistSlug}/${timestamp}-${random}.${ext}`
 
         // Subir archivo
         const { error: uploadError } = await supabase.storage
           .from('portfolio')
           .upload(filename, image, {
-            contentType: 'image/jpeg',
+            contentType: image.type,
             cacheControl: '3600',
           })
 
