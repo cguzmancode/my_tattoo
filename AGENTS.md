@@ -92,6 +92,7 @@ import { prisma } from '@/lib/prisma'
 
 **Security scripts** (not expressed in `schema.prisma`):
 - Apply RLS + role revokes via `psql "$DATABASE_URL" -f prisma/security/01-rls-lockdown.sql` after `pnpm db:push` on a fresh DB.
+- Rate limiting is Postgres-backed: create its table with `psql "$DATABASE_URL" -f prisma/rate-limit/01-init.sql` (idempotent; the limiter fails open if the table is missing).
 - See `prisma/security/README.md` for details.
 
 ---

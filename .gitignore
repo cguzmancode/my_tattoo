@@ -51,4 +51,7 @@ skills-lock.json
 # IDE
 /.idea/
 
+# local agent tooling
+/.atl/
+
 /src/generated/prisma

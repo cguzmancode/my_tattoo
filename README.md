@@ -8,6 +8,14 @@ Proyecto personal construido sobre el stack más reciente de Next.js + Prisma + 
 
 ---
 
+## 📸 Capturas
+
+| Calendario | Detalle de cita |
+|---|---|
+| ![Calendario](./screenshots/calendario.png) | ![Detalle de cita](./screenshots/detalle_cita.png) |
+
+---
+
 ## 🧱 Stack
 
 | Capa             | Tecnología                                  |
@@ -110,7 +118,10 @@ pnpm db:push
 # 4. Aplicar la lockdown de RLS y revokes (idempotente)
 psql "$DATABASE_URL" -f prisma/security/01-rls-lockdown.sql
 
-# 5. Servidor de desarrollo
+# 5. Crear la tabla del rate limiter (idempotente)
+psql "$DATABASE_URL" -f prisma/rate-limit/01-init.sql
+
+# 6. Servidor de desarrollo
 pnpm dev
 ```
 

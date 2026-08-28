@@ -8,6 +8,14 @@ Personal project built on the latest Next.js + Prisma + Clerk + Supabase stack, 
 
 ---
 
+## 📸 Screenshots
+
+| Calendar | Booking detail |
+|---|---|
+| ![Calendar](./screenshots/calendario.png) | ![Booking detail](./screenshots/detalle_cita.png) |
+
+---
+
 ## 🧱 Stack
 
 | Layer            | Tech                                        |
@@ -110,7 +118,10 @@ pnpm db:push
 # 4. Apply the RLS lockdown and revokes (idempotent)
 psql "$DATABASE_URL" -f prisma/security/01-rls-lockdown.sql
 
-# 5. Dev server
+# 5. Create the rate limiter table (idempotent)
+psql "$DATABASE_URL" -f prisma/rate-limit/01-init.sql
+
+# 6. Dev server
 pnpm dev
 ```
 

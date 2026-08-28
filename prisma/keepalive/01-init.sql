@@ -1,12 +1,29 @@
--- Keepalive heartbeat table. The GitHub Actions keepalive workflow updates
--- this row periodically so Supabase counts the project as active and does
--- not pause it for inactivity.
+-- Keepalive RPC. The GitHub Actions keepalive workflow calls
+-- public.keepalive() through PostgREST so Supabase counts the project as
+-- active and does not pause it for inactivity.
 --
--- A plain `SELECT 1;` is not enough — Supabase's inactivity detector tracks
--- writes against user tables. An UPDATE on this row is what registers.
+-- The free-tier inactivity detector measures activity arriving through the
+-- auto-generated API (PostgREST) — direct Postgres connections and Auth
+-- config reads do not register. A trivial SQL function invoked via
+-- /rest/v1/rpc/ is enough: the request flows through the layer the
+-- detector observes and executes real SQL against Postgres.
+--
+-- This matches the function deployed on both projects (verified 2026-08-28).
+-- Functions default to EXECUTE for PUBLIC, which covers the anon role the
+-- workflow authenticates with. It exposes only the server time.
 --
 -- This script is idempotent: re-running it is safe.
 
+CREATE OR REPLACE FUNCTION public.keepalive()
+RETURNS timestamptz
+LANGUAGE sql
+AS $$
+  select now();
+$$;
+
+-- Legacy of the earlier PATCH-based keepalive iteration. The current RPC
+-- does not touch it; it stays locked down (RLS on, API roles revoked) and
+-- harmless. Kept here so a fresh database matches the deployed ones.
 CREATE TABLE IF NOT EXISTS public._keepalive (
   id        INT         PRIMARY KEY,
   last_ping TIMESTAMPTZ NOT NULL DEFAULT now()
