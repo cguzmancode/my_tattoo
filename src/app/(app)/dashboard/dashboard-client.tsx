@@ -1,70 +1,32 @@
 'use client'
 
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Calendar, Clock, DollarSign, TrendingUp, ArrowRight, AlertCircle, ExternalLink, Copy, Check } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
 import { StatusBadge } from '@/components/dashboard/status-badge'
-import { ArtistStatsDashboard } from '@/components/dashboard/artist-stats-dashboard'
 import { EmptyBookings } from '@/components/ui/empty-state'
 import { useToast } from '@/components/ui/toast'
-import { MockBooking } from '@/lib/mocks'
 import { BookingDetailDrawer } from '@/components/dashboard/booking-detail-drawer'
+import type { DashboardArtist, DashboardBooking, DashboardStats } from '@/types/dashboard'
 import { useBookingMessages } from '@/hooks/use-booking-messages'
 
-interface Artist {
-  id: string
-  name: string
-  slug: string
-  bio?: string | null
-  styles?: string[] | null
-  depositAmount?: number | null
-  instagramUrl?: string | null
-}
-
-interface Stats {
-  totalBookings: number
-  pendingBookings: number
-  acceptedBookings: number
-  confirmedBookings: number
-  cancelledBookings: number
-  thisWeek: number
-  thisMonth: number
-}
-
-interface Booking {
-  id: string
-  clientName: string
-  clientEmail: string
-  clientPhone?: string | null
-  bodyZone: string
-  size: string
-  description: string
-  style?: string
-  referenceImages: string[]
-  preferredDates: Date[]
-  status: 'PENDING' | 'ACCEPTED' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED'
-  createdAt: Date
-  updatedAt: Date
-  artistId: string
-}
-
 interface DashboardClientProps {
-  artist: Artist
-  bookings: Booking[]
-  stats: Stats
+  artist: DashboardArtist
+  bookings: DashboardBooking[]
+  stats: DashboardStats
   isDemo?: boolean
 }
 
 export function DashboardClient({ artist, bookings, stats, isDemo }: DashboardClientProps) {
   const { showToast } = useToast()
   const [copied, setCopied] = useState(false)
-  const [selectedBooking, setSelectedBooking] = useState<MockBooking | null>(null)
+  const [selectedBooking, setSelectedBooking] = useState<DashboardBooking | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const refreshMessages = useBookingMessages(selectedBooking, setSelectedBooking)
 
-  const handleOpenBooking = (booking: Booking) => {
-    setSelectedBooking(booking as unknown as MockBooking)
+  const handleOpenBooking = (booking: DashboardBooking) => {
+    setSelectedBooking(booking)
     setIsDrawerOpen(true)
   }
 
@@ -94,7 +56,7 @@ export function DashboardClient({ artist, bookings, stats, isDemo }: DashboardCl
     if (navigator.share) {
       try {
         await navigator.share(shareData)
-      } catch (err) {
+      } catch {
         // User cancelled or share failed
       }
     } else {
@@ -281,8 +243,8 @@ export function DashboardClient({ artist, bookings, stats, isDemo }: DashboardCl
                 <div className="flex items-center gap-6">
                   <div className="text-right hidden sm:block">
                     <p className="text-sm text-[#a1a1a1]">
-                      {(booking as any).proposedDate
-                        ? new Date((booking as any).proposedDate).toLocaleDateString('es-ES', {
+                      {booking.proposedDate
+                        ? booking.proposedDate.toLocaleDateString('es-ES', {
                             day: 'numeric',
                             month: 'short'
                           })

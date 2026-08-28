@@ -6,7 +6,7 @@ import { blockDate, unblockDateByDate } from '@/app/actions/calendar'
 import { getBookingById } from '@/app/actions/bookings'
 import { useToast } from '@/components/ui/toast'
 import { BookingDetailDrawer } from '@/components/dashboard/booking-detail-drawer'
-import { MockBooking } from '@/lib/mocks'
+import type { DashboardBooking } from '@/types/dashboard'
 import { useBookingMessages } from '@/hooks/use-booking-messages'
 
 interface CalendarClientProps {
@@ -18,17 +18,16 @@ interface CalendarClientProps {
     status: string
   }>
   blockedDates: Date[]
-  artistId: string
 }
 
-export function CalendarClient({ events: initialEvents, blockedDates: initialBlockedDates, artistId }: CalendarClientProps) {
+export function CalendarClient({ events: initialEvents, blockedDates: initialBlockedDates }: CalendarClientProps) {
   const [events, setEvents] = useState(initialEvents)
   const [blockedDates, setBlockedDates] = useState<Date[]>(initialBlockedDates)
-  const [isPending, startTransition] = useTransition()
+  const [, startTransition] = useTransition()
   const { showToast } = useToast()
   
   // Drawer state
-  const [selectedBooking, setSelectedBooking] = useState<MockBooking | null>(null)
+  const [selectedBooking, setSelectedBooking] = useState<DashboardBooking | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const refreshMessages = useBookingMessages(selectedBooking, setSelectedBooking)
 
@@ -80,34 +79,8 @@ export function CalendarClient({ events: initialEvents, blockedDates: initialBlo
     try {
       const bookingData = await getBookingById(bookingId)
 
-      const booking: MockBooking = {
-        id: bookingData.id,
-        clientName: bookingData.clientName,
-        clientEmail: bookingData.clientEmail,
-        clientPhone: bookingData.clientPhone ?? '',
-        bodyZone: bookingData.bodyZone,
-        size: bookingData.size,
-        description: bookingData.description,
-        style: '',
-        referenceImages: bookingData.referenceImages || [],
-        preferredDates: (bookingData.preferredDates || []).map((d: string) => new Date(d)),
-        status: bookingData.status as MockBooking['status'],
-        createdAt: new Date(bookingData.createdAt),
-        updatedAt: new Date(bookingData.updatedAt),
-        artistId: bookingData.artistId,
-        proposedDate: bookingData.proposedDate ? new Date(bookingData.proposedDate) : undefined,
-        priceEstimate: bookingData.priceEstimate || undefined,
-        durationEstimate: bookingData.durationEstimate || undefined,
-        artistNotes: bookingData.artistNotes || undefined,
-        messages: (bookingData.messages || []).map((m) => ({
-          id: m.id,
-          bookingId: m.bookingId,
-          sender: m.sender as 'client' | 'artist',
-          message: m.message,
-          createdAt: new Date(m.createdAt),
-          read: m.read,
-        })),
-      }
+      // getBookingById already returns the Prisma shape the drawer consumes
+      const booking: DashboardBooking = bookingData
 
       setSelectedBooking(booking)
       setIsDrawerOpen(true)

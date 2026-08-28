@@ -7,18 +7,6 @@ const isProtectedRoute = createRouteMatcher([
   '/api/upload',
 ])
 
-// Rutas públicas (no necesitan autenticación)
-const isPublicRoute = createRouteMatcher([
-  '/',
-  '/sign-in(.*)',
-  '/sign-up(.*)',
-  '/t/(.*)',
-  '/api/webhooks/(.*)',
-  '/api/bookings',
-  '/api/bookings/(.*)',
-  '/api/payments',
-])
-
 export default clerkMiddleware(async (auth, req) => {
   // Si es una ruta protegida, requerir autenticación
   if (isProtectedRoute(req)) {

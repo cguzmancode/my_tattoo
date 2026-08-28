@@ -9,10 +9,10 @@ interface BookingDetailEditProps {
   booking: {
     id: string
     status: 'PENDING' | 'ACCEPTED' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED' | 'REJECTED'
-    proposedDate?: Date
-    priceEstimate?: number
-    durationEstimate?: string
-    artistNotes?: string
+    proposedDate?: Date | null
+    priceEstimate?: number | null
+    durationEstimate?: string | null
+    artistNotes?: string | null
   }
   onSave: (data: {
     status: string

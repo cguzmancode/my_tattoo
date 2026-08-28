@@ -53,19 +53,15 @@ export default async function CalendarPage() {
   // Transform bookings to calendar events
   const events = bookings.map((booking) => {
     // Usar proposedDate si existe, si no usar preferredDates[0]
-    const proposedDate = (booking as any).proposedDate
-    const preferredDates = (booking as any).preferredDates
-    
-    const eventDate = proposedDate 
-      ? new Date(proposedDate) 
-      : (preferredDates?.[0] ? new Date(preferredDates[0]) : new Date())
-    
+    const eventDate = booking.proposedDate
+      ?? (booking.preferredDates[0] ? new Date(booking.preferredDates[0]) : new Date())
+
     return {
       id: booking.id,
       date: eventDate,
       type: 'booking' as const,
-      title: (booking as any).clientName,
-      status: (booking as any).status,
+      title: booking.clientName,
+      status: booking.status,
     }
   })
 
@@ -83,7 +79,6 @@ export default async function CalendarPage() {
       <CalendarClient
         events={events}
         blockedDates={blockedDates.map((bd) => new Date(bd.date))}
-        artistId={artist.id}
       />
     </div>
   )

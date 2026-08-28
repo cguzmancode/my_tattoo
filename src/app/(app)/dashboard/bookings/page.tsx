@@ -41,7 +41,7 @@ export default async function BookingsPage() {
 
   return (
     <BookingsClient
-      initialBookings={bookings as any[]}
+      initialBookings={bookings}
       isDemo={isDemo}
     />
   )

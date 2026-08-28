@@ -1,9 +1,9 @@
-import { MockBooking } from '@/lib/mocks'
+import type { DashboardBooking } from '@/types/dashboard'
 import { TattooBookingCard } from './tattoo-booking-card'
 
 interface BookingListProps {
-  bookings?: MockBooking[]
-  onBookingClick?: (booking: MockBooking) => void
+  bookings?: DashboardBooking[]
+  onBookingClick?: (booking: DashboardBooking) => void
 }
 
 export function BookingList({

@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { BookingStatus } from '@prisma/client'
 import { updateBookingStatus } from '@/app/actions/bookings'
 import { updateBookingDetails, checkDateConflicts } from '@/app/actions/booking-details'
+
+type DateConflict = Awaited<ReturnType<typeof checkDateConflicts>>['conflicts'][number]
 import { StatusBadge } from './status-badge'
 import { formatCurrency } from '@/lib/utils'
 import { format } from 'date-fns'
@@ -34,7 +36,7 @@ export function BookingDetail({ booking }: BookingDetailProps) {
   const [loading, setLoading] = useState(false)
   const [editing, setEditing] = useState(false)
   const [showContactModal, setShowContactModal] = useState(false)
-  const [conflicts, setConflicts] = useState<any[]>([])
+  const [conflicts, setConflicts] = useState<DateConflict[]>([])
   const [showConflicts, setShowConflicts] = useState(false)
   
   // Editable fields

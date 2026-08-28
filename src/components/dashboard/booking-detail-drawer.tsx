@@ -2,30 +2,23 @@
 
 import { useEffect, useCallback, useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Phone, Mail, MapPin, Calendar, Clock, DollarSign, Palette, Edit2, CheckCircle, AlertCircle, FileText, MessageCircle, Send } from 'lucide-react'
+import { X, Phone, Mail, MapPin, Calendar, Clock, DollarSign, Palette, Edit2, CheckCircle, AlertCircle, FileText, Send } from 'lucide-react'
 import Image from 'next/image'
 import { StatusBadge } from './status-badge'
 import { BookingDetailEdit } from './booking-detail-edit'
 import { updateBookingStatus } from '@/app/actions/bookings'
 import { addMessageToBooking } from '@/app/actions/booking-public'
 
-import { MockBooking } from '@/lib/mocks'
+import type { DashboardBooking } from '@/types/dashboard'
 
 interface BookingDetailDrawerProps {
   isOpen: boolean
   onClose: () => void
-  booking?: MockBooking | null
+  booking?: DashboardBooking | null
   onBookingUpdated?: (bookingId: string, newDate?: Date) => void
   onRefreshMessages?: () => Promise<void>
 }
 
-interface Message {
-  id: string
-  sender: 'client' | 'artist'
-  message: string
-  createdAt: Date
-  read: boolean
-}
 
 export function BookingDetailDrawer({ isOpen, onClose, booking, onBookingUpdated, onRefreshMessages }: BookingDetailDrawerProps) {
   const [isEditing, setIsEditing] = useState(false)
@@ -38,9 +31,9 @@ export function BookingDetailDrawer({ isOpen, onClose, booking, onBookingUpdated
   // Use messages from booking prop directly (passed from server)
   const messages = useMemo(() => {
     if (!booking?.messages) return []
-    return booking.messages.map((m: any) => ({
+    return booking.messages.map((m) => ({
       ...m,
-      createdAt: m.createdAt instanceof Date ? m.createdAt : new Date(m.createdAt)
+      createdAt: m.createdAt instanceof Date ? m.createdAt : new Date(m.createdAt),
     }))
   }, [booking?.messages])
 
@@ -323,7 +316,7 @@ const handleSendMessage = async (e: React.FormEvent) => {
                       <div className="mt-4 p-4 rounded-xl bg-[#0a0a0a] border border-white/5">
                         <p className="text-xs text-[#525252] mb-2">Descripción</p>
                         <p className="text-sm text-[#a1a1a1] italic leading-relaxed">
-                          "{booking.description}"
+                          &ldquo;{booking.description}&rdquo;
                         </p>
                       </div>
                     </div>

@@ -1,8 +1,9 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Calendar, Clock, ArrowRight } from 'lucide-react'
+import { Clock, ArrowRight } from 'lucide-react'
 import { formatDistanceToNow } from '@/lib/utils'
+import type { BookingStatus } from '@prisma/client'
 
 interface TattooBookingCardProps {
   booking: {
@@ -12,7 +13,7 @@ interface TattooBookingCardProps {
     bodyZone: string
     size: string
     description: string
-    status: 'PENDING' | 'ACCEPTED' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED'
+    status: BookingStatus
     createdAt: Date | string
   }
   onClick?: () => void
@@ -209,7 +210,7 @@ export function TattooBookingCard({ booking, onClick }: TattooBookingCardProps) 
         <div className="flex items-start gap-3 p-3 rounded-lg bg-[#0a0a0a] border border-white/5">
           <span className="text-xl">🎨</span>
           <p className="text-sm text-[#a1a1a1] leading-relaxed italic">
-            "{description}"
+            &ldquo;{description}&rdquo;
           </p>
         </div>
       </div>

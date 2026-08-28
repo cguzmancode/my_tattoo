@@ -3,9 +3,9 @@
 import { useCallback } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { getBookingById } from '@/app/actions/bookings'
-import type { MockBooking } from '@/lib/mocks'
+import type { DashboardBooking } from '@/types/dashboard'
 
-type Setter = Dispatch<SetStateAction<MockBooking | null>>
+type Setter = Dispatch<SetStateAction<DashboardBooking | null>>
 
 /**
  * Re-fetches the selected booking's messages and merges them into the
@@ -14,7 +14,7 @@ type Setter = Dispatch<SetStateAction<MockBooking | null>>
  * sync after the user sends a reply.
  */
 export function useBookingMessages(
-  selectedBooking: MockBooking | null,
+  selectedBooking: DashboardBooking | null,
   setSelectedBooking: Setter,
 ) {
   return useCallback(async () => {
@@ -22,16 +22,8 @@ export function useBookingMessages(
 
     try {
       const bookingData = await getBookingById(selectedBooking.id)
-      const updatedMessages = (bookingData.messages ?? []).map((m) => ({
-        id: m.id,
-        bookingId: m.bookingId,
-        sender: m.sender as 'client' | 'artist',
-        message: m.message,
-        createdAt: new Date(m.createdAt),
-        read: m.read,
-      }))
       setSelectedBooking((prev) =>
-        prev ? { ...prev, messages: updatedMessages } : null,
+        prev ? { ...prev, messages: bookingData.messages ?? [] } : null,
       )
     } catch (error) {
       console.error('Error refreshing messages:', error)

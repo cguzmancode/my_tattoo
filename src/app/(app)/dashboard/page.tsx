@@ -95,8 +95,8 @@ export default async function DashboardPage() {
   return (
     <Suspense fallback={<DashboardSkeleton />}>
       <DashboardClient
-        artist={artist as any}
-        bookings={bookings as any[]}
+        artist={artist}
+        bookings={bookings}
         stats={stats}
         isDemo={!userId}
       />

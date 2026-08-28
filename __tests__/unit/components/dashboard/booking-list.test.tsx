@@ -1,12 +1,12 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { BookingList } from '@/components/dashboard/booking-list'
 import { BookingStatus } from '@prisma/client'
 
-import type { MockBooking } from '@/lib/mocks'
+import type { DashboardBooking } from '@/types/dashboard'
 
 describe('BookingList', () => {
-  const mockBookings: MockBooking[] = [
+  const mockBookings: DashboardBooking[] = [
     {
       id: '1',
       clientName: 'María García',
@@ -17,8 +17,14 @@ describe('BookingList', () => {
       description: 'Minimalist rose',
       style: 'Fine line',
       referenceImages: [],
-      preferredDates: [new Date('2026-06-01')],
+      preferredDates: ['2026-06-01'],
       status: BookingStatus.PENDING,
+      proposedDate: null,
+      priceEstimate: null,
+      durationEstimate: null,
+      artistNotes: null,
+      reminderSent24h: false,
+      reminderSent48h: false,
       createdAt: new Date('2026-05-01'),
       updatedAt: new Date('2026-05-01'),
       artistId: 'demo-artist-001',
@@ -33,8 +39,14 @@ describe('BookingList', () => {
       description: 'Dragon tattoo',
       style: 'Japanese',
       referenceImages: [],
-      preferredDates: [new Date('2026-06-02')],
+      preferredDates: ['2026-06-02'],
       status: BookingStatus.ACCEPTED,
+      proposedDate: null,
+      priceEstimate: null,
+      durationEstimate: null,
+      artistNotes: null,
+      reminderSent24h: false,
+      reminderSent48h: false,
       createdAt: new Date('2026-05-02'),
       updatedAt: new Date('2026-05-02'),
       artistId: 'demo-artist-001',

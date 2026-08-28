@@ -1,5 +1,10 @@
 // Mock data for local development and demo
-// Pure data - no server dependencies
+// Pure data — the only imports are type-only, so nothing leaks to runtime.
+import type {
+  DashboardArtist,
+  DashboardBooking,
+  DashboardStats,
+} from '@/types/dashboard'
 
 export const DEMO_ARTIST = {
   id: 'demo-artist-001',
@@ -21,39 +26,43 @@ export const DEMO_ARTIST = {
   isActive: true,
   createdAt: new Date('2020-01-15'),
   updatedAt: new Date('2024-01-15'),
+} satisfies DashboardArtist
+
+// Fields every fixture shares; the factory keeps each entry focused on what
+// makes it different while the return type guarantees the full Prisma shape.
+type DemoBookingInput = Pick<
+  DashboardBooking,
+  | 'id'
+  | 'clientName'
+  | 'clientEmail'
+  | 'clientPhone'
+  | 'bodyZone'
+  | 'size'
+  | 'description'
+  | 'style'
+  | 'preferredDates'
+  | 'status'
+  | 'createdAt'
+  | 'updatedAt'
+> &
+  Partial<DashboardBooking>
+
+function demoBooking(input: DemoBookingInput): DashboardBooking {
+  return {
+    artistId: DEMO_ARTIST.id,
+    referenceImages: [],
+    proposedDate: null,
+    priceEstimate: null,
+    durationEstimate: null,
+    artistNotes: null,
+    reminderSent24h: false,
+    reminderSent48h: false,
+    ...input,
+  }
 }
 
-export interface MockBooking {
-  id: string
-  clientName: string
-  clientEmail: string
-  clientPhone: string
-  bodyZone: string
-  size: string
-  description: string
-  style: string
-  referenceImages: string[]
-  preferredDates: Date[]
-  status: 'PENDING' | 'ACCEPTED' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED'
-  createdAt: Date
-  updatedAt: Date
-  artistId: string
-  proposedDate?: Date
-  priceEstimate?: number
-  durationEstimate?: string
-  artistNotes?: string
-  messages?: Array<{
-    id: string
-    bookingId: string
-    sender: 'client' | 'artist'
-    message: string
-    createdAt: Date
-    read: boolean
-  }>
-}
-
-export const DEMO_BOOKINGS: MockBooking[] = [
-  {
+export const DEMO_BOOKINGS: DashboardBooking[] = [
+  demoBooking({
     id: 'booking-001',
     clientName: 'María García',
     clientEmail: 'maria@example.com',
@@ -62,14 +71,12 @@ export const DEMO_BOOKINGS: MockBooking[] = [
     size: 'Medium (10-15cm)',
     description: 'Quiero un diseño de una rosa tradicional con un banner que diga "Mamá". Colores vivos, estilo old school.',
     style: 'Traditional',
-    referenceImages: [],
-    preferredDates: [new Date('2024-02-15'), new Date('2024-02-16')],
-    status: 'PENDING' as const,
+    preferredDates: ['2024-02-15', '2024-02-16'],
+    status: 'PENDING',
     createdAt: new Date('2024-01-10'),
     updatedAt: new Date('2024-01-10'),
-    artistId: 'demo-artist-001',
-  },
-  {
+  }),
+  demoBooking({
     id: 'booking-002',
     clientName: 'Carlos Rodríguez',
     clientEmail: 'carlos@example.com',
@@ -78,14 +85,12 @@ export const DEMO_BOOKINGS: MockBooking[] = [
     size: 'Large (20-30cm)',
     description: 'Dragón japonés estilo irezumi, en blanco y negro con sombreado. Diseño que se extienda por el pecho.',
     style: 'Japanese',
-    referenceImages: [],
-    preferredDates: [new Date('2024-02-20')],
-    status: 'PENDING' as const,
+    preferredDates: ['2024-02-20'],
+    status: 'PENDING',
     createdAt: new Date('2024-01-12'),
     updatedAt: new Date('2024-01-12'),
-    artistId: 'demo-artist-001',
-  },
-  {
+  }),
+  demoBooking({
     id: 'booking-003',
     clientName: 'Laura Martínez',
     clientEmail: 'laura@example.com',
@@ -94,14 +99,12 @@ export const DEMO_BOOKINGS: MockBooking[] = [
     size: 'Small (5-8cm)',
     description: 'Tatuaje minimalista de una luna con una cara sutil. Estilo fine line.',
     style: 'Minimalist',
-    referenceImages: [],
-    preferredDates: [new Date('2024-02-10')],
-    status: 'ACCEPTED' as const,
+    preferredDates: ['2024-02-10'],
+    status: 'ACCEPTED',
     createdAt: new Date('2024-01-08'),
     updatedAt: new Date('2024-01-11'),
-    artistId: 'demo-artist-001',
-  },
-  {
+  }),
+  demoBooking({
     id: 'booking-004',
     clientName: 'Juan López',
     clientEmail: 'juan@example.com',
@@ -110,14 +113,12 @@ export const DEMO_BOOKINGS: MockBooking[] = [
     size: 'Extra Large (Full Back)',
     description: 'Calavera mexicana con elementos florales y un reloj. Estilo neotradicional a color.',
     style: 'Neotraditional',
-    referenceImages: [],
-    preferredDates: [new Date('2024-03-01'), new Date('2024-03-02')],
-    status: 'ACCEPTED' as const,
+    preferredDates: ['2024-03-01', '2024-03-02'],
+    status: 'ACCEPTED',
     createdAt: new Date('2024-01-05'),
     updatedAt: new Date('2024-01-09'),
-    artistId: 'demo-artist-001',
-  },
-  {
+  }),
+  demoBooking({
     id: 'booking-005',
     clientName: 'Ana Fernández',
     clientEmail: 'ana@example.com',
@@ -126,14 +127,12 @@ export const DEMO_BOOKINGS: MockBooking[] = [
     size: 'Large (20-25cm)',
     description: 'Serpiente enroscada con rosas y dagas. Estilo tradicional con colores vivos.',
     style: 'Traditional',
-    referenceImages: [],
-    preferredDates: [new Date('2024-01-25')],
-    status: 'CONFIRMED' as const,
+    preferredDates: ['2024-01-25'],
+    status: 'CONFIRMED',
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-06'),
-    artistId: 'demo-artist-001',
-  },
-  {
+  }),
+  demoBooking({
     id: 'booking-006',
     clientName: 'Pedro Sánchez',
     clientEmail: 'pedro@example.com',
@@ -142,14 +141,12 @@ export const DEMO_BOOKINGS: MockBooking[] = [
     size: 'Medium (12-18cm)',
     description: 'Ancla con cadenas y rosas. Estilo tradicional americano, colores sólidos.',
     style: 'Traditional',
-    referenceImages: [],
-    preferredDates: [new Date('2024-01-28')],
-    status: 'CONFIRMED' as const,
+    preferredDates: ['2024-01-28'],
+    status: 'CONFIRMED',
     createdAt: new Date('2023-12-28'),
     updatedAt: new Date('2024-01-03'),
-    artistId: 'demo-artist-001',
-  },
-  {
+  }),
+  demoBooking({
     id: 'booking-007',
     clientName: 'Sofía Ruiz',
     clientEmail: 'sofia@example.com',
@@ -158,14 +155,12 @@ export const DEMO_BOOKINGS: MockBooking[] = [
     size: 'Small (5-7cm)',
     description: 'Letras con el nombre de mi hija en estilo script.',
     style: 'Script',
-    referenceImages: [],
-    preferredDates: [new Date('2024-01-20')],
-    status: 'CANCELLED' as const,
+    preferredDates: ['2024-01-20'],
+    status: 'CANCELLED',
     createdAt: new Date('2024-01-03'),
     updatedAt: new Date('2024-01-07'),
-    artistId: 'demo-artist-001',
-  },
-  {
+  }),
+  demoBooking({
     id: 'booking-008',
     clientName: 'Miguel Torres',
     clientEmail: 'miguel@example.com',
@@ -174,13 +169,11 @@ export const DEMO_BOOKINGS: MockBooking[] = [
     size: 'Medium (10-14cm)',
     description: 'Lobo aullando a la luna con bosque de fondo. Estilo blackwork.',
     style: 'Blackwork',
-    referenceImages: [],
-    preferredDates: [new Date('2024-02-05')],
-    status: 'PENDING' as const,
+    preferredDates: ['2024-02-05'],
+    status: 'PENDING',
     createdAt: new Date('2024-01-13'),
     updatedAt: new Date('2024-01-13'),
-    artistId: 'demo-artist-001',
-  },
+  }),
 ]
 
 export const DEMO_BLOCKED_DATES = [
@@ -189,7 +182,7 @@ export const DEMO_BLOCKED_DATES = [
   { id: 'blocked-003', date: new Date('2024-02-14'), artistId: 'demo-artist-001', reason: 'Holiday' },
 ]
 
-export const DEMO_STATS = {
+export const DEMO_STATS: DashboardStats = {
   totalBookings: 24,
   pendingBookings: 3,
   acceptedBookings: 2,

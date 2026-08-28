@@ -5,13 +5,12 @@ import { motion } from 'framer-motion'
 import { Calendar, Filter, Search, AlertCircle } from 'lucide-react'
 import { BookingList } from '@/components/dashboard/booking-list'
 import { BookingDetailDrawer } from '@/components/dashboard/booking-detail-drawer'
-import { MockBooking } from '@/lib/mocks'
+import type { BookingStatus } from '@prisma/client'
+import type { DashboardBooking } from '@/types/dashboard'
 import { useBookingMessages } from '@/hooks/use-booking-messages'
 
-type BookingStatus = 'PENDING' | 'ACCEPTED' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED'
-
 interface BookingsClientProps {
-  initialBookings: MockBooking[]
+  initialBookings: DashboardBooking[]
   isDemo?: boolean
 }
 
@@ -25,7 +24,7 @@ const statusFilters: { value: BookingStatus | 'ALL'; label: string }[] = [
 ]
 
 export function BookingsClient({ initialBookings, isDemo }: BookingsClientProps) {
-  const [selectedBooking, setSelectedBooking] = useState<MockBooking | null>(null)
+  const [selectedBooking, setSelectedBooking] = useState<DashboardBooking | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<BookingStatus | 'ALL'>('ALL')
@@ -53,7 +52,7 @@ export function BookingsClient({ initialBookings, isDemo }: BookingsClientProps)
     return result
   }, [initialBookings, statusFilter, searchQuery])
 
-  const handleBookingClick = (booking: MockBooking) => {
+  const handleBookingClick = (booking: DashboardBooking) => {
     setSelectedBooking(booking)
     setIsDrawerOpen(true)
   }
