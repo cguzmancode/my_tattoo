@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { generateSlug } from '@/lib/utils'
 
-interface ClerkEvent {
+export interface ClerkEvent {
   type: string
   data: {
     id: string
