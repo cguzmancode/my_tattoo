@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test } from '@playwright/test'
 
 // Este test genera screenshots de todas las páginas para preview visual
 test.describe('📸 Screenshot Preview - UX Redesign', () => {

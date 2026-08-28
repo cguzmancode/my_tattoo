@@ -1,9 +1,10 @@
 import { describe, it, expect, beforeAll } from 'vitest'
+import type { Artist, Booking } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 
 describe('Messages Integration Tests', () => {
-  let testArtist: any
-  let testBooking: any
+  let testArtist: Artist
+  let testBooking: Booking
 
   beforeAll(async () => {
     // Create test artist

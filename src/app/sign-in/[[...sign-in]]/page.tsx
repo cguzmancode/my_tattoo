@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { SignIn } from '@clerk/nextjs'
 import { motion } from 'framer-motion'
 import { TattooNeedle } from '@/components/icons/tattoo-needle'
@@ -101,9 +102,9 @@ fallbackRedirectUrl="/dashboard"
           className="text-center mt-8 text-[#525252] text-sm"
         >
           ¿No tienes cuenta?{' '}
-          <a href="/sign-up" className="text-[#ff6b35] hover:text-[#ff8555] transition-colors font-medium">
+          <Link href="/sign-up" className="text-[#ff6b35] hover:text-[#ff8555] transition-colors font-medium">
             Regístrate gratis
-          </a>
+          </Link>
         </motion.p>
       </motion.div>
     </div>

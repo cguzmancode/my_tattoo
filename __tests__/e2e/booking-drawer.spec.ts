@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test } from '@playwright/test'
 
 test.describe('📸 Booking Detail Drawer', () => {
   test('Drawer - Vista de detalle', async ({ page }) => {

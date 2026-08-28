@@ -169,7 +169,7 @@ export function TattooPreviewCard({ booking, onClick }: TattooPreviewCardProps) 
 
         {/* Description preview */}
         <p className="text-sm text-[#a1a1a1] line-clamp-2 italic">
-          "{booking.description}"
+          &ldquo;{booking.description}&rdquo;
         </p>
 
         {/* Timeline */}

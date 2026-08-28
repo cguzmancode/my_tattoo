@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { SignUp } from '@clerk/nextjs'
 import { motion } from 'framer-motion'
 import { TattooNeedle } from '@/components/icons/tattoo-needle'
@@ -101,9 +102,9 @@ export default function SignUpPage() {
           className="text-center mt-8 text-[#525252] text-sm"
         >
           ¿Ya tienes cuenta?{' '}
-          <a href="/sign-in" className="text-[#ff6b35] hover:text-[#ff8555] transition-colors font-medium">
+          <Link href="/sign-in" className="text-[#ff6b35] hover:text-[#ff8555] transition-colors font-medium">
             Inicia sesión
-          </a>
+          </Link>
         </motion.p>
       </motion.div>
     </div>

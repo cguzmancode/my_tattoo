@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { Send, CheckCircle, AlertCircle, Loader2, ChevronDown } from 'lucide-react'
 import { BodyZoneSelector } from '@/components/body-zone/body-zone-selector'
 import { ImageUpload } from '@/components/ui/image-upload'
@@ -29,7 +28,6 @@ const sizes = [
 ]
 
 export function BookingRequestForm({ artistSlug }: BookingRequestFormProps) {
-  const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [isDemoSuccess, setIsDemoSuccess] = useState(false)

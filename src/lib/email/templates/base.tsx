@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Html, Head, Body, Container, Section, Text, Link, Button, Hr } from '@react-email/components'
+import { Html, Head, Body, Container, Section, Text, Link, Hr } from '@react-email/components'
 
 interface BaseEmailProps {
   children: React.ReactNode

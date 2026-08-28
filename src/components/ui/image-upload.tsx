@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Upload, X, Image as ImageIcon, AlertCircle, Check } from 'lucide-react'
+import { Upload, X, AlertCircle, Check } from 'lucide-react'
 import Image from 'next/image'
 
 interface ImageUploadProps {
@@ -33,7 +33,7 @@ export function ImageUpload({
 
   const maxSizeBytes = maxSizeMB * 1024 * 1024
 
-  const validateFile = (file: File): string | null => {
+  const validateFile = useCallback((file: File): string | null => {
     if (!file.type.startsWith('image/')) {
       return `${file.name} no es una imagen válida`
     }
@@ -41,7 +41,7 @@ export function ImageUpload({
       return `${file.name} excede el límite de ${maxSizeMB}MB`
     }
     return null
-  }
+  }, [maxSizeBytes, maxSizeMB])
 
   const compressImage = async (file: File): Promise<File> => {
     return new Promise((resolve) => {
@@ -129,7 +129,7 @@ export function ImageUpload({
       setPreviews((prev) => [...prev, ...newPreviews])
       onFilesSelected(validFiles)
     }
-  }, [maxFiles, maxSizeBytes, onFilesSelected, previews.length])
+  }, [maxFiles, onFilesSelected, previews.length, validateFile])
 
   const handleDrop = useCallback(
     async (e: React.DragEvent) => {

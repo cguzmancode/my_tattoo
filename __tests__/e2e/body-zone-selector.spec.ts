@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test } from '@playwright/test'
 
 test.describe('🎯 Body Zone Selector', () => {
   test('Screenshot - Body Zone Selector en formulario', async ({ page }) => {

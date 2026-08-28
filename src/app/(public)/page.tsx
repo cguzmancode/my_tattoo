@@ -7,7 +7,7 @@ import { TattooNeedle } from '@/components/icons/tattoo-needle'
 import { useAuth } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
-import { DEMO_ARTIST, DEMO_STATS } from '@/lib/mocks'
+import { DEMO_ARTIST } from '@/lib/mocks'
 import { EnterAsDemoButton } from '@/components/public/enter-as-demo-button'
 
 const features = [

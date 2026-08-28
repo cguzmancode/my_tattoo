@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { CompleteBookingUseCase } from './complete-booking'
 import { AcceptBookingUseCase } from './accept-booking'
 import { ConfirmBookingUseCase } from './confirm-booking'

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { prisma } from '@/lib/prisma'
 import { currentUser, auth } from '@clerk/nextjs/server'
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { POST as onboardingPOST } from '@/app/api/onboarding/route'
 
 // Mock Clerk
@@ -34,8 +34,8 @@ describe('POST /api/onboarding', () => {
       lastName: 'Artist',
     }
     
-    vi.mocked(currentUser).mockResolvedValue(mockUser as any)
-    vi.mocked(auth).mockResolvedValue({ userId: 'test_clerk_id_123' } as any)
+    vi.mocked(currentUser).mockResolvedValue(mockUser as unknown as Awaited<ReturnType<typeof currentUser>>)
+    vi.mocked(auth).mockResolvedValue({ userId: 'test_clerk_id_123' } as unknown as Awaited<ReturnType<typeof auth>>)
 
     const formData = {
       name: 'Test Tattoo Artist',
@@ -90,8 +90,8 @@ describe('POST /api/onboarding', () => {
       lastName: 'Artist',
     }
     
-    vi.mocked(currentUser).mockResolvedValue(mockUser as any)
-    vi.mocked(auth).mockResolvedValue({ userId: 'existing_clerk_id' } as any)
+    vi.mocked(currentUser).mockResolvedValue(mockUser as unknown as Awaited<ReturnType<typeof currentUser>>)
+    vi.mocked(auth).mockResolvedValue({ userId: 'existing_clerk_id' } as unknown as Awaited<ReturnType<typeof auth>>)
 
     const formData = {
       name: 'Updated Artist Name',
@@ -125,8 +125,8 @@ describe('POST /api/onboarding', () => {
 
   it('should return 401 if user is not authenticated', async () => {
     // Arrange: No auth
-    vi.mocked(auth).mockResolvedValue({ userId: null } as any)
-    vi.mocked(currentUser).mockResolvedValue(null as any)
+    vi.mocked(auth).mockResolvedValue({ userId: null } as unknown as Awaited<ReturnType<typeof auth>>)
+    vi.mocked(currentUser).mockResolvedValue(null)
 
     // Create a mock request
     const request = new NextRequest('http://localhost:3000/api/onboarding', {

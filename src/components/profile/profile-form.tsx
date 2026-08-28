@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Save, Loader2, User, Link as LinkIcon, DollarSign, FileText, Image as ImageIcon, CheckCircle, AlertCircle, Sparkles } from 'lucide-react'
 import { updateProfile } from '@/app/actions/profile'
-import { uploadImage as uploadImageAction, deleteImage } from '@/app/actions/upload'
+import { deleteImage } from '@/app/actions/upload'
 import { generateSlug } from '@/lib/utils'
 import { ImageUpload } from '@/components/ui/image-upload'
 

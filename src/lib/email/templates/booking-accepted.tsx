@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Text, Link } from '@react-email/components'
+import { Text } from '@react-email/components'
 import { BookingEmailTemplate } from './base'
 
 interface BookingAcceptedProps {
