@@ -1,41 +1,68 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
+import { prisma } from '@/lib/prisma'
 
-// NOTE: This in-memory rate limiter does NOT work in serverless environments (Vercel).
-// Each lambda has its own memory, so the Map is reset between requests.
-// For production, use: Upstash Redis, Vercel KV, or a dedicated rate limiting service.
+// Fixed-window rate limiter backed by Postgres (table: rate_limits, created
+// by prisma/rate-limit/01-init.sql). A single atomic upsert per request makes
+// it safe across concurrent serverless instances — the reason the previous
+// in-memory Map implementation could not work on Vercel.
 
-const rateLimitMap = new Map<string, { count: number; timestamp: number }>()
-
-export function rateLimit(request: NextRequest, maxRequests = 10, windowMs = 60000) {
-  const forwardedFor = request.headers.get('x-forwarded-for')
-  const realIp = request.headers.get('x-real-ip')
-  const ip = (forwardedFor?.split(',')[0] ?? realIp ?? 'unknown').trim()
-  const now = Date.now()
-  const windowStart = now - windowMs
-  
-  const record = rateLimitMap.get(ip)
-  
-  if (!record || record.timestamp < windowStart) {
-    rateLimitMap.set(ip, { count: 1, timestamp: now })
-    return { success: true }
-  }
-  
-  if (record.count >= maxRequests) {
-    return { 
-      success: false, 
-      error: 'Rate limit exceeded',
-      statusCode: 429 
-    }
-  }
-  
-  record.count++
-  return { success: true }
+export interface RateLimitOptions {
+  maxRequests?: number
+  windowMs?: number
 }
 
-export function rateLimitMiddleware(
-  request: NextRequest, 
-  options: { maxRequests?: number; windowMs?: number } = {}
-) {
+export type RateLimitResult =
+  | { success: true }
+  | { success: false; error: string; statusCode: number }
+
+export function clientIpFrom(headers: Headers): string {
+  const forwardedFor = headers.get('x-forwarded-for')
+  const realIp = headers.get('x-real-ip')
+  return (forwardedFor?.split(',')[0] ?? realIp ?? 'unknown').trim()
+}
+
+export async function rateLimitByKey(
+  key: string,
+  options: RateLimitOptions = {}
+): Promise<RateLimitResult> {
   const { maxRequests = 10, windowMs = 60000 } = options
-  return rateLimit(request, maxRequests, windowMs)
+
+  try {
+    // Insert-or-increment in one statement; expired windows reset in place.
+    const rows = await prisma.$queryRaw<Array<{ count: number }>>`
+      INSERT INTO rate_limits (key, count, window_start)
+      VALUES (${key}, 1, now())
+      ON CONFLICT (key) DO UPDATE SET
+        count = CASE
+          WHEN rate_limits.window_start <= now() - (${windowMs}::int * interval '1 millisecond')
+          THEN 1
+          ELSE rate_limits.count + 1
+        END,
+        window_start = CASE
+          WHEN rate_limits.window_start <= now() - (${windowMs}::int * interval '1 millisecond')
+          THEN now()
+          ELSE rate_limits.window_start
+        END
+      RETURNING count
+    `
+
+    const count = rows[0]?.count ?? 1
+    if (count > maxRequests) {
+      return { success: false, error: 'Rate limit exceeded', statusCode: 429 }
+    }
+    return { success: true }
+  } catch (error) {
+    // Fail open: a rate limiter outage must not take the booking form down.
+    console.error('Rate limit check failed, allowing request:', error)
+    return { success: true }
+  }
+}
+
+export async function rateLimitMiddleware(
+  request: NextRequest,
+  options: RateLimitOptions = {}
+): Promise<RateLimitResult> {
+  const ip = clientIpFrom(request.headers)
+  const route = new URL(request.url).pathname
+  return rateLimitByKey(`${route}:${ip}`, options)
 }

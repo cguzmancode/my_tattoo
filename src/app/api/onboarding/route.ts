@@ -5,7 +5,7 @@ import { rateLimitMiddleware } from '@/lib/rate-limit'
 
 export async function POST(request: NextRequest) {
   // Aplicar rate limiting: 3 requests por minuto
-  const rateLimitResult = rateLimitMiddleware(request, { maxRequests: 3, windowMs: 60000 })
+  const rateLimitResult = await rateLimitMiddleware(request, { maxRequests: 3, windowMs: 60000 })
   if (!rateLimitResult.success) {
     return NextResponse.json(
       { error: rateLimitResult.error },
@@ -45,9 +45,6 @@ export async function POST(request: NextRequest) {
     }
 
     const email = user.emailAddresses?.[0]?.emailAddress
-    const firstName = user.firstName || ''
-    const lastName = user.lastName || ''
-    const clerkName = `${firstName} ${lastName}`.trim() || name
 
     // Buscar si el artista ya existe
     let artist = await prisma.artist.findUnique({
